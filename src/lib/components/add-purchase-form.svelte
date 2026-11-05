@@ -66,7 +66,7 @@
         {@render issues(fields.boughtAt.issues())}
       </div>
       <div class="grid gap-2">
-        <Label for="pricePerShare">Price per share</Label>
+        <Label for="pricePerShare">Price per share (GBP)</Label>
         <Input
           id="pricePerShare"
           {...fields.pricePerShare.as("number")}
