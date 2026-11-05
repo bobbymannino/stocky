@@ -125,7 +125,9 @@
                 <th class="py-2 pr-4 font-medium">Company</th>
                 <th class="py-2 pr-4 text-right font-medium">Price</th>
                 <th class="py-2 pr-4 text-right font-medium">Shares</th>
-                <th class="py-2 text-right font-medium">Added</th>
+                <th class="py-2 text-right font-medium">Total</th>
+                <th class="py-2 text-right font-medium">Tax (0.5%)</th>
+                <th class="py-2 text-right font-medium">Total (inc. tax)</th>
               </tr>
             </thead>
             <tbody>
@@ -140,9 +142,15 @@
                   <td class="py-2 pr-4 text-right tabular-nums"
                     >{Number(p.shares)}</td
                   >
-                  <td class="py-2 text-right text-muted-foreground"
-                    >{p.createdAt.toLocaleDateString()}</td
-                  >
+                  <td class="py-2 text-right text-muted-foreground">
+                    {money.format(p.shares * p.pricePerShare)}
+                  </td>
+                  <td class="py-2 text-right text-muted-foreground">
+                    {money.format(p.shares * p.pricePerShare * 0.005)}
+                  </td>
+                  <td class="py-2 text-right text-muted-foreground">
+                    {money.format(p.shares * p.pricePerShare * 1.005)}
+                  </td>
                 </tr>
               {/each}
             </tbody>
