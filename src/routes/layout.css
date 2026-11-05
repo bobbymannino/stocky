@@ -1,1 +1,47 @@
 @import 'tailwindcss';
+
+/* Catppuccin — Latte in light mode, Mocha in dark mode (follows OS appearance) */
+:root {
+	color-scheme: light dark;
+}
+
+@theme {
+	--color-ctp-rosewater: light-dark(#dc8a78, #f5e0dc);
+	--color-ctp-flamingo: light-dark(#dd7878, #f2cdcd);
+	--color-ctp-pink: light-dark(#ea76cb, #f5c2e7);
+	--color-ctp-mauve: light-dark(#8839ef, #cba6f7);
+	--color-ctp-red: light-dark(#d20f39, #f38ba8);
+	--color-ctp-maroon: light-dark(#e64553, #eba0ac);
+	--color-ctp-peach: light-dark(#fe640b, #fab387);
+	--color-ctp-yellow: light-dark(#df8e1d, #f9e2af);
+	--color-ctp-green: light-dark(#40a02b, #a6e3a1);
+	--color-ctp-teal: light-dark(#179299, #94e2d5);
+	--color-ctp-sky: light-dark(#04a5e5, #89dceb);
+	--color-ctp-sapphire: light-dark(#209fb5, #74c7ec);
+	--color-ctp-blue: light-dark(#1e66f5, #89b4fa);
+	--color-ctp-lavender: light-dark(#7287fd, #b4befe);
+	--color-ctp-text: light-dark(#4c4f69, #cdd6f4);
+	--color-ctp-subtext1: light-dark(#5c5f77, #bac2de);
+	--color-ctp-subtext0: light-dark(#6c6f85, #a6adc8);
+	--color-ctp-overlay2: light-dark(#7c7f93, #9399b2);
+	--color-ctp-overlay1: light-dark(#8c8fa1, #7f849c);
+	--color-ctp-overlay0: light-dark(#9ca0b0, #6c7086);
+	--color-ctp-surface2: light-dark(#acb0be, #585b70);
+	--color-ctp-surface1: light-dark(#bcc0cc, #45475a);
+	--color-ctp-surface0: light-dark(#ccd0da, #313244);
+	--color-ctp-base: light-dark(#eff1f5, #1e1e2e);
+	--color-ctp-mantle: light-dark(#e6e9ef, #181825);
+	--color-ctp-crust: light-dark(#dce0e8, #11111b);
+}
+
+@layer base {
+	body {
+		@apply bg-ctp-base text-ctp-text;
+	}
+
+	input,
+	textarea,
+	select {
+		@apply border-ctp-surface1 bg-ctp-mantle placeholder:text-ctp-overlay0;
+	}
+}
