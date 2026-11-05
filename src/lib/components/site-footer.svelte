@@ -24,9 +24,15 @@
         <GitBranchIcon class="size-4" aria-hidden="true" />
         View on GitHub
       </a>
-      <span class="font-mono text-xs" title="App version">
+      <a
+        href="{REPO_URL}/releases/tag/v{version}"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="font-mono text-xs transition-colors hover:text-foreground"
+        title="Release notes for v{version}"
+      >
         v{version}
-      </span>
+      </a>
     </div>
     <div class="flex gap-2">
       <Button
