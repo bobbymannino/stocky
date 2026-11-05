@@ -2,11 +2,30 @@
   import BugIcon from "@lucide/svelte/icons/bug";
   import GitBranchIcon from "@lucide/svelte/icons/git-branch";
   import LightbulbIcon from "@lucide/svelte/icons/lightbulb";
+  import { onMount } from "svelte";
   import { Button } from "#lib/components/ui/button/index.js";
+  import { version as buildId } from "$app/env";
   import { version } from "../../../package.json";
 
   const REPO_URL = "https://github.com/bobbymannino/stocky";
   const year = new Date().getFullYear();
+
+  // SvelteKit's default `version.name` is `Date.now()` at build time
+  // (in dev it's when the dev server started)
+  const builtAt = Number.isFinite(Number(buildId))
+    ? new Date(Number(buildId))
+    : undefined;
+
+  const formatBuiltAt = (timeZone?: string) =>
+    builtAt?.toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone,
+    });
+
+  // the server renders in UTC; switch to the viewer's timezone once in the browser
+  let builtAtText = $state(formatBuiltAt("UTC"));
+  onMount(() => (builtAtText = formatBuiltAt()));
 </script>
 
 <footer class="border-t">
@@ -33,6 +52,11 @@
       >
         v{version}
       </a>
+      {#if builtAt}
+        <span class="text-xs">
+          Built <time datetime={builtAt.toISOString()} title={builtAt.toISOString()}>{builtAtText}</time>
+        </span>
+      {/if}
     </div>
     <div class="flex gap-2">
       <Button
