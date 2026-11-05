@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { purchase } from "#lib/server/db/schema.js";
+  import { formatMoney } from "#lib/utils.js";
 
   type Purchase = typeof purchase.$inferSelect;
 
@@ -7,10 +8,6 @@
 
   const TAX_RATE = 0.005;
 
-  const money = new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "GBP",
-  });
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
 
   // numeric columns come back from Postgres as strings
@@ -51,7 +48,7 @@
           </div>
           <div class="text-right">
             <p class="font-medium tabular-nums">
-              {money.format(p.totalIncTax)}
+              {formatMoney(p.totalIncTax)}
             </p>
             <p class="text-xs text-muted-foreground">inc. tax</p>
           </div>
@@ -61,12 +58,12 @@
           <dd class="text-right">{p.boughtOn}</dd>
           <dt class="text-muted-foreground">Shares</dt>
           <dd class="text-right tabular-nums">
-            {p.shares} × {money.format(p.price)}
+            {p.shares} × {formatMoney(p.price)}
           </dd>
           <dt class="text-muted-foreground">Total</dt>
-          <dd class="text-right tabular-nums">{money.format(p.total)}</dd>
+          <dd class="text-right tabular-nums">{formatMoney(p.total)}</dd>
           <dt class="text-muted-foreground">Tax (0.5%)</dt>
-          <dd class="text-right tabular-nums">{money.format(p.tax)}</dd>
+          <dd class="text-right tabular-nums">{formatMoney(p.tax)}</dd>
         </dl>
       </li>
     {/each}
@@ -99,16 +96,16 @@
             <td class="max-w-48 truncate" title={p.companyName}>
               {p.companyName}
             </td>
-            <td class="text-right tabular-nums">{money.format(p.price)}</td>
+            <td class="text-right tabular-nums">{formatMoney(p.price)}</td>
             <td class="text-right tabular-nums">{p.shares}</td>
             <td class="text-right text-muted-foreground tabular-nums">
-              {money.format(p.total)}
+              {formatMoney(p.total)}
             </td>
             <td class="text-right text-muted-foreground tabular-nums">
-              {money.format(p.tax)}
+              {formatMoney(p.tax)}
             </td>
             <td class="text-right font-medium tabular-nums">
-              {money.format(p.totalIncTax)}
+              {formatMoney(p.totalIncTax)}
             </td>
           </tr>
         {/each}

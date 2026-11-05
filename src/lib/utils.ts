@@ -10,3 +10,13 @@ export type WithoutChildrenOrChild<T> = WithoutChildren<WithoutChild<T>>;
 export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & {
   ref?: U | null;
 };
+
+const moneyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "GBP",
+});
+
+/** Formats an amount as GBP in the viewer's locale, e.g. `£1,234.50`. */
+export function formatMoney(amount: number): string {
+  return moneyFormatter.format(amount);
+}
