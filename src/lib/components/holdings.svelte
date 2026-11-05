@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { companyColorVar, type CompanyColors } from "#lib/company-colors.js";
+  import {
+    companyColorVar,
+    type CompanyColor,
+    type CompanyColors,
+  } from "#lib/company-colors.js";
   import CompanySwatch from "#lib/components/company-swatch.svelte";
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
@@ -14,6 +18,12 @@
 
   let { purchases, colors }: { purchases: Purchase[]; colors: CompanyColors } =
     $props();
+
+  /** A faint wash of the company colour, strongest at the bottom of the card. */
+  function accentGradient(color: CompanyColor | undefined) {
+    const tint = `color-mix(in oklab, ${companyColorVar(color)} 20%, transparent)`;
+    return `linear-gradient(to top, ${tint}, transparent)`;
+  }
 
   let holdings = $derived.by(() => {
     const byTicker = new Map<
@@ -74,8 +84,8 @@
       {@const value = price === undefined ? undefined : price * h.shares}
       {@const gain = value === undefined ? undefined : value - h.cost}
       <div
-        class="flex flex-col gap-3 rounded-lg border border-l-4 p-4"
-        style:border-left-color={companyColorVar(colors[h.ticker])}
+        class="flex flex-col gap-3 rounded-lg border p-4"
+        style:background-image={accentGradient(colors[h.ticker])}
       >
         <div class="min-w-0">
           <p class="flex items-center gap-2 font-mono font-medium">
