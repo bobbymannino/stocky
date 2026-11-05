@@ -16,20 +16,30 @@
   let holdings = $derived.by(() => {
     const byTicker = new Map<
       string,
-      { ticker: string; companyName: string; shares: number; cost: number }
+      {
+        ticker: string;
+        companyName: string;
+        shares: number;
+        /** total paid excluding tax, for the average share price */
+        spent: number;
+        /** total paid including tax */
+        cost: number;
+      }
     >();
     // purchases are newest first, so the first name seen is the latest
     for (const p of purchases) {
-      const { shares, totalIncTax } = purchaseCosts(p);
+      const { shares, total, totalIncTax } = purchaseCosts(p);
       const h = byTicker.get(p.ticker);
       if (h) {
         h.shares += shares;
+        h.spent += total;
         h.cost += totalIncTax;
       } else {
         byTicker.set(p.ticker, {
           ticker: p.ticker,
           companyName: p.companyName,
           shares,
+          spent: total,
           cost: totalIncTax,
         });
       }
@@ -86,6 +96,10 @@
         <dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
           <dt class="text-muted-foreground">Shares</dt>
           <dd class="text-right tabular-nums">{h.shares}</dd>
+          <dt class="text-muted-foreground">Avg. share price</dt>
+          <dd class="text-right tabular-nums">
+            {formatMoney(h.spent / h.shares)}
+          </dd>
           <dt class="text-muted-foreground">Cost (inc. tax)</dt>
           <dd class="text-right tabular-nums">{formatMoney(h.cost)}</dd>
           <dt class="text-muted-foreground">Value</dt>
