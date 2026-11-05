@@ -1,11 +1,17 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import AddPurchaseForm from "#lib/components/add-purchase-form.svelte";
+  import Holdings from "#lib/components/holdings.svelte";
   import PurchasesTable from "#lib/components/purchases-table.svelte";
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Card from "#lib/components/ui/card/index.js";
+  import { currentPrices } from "#lib/current-prices.svelte.js";
   import type { PageProps } from "./$types";
 
   let { data }: PageProps = $props();
+
+  // today's prices live in sessionStorage, which only exists in the browser
+  onMount(() => currentPrices.load());
 
   // purchases are newest first, so keep the first (most recent) name per ticker
   let companies = $derived(
@@ -30,6 +36,19 @@
   </header>
 
   <AddPurchaseForm {companies} />
+
+  <Card.Root>
+    <Card.Header>
+      <Card.Title>Holdings</Card.Title>
+      <Card.Description>
+        Enter today's price for each stock to see your gain or loss. Prices are
+        only kept until you close this tab.
+      </Card.Description>
+    </Card.Header>
+    <Card.Content>
+      <Holdings purchases={data.purchases} />
+    </Card.Content>
+  </Card.Root>
 
   <Card.Root>
     <Card.Header>

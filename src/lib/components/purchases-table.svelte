@@ -2,39 +2,32 @@
   import TrashIcon from "@lucide/svelte/icons/trash";
   import * as AlertDialog from "#lib/components/ui/alert-dialog/index.js";
   import { Button } from "#lib/components/ui/button/index.js";
+  import { currentPrices } from "#lib/current-prices.svelte.js";
+  import { purchaseCosts, type Purchase } from "#lib/purchases.js";
   import { deletePurchase } from "#lib/remote/purchases.remote.js";
-  import type { purchase } from "#lib/server/db/schema.js";
-  import { formatMoney } from "#lib/utils.js";
+  import { cn, formatMoney } from "#lib/utils.js";
   import { refreshAll } from "$app/navigation";
-
-  type Purchase = typeof purchase.$inferSelect;
 
   let { purchases }: { purchases: Purchase[] } = $props();
 
-  const TAX_RATE = 0.005;
-
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
 
-  // numeric columns come back from Postgres as strings
   let rows = $derived(
-    purchases.map((p) => {
-      const price = Number(p.pricePerShare);
-      const shares = Number(p.shares);
-      const total = price * shares;
-      const tax = total * TAX_RATE;
-      return {
+    purchases.map((p) =>
+      Object.assign(purchaseCosts(p), {
         id: p.id,
         ticker: p.ticker,
         companyName: p.companyName,
-        price,
-        shares,
-        total,
-        tax,
-        totalIncTax: total + tax,
         boughtOn: date.format(new Date(p.boughtAt)),
-      };
-    }),
+      }),
+    ),
   );
+
+  /** Value at today's price, or undefined if no price has been entered. */
+  function currentValue(row: Row) {
+    const price = currentPrices.get(row.ticker);
+    return price === undefined ? undefined : price * row.shares;
+  }
 
   type Row = (typeof rows)[number];
 
@@ -64,6 +57,19 @@
     }
   }
 </script>
+
+{#snippet valueText(row: Row)}
+  {@const value = currentValue(row)}
+  <span
+    class={cn(
+      "tabular-nums",
+      value !== undefined && value > row.totalIncTax && "text-ctp-green",
+      value !== undefined && value < row.totalIncTax && "text-ctp-red",
+    )}
+  >
+    {value === undefined ? "—" : formatMoney(value)}
+  </span>
+{/snippet}
 
 {#snippet deleteButton(row: Row)}
   <Button
@@ -111,6 +117,8 @@
           <dd class="text-right tabular-nums">{formatMoney(p.total)}</dd>
           <dt class="text-muted-foreground">Tax (0.5%)</dt>
           <dd class="text-right tabular-nums">{formatMoney(p.tax)}</dd>
+          <dt class="text-muted-foreground">Current value</dt>
+          <dd class="text-right">{@render valueText(p)}</dd>
         </dl>
       </li>
     {/each}
@@ -131,6 +139,7 @@
           <th class="text-right">Total</th>
           <th class="text-right">Tax (0.5%)</th>
           <th class="text-right">Total (inc. tax)</th>
+          <th class="text-right">Current value</th>
           <th><span class="sr-only">Actions</span></th>
         </tr>
       </thead>
@@ -155,6 +164,7 @@
             <td class="text-right font-medium tabular-nums">
               {formatMoney(p.totalIncTax)}
             </td>
+            <td class="text-right">{@render valueText(p)}</td>
             <td class="w-0 py-1! text-right">{@render deleteButton(p)}</td>
           </tr>
         {/each}
