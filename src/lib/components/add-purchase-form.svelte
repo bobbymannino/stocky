@@ -1,10 +1,11 @@
 <script lang="ts">
-  import { untrack } from "svelte";
+  import { onMount, untrack } from "svelte";
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Card from "#lib/components/ui/card/index.js";
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
   import { addPurchase } from "#lib/remote/purchases.remote.js";
+  import { goto } from "$app/navigation";
 
   /** Ticker → company name, from the user's existing purchases. */
   let { companies }: { companies: Map<string, string> } = $props();
@@ -22,6 +23,15 @@
   // the company name we last filled in, so we only replace our own value
   // and never overwrite something the user typed themselves
   let autofilled = $state<string>();
+
+  // Remote form state outlives the page, so start each visit with an empty form.
+  // A back/forward visit then restores its snapshot on top of this (see the page).
+  function resetForm() {
+    fields.set({ boughtAt: today });
+    autofilled = undefined;
+  }
+
+  onMount(resetForm);
 
   $effect(() => {
     const ticker = (fields.ticker.value() ?? "").trim().toUpperCase();
@@ -59,7 +69,13 @@
       {...addPurchase.enhance(async (form) => {
         error = undefined;
         try {
-          if (await form.submit()) form.element.reset();
+          // `.updates()` skips refreshing this page; the portfolio loads fresh anyway
+          if (await form.submit().updates()) {
+            // reset before navigating so the history snapshot is the empty form,
+            // not the purchase that was just saved
+            resetForm();
+            await goto("/");
+          }
         } catch {
           error = "Something went wrong. Please try again.";
         }

@@ -57,8 +57,7 @@ export const addPurchase = form(AddPurchaseSchema, async (data) => {
     shares: String(data.shares),
   });
 
-  // back to the portfolio, whose load re-runs and shows the new purchase
-  redirect(303, "/");
+  // the client resets the form and navigates to the portfolio itself
 });
 
 export const deletePurchase = command(
