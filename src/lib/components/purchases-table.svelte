@@ -2,6 +2,7 @@
   import TrashIcon from "@lucide/svelte/icons/trash";
   import * as AlertDialog from "#lib/components/ui/alert-dialog/index.js";
   import { Button } from "#lib/components/ui/button/index.js";
+  import * as Select from "#lib/components/ui/select/index.js";
   import { currentPrices } from "#lib/current-prices.svelte.js";
   import { purchaseCosts, type Purchase } from "#lib/purchases.js";
   import { deletePurchase } from "#lib/remote/purchases.remote.js";
@@ -35,6 +36,25 @@
   }
 
   type Row = (typeof rows)[number];
+
+  const ALL = "all";
+  let tickerFilter = $state(ALL);
+
+  /** Unique tickers with their latest company name, A–Z. */
+  let tickers = $derived(
+    [...new Map(rows.toReversed().map((r) => [r.ticker, r.companyName]))]
+      .map(([ticker, companyName]) => ({ ticker, companyName }))
+      .toSorted((a, b) => a.ticker.localeCompare(b.ticker)),
+  );
+
+  // falls back to all if the selected ticker no longer exists (e.g. deleted)
+  let activeTicker = $derived(
+    tickers.some((t) => t.ticker === tickerFilter) ? tickerFilter : ALL,
+  );
+
+  let visibleRows = $derived(
+    activeTicker === ALL ? rows : rows.filter((r) => r.ticker === activeTicker),
+  );
 
   let pendingDelete = $state<Row>();
   let dialogOpen = $state(false);
@@ -109,9 +129,31 @@
 {#if rows.length === 0}
   <p class="text-sm text-muted-foreground">No purchases yet.</p>
 {:else}
+  <div class="mb-4 flex items-center gap-2">
+    <Select.Root type="single" bind:value={tickerFilter}>
+      <Select.Trigger class="w-full sm:w-56" aria-label="Filter by ticker">
+        {activeTicker === ALL ? "All tickers" : activeTicker}
+      </Select.Trigger>
+      <Select.Content>
+        <Select.Item value={ALL} label="All tickers">All tickers</Select.Item>
+        {#each tickers as t (t.ticker)}
+          <Select.Item value={t.ticker} label={t.ticker}>
+            <span class="font-mono">{t.ticker}</span>
+            <span class="truncate text-muted-foreground">{t.companyName}</span>
+          </Select.Item>
+        {/each}
+      </Select.Content>
+    </Select.Root>
+    {#if activeTicker !== ALL}
+      <Button variant="ghost" size="sm" onclick={() => (tickerFilter = ALL)}>
+        Clear
+      </Button>
+    {/if}
+  </div>
+
   <!-- Mobile: stacked cards -->
   <ul class="flex flex-col divide-y md:hidden">
-    {#each rows as p (p.id)}
+    {#each visibleRows as p (p.id)}
       <li class="flex flex-col gap-2 py-3 first:pt-0 last:pb-0">
         <div class="flex items-start justify-between gap-4">
           <div class="min-w-0">
@@ -171,7 +213,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each rows as p (p.id)}
+        {#each visibleRows as p (p.id)}
           <tr
             class="border-b last:border-0 [&>td]:py-2 [&>td]:pr-4 [&>td:last-child]:pr-0"
           >
