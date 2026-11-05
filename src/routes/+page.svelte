@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PurchasesTable from "#lib/components/purchases-table.svelte";
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Card from "#lib/components/ui/card/index.js";
   import { Input } from "#lib/components/ui/input/index.js";
@@ -9,10 +10,6 @@
   let { data, form }: PageProps = $props();
 
   const today = new Date().toISOString().slice(0, 10);
-  const money = new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "GBP",
-  });
 </script>
 
 <div class="mx-auto flex max-w-4xl flex-col gap-6 p-4">
@@ -113,50 +110,7 @@
       <Card.Title>Your purchases</Card.Title>
     </Card.Header>
     <Card.Content>
-      {#if data.purchases.length === 0}
-        <p class="text-sm text-muted-foreground">No purchases yet.</p>
-      {:else}
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="text-left text-muted-foreground">
-              <tr class="border-b">
-                <th class="py-2 pr-4 font-medium">Bought</th>
-                <th class="py-2 pr-4 font-medium">Ticker</th>
-                <th class="py-2 pr-4 font-medium">Company</th>
-                <th class="py-2 pr-4 text-right font-medium">Price</th>
-                <th class="py-2 pr-4 text-right font-medium">Shares</th>
-                <th class="py-2 text-right font-medium">Total</th>
-                <th class="py-2 text-right font-medium">Tax (0.5%)</th>
-                <th class="py-2 text-right font-medium">Total (inc. tax)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {#each data.purchases as p (p.id)}
-                <tr class="border-b last:border-0">
-                  <td class="py-2 pr-4">{p.boughtAt}</td>
-                  <td class="py-2 pr-4 font-mono">{p.ticker}</td>
-                  <td class="py-2 pr-4">{p.companyName}</td>
-                  <td class="py-2 pr-4 text-right tabular-nums"
-                    >{money.format(Number(p.pricePerShare))}</td
-                  >
-                  <td class="py-2 pr-4 text-right tabular-nums"
-                    >{Number(p.shares)}</td
-                  >
-                  <td class="py-2 text-right text-muted-foreground">
-                    {money.format(p.shares * p.pricePerShare)}
-                  </td>
-                  <td class="py-2 text-right text-muted-foreground">
-                    {money.format(p.shares * p.pricePerShare * 0.005)}
-                  </td>
-                  <td class="py-2 text-right text-muted-foreground">
-                    {money.format(p.shares * p.pricePerShare * 1.005)}
-                  </td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
-      {/if}
+      <PurchasesTable purchases={data.purchases} />
     </Card.Content>
   </Card.Root>
 </div>
