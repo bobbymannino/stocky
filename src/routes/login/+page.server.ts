@@ -1,10 +1,18 @@
 import { fail, redirect } from "@sveltejs/kit";
 import { APIError } from "better-auth/api";
+import { definePageMetaTags } from "svelte-meta-tags";
 import { auth } from "#lib/server/auth.js";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = ({ locals }) => {
   if (locals.auth) redirect(303, "/");
+
+  return {
+    ...definePageMetaTags({
+      title: "Sign in",
+      description: "Sign in or create a Stocky account.",
+    }),
+  };
 };
 
 export const actions: Actions = {

@@ -1,5 +1,6 @@
 import { fail, redirect } from "@sveltejs/kit";
 import { desc, eq } from "drizzle-orm";
+import { definePageMetaTags } from "svelte-meta-tags";
 import { auth } from "#lib/server/auth.js";
 import { db } from "#lib/server/db/index.js";
 import { purchase } from "#lib/server/db/schema.js";
@@ -14,7 +15,14 @@ export const load: PageServerLoad = async ({ locals }) => {
     .where(eq(purchase.userId, locals.auth.user.id))
     .orderBy(desc(purchase.boughtAt), desc(purchase.createdAt));
 
-  return { user: locals.auth.user, purchases };
+  return {
+    user: locals.auth.user,
+    purchases,
+    ...definePageMetaTags({
+      title: "Portfolio",
+      description: "Your recorded share purchases.",
+    }),
+  };
 };
 
 const DECIMAL = /^\d+(\.\d+)?$/;
