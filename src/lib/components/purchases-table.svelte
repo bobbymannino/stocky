@@ -217,7 +217,7 @@
     <table class="w-full text-sm whitespace-nowrap">
       <thead class="text-left text-muted-foreground">
         <tr
-          class="border-b [&>th]:py-2 [&>th]:pr-4 [&>th]:font-medium [&>th:first-child]:pl-2 [&>th:last-child]:pr-2"
+          class="border-b [&>th]:py-4 [&>th]:pr-4 [&>th]:font-medium [&>th:first-child]:pl-4 [&>th:last-child]:pr-4"
         >
           <th>Bought</th>
           <th>Ticker</th>
@@ -236,7 +236,7 @@
         {#each visibleRows as p (p.id)}
           <tr
             class={cn(
-              "border-b transition-colors last:border-0 [&>td]:py-2 [&>td]:pr-4 [&>td:first-child]:pl-2 [&>td:last-child]:pr-2",
+              "border-b transition-colors last:border-0 [&>td]:py-4 [&>td]:pr-4 [&>td:first-child]:pl-4 [&>td:last-child]:pr-4",
               rowTint(p),
             )}
           >
