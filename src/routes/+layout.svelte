@@ -1,6 +1,7 @@
 <script lang="ts">
   import "./layout.css";
   import { MetaTags, deepMerge } from "svelte-meta-tags";
+  import SiteFooter from "#lib/components/site-footer.svelte";
   import { page } from "$app/state";
   import type { LayoutProps } from "./$types";
 
@@ -11,4 +12,9 @@
 
 <MetaTags {...metaTags} />
 
-{@render children()}
+<div class="flex min-h-svh flex-col">
+  <main class="flex flex-1 flex-col">
+    {@render children()}
+  </main>
+  <SiteFooter />
+</div>

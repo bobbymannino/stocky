@@ -9,7 +9,7 @@
   let { form }: PageProps = $props();
 </script>
 
-<div class="flex min-h-svh items-center justify-center p-4">
+<div class="flex flex-1 items-center justify-center p-4">
   <Card.Root class="w-full max-w-sm">
     <Card.Header>
       <Card.Title class="text-2xl">Sign in</Card.Title>
