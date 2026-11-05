@@ -3,6 +3,7 @@
   import GitBranchIcon from "@lucide/svelte/icons/git-branch";
   import LightbulbIcon from "@lucide/svelte/icons/lightbulb";
   import { Button } from "#lib/components/ui/button/index.js";
+  import { version } from "../../../package.json";
 
   const REPO_URL = "https://github.com/bobbymannino/stocky";
   const year = new Date().getFullYear();
@@ -23,6 +24,9 @@
         <GitBranchIcon class="size-4" aria-hidden="true" />
         View on GitHub
       </a>
+      <span class="font-mono text-xs" title="App version">
+        v{version}
+      </span>
     </div>
     <div class="flex gap-2">
       <Button
