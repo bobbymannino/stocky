@@ -5,7 +5,12 @@
   import { currentPrices } from "#lib/current-prices.svelte.js";
   import { purchaseCosts, type Purchase } from "#lib/purchases.js";
   import { deletePurchase } from "#lib/remote/purchases.remote.js";
-  import { cn, formatMoney } from "#lib/utils.js";
+  import {
+    cn,
+    formatMoney,
+    formatPercent,
+    formatSignedMoney,
+  } from "#lib/utils.js";
   import { refreshAll } from "$app/navigation";
 
   let { purchases }: { purchases: Purchase[] } = $props();
@@ -71,6 +76,25 @@
   </span>
 {/snippet}
 
+{#snippet diffText(row: Row)}
+  {@const value = currentValue(row)}
+  {@const diff = value === undefined ? undefined : value - row.totalIncTax}
+  <span
+    class={cn(
+      "tabular-nums",
+      diff !== undefined && diff > 0 && "text-ctp-green",
+      diff !== undefined && diff < 0 && "text-ctp-red",
+    )}
+  >
+    {#if diff === undefined}
+      —
+    {:else}
+      {formatSignedMoney(diff)}
+      <span class="text-xs">({formatPercent(diff / row.totalIncTax)})</span>
+    {/if}
+  </span>
+{/snippet}
+
 {#snippet deleteButton(row: Row)}
   <Button
     variant="destructive"
@@ -119,6 +143,8 @@
           <dd class="text-right tabular-nums">{formatMoney(p.tax)}</dd>
           <dt class="text-muted-foreground">Current value</dt>
           <dd class="text-right">{@render valueText(p)}</dd>
+          <dt class="text-muted-foreground">Gain / loss</dt>
+          <dd class="text-right">{@render diffText(p)}</dd>
         </dl>
       </li>
     {/each}
@@ -140,6 +166,7 @@
           <th class="text-right">Tax (0.5%)</th>
           <th class="text-right">Total (inc. tax)</th>
           <th class="text-right">Current value</th>
+          <th class="text-right">Gain / loss</th>
           <th><span class="sr-only">Actions</span></th>
         </tr>
       </thead>
@@ -165,6 +192,7 @@
               {formatMoney(p.totalIncTax)}
             </td>
             <td class="text-right">{@render valueText(p)}</td>
+            <td class="text-right">{@render diffText(p)}</td>
             <td class="w-0 py-1! text-right">{@render deleteButton(p)}</td>
           </tr>
         {/each}

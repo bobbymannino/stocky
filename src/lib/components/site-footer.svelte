@@ -10,7 +10,7 @@
 
 <footer class="border-t">
   <div
-    class="mx-auto flex max-w-4xl flex-col gap-4 p-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between"
+    class="mx-auto flex max-w-5xl flex-col gap-4 p-4 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between"
   >
     <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
       <p>&copy; {year} Bob Mannino. All rights reserved.</p>

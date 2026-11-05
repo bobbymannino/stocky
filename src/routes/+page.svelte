@@ -14,7 +14,7 @@
   onMount(() => currentPrices.load());
 </script>
 
-<div class="mx-auto flex w-full max-w-4xl flex-col gap-6 p-4">
+<div class="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4">
   <header class="flex flex-wrap items-center justify-between gap-4">
     <div>
       <h1 class="text-2xl font-semibold">Stocky</h1>

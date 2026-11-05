@@ -20,3 +20,25 @@ const moneyFormatter = new Intl.NumberFormat(undefined, {
 export function formatMoney(amount: number): string {
   return moneyFormatter.format(amount);
 }
+
+const signedMoneyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "GBP",
+  signDisplay: "exceptZero",
+});
+
+/** Like `formatMoney`, but always shows the sign, e.g. `+£12.00` / `-£3.50`. */
+export function formatSignedMoney(amount: number): string {
+  return signedMoneyFormatter.format(amount);
+}
+
+const percentFormatter = new Intl.NumberFormat(undefined, {
+  style: "percent",
+  maximumFractionDigits: 2,
+  signDisplay: "exceptZero",
+});
+
+/** Formats a fraction as a signed percentage, e.g. `0.125` → `+12.5%`. */
+export function formatPercent(fraction: number): string {
+  return percentFormatter.format(fraction);
+}

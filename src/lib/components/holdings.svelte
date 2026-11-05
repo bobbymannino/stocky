@@ -3,15 +3,14 @@
   import { Label } from "#lib/components/ui/label/index.js";
   import { currentPrices } from "#lib/current-prices.svelte.js";
   import { purchaseCosts, type Purchase } from "#lib/purchases.js";
-  import { cn, formatMoney } from "#lib/utils.js";
+  import {
+    cn,
+    formatMoney,
+    formatPercent,
+    formatSignedMoney,
+  } from "#lib/utils.js";
 
   let { purchases }: { purchases: Purchase[] } = $props();
-
-  const percent = new Intl.NumberFormat(undefined, {
-    style: "percent",
-    maximumFractionDigits: 2,
-    signDisplay: "exceptZero",
-  });
 
   let holdings = $derived.by(() => {
     const byTicker = new Map<
@@ -117,8 +116,8 @@
             {#if gain === undefined}
               —
             {:else}
-              {gain > 0 ? "+" : ""}{formatMoney(gain)}
-              <span class="text-xs">({percent.format(gain / h.cost)})</span>
+              {formatSignedMoney(gain)}
+              <span class="text-xs">({formatPercent(gain / h.cost)})</span>
             {/if}
           </dd>
         </dl>
