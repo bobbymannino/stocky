@@ -40,6 +40,13 @@
 
   type Row = (typeof rows)[number];
 
+  /** Background tint for a row: green if it's up, red if down, none without a price. */
+  function rowTint(row: Row) {
+    const value = currentValue(row);
+    if (value === undefined || value === row.totalIncTax) return "";
+    return value > row.totalIncTax ? "bg-ctp-green/5" : "bg-ctp-red/5";
+  }
+
   const ALL = "all";
   let tickerFilter = $state(ALL);
 
@@ -159,7 +166,10 @@
   <ul class="flex flex-col divide-y md:hidden">
     {#each visibleRows as p (p.id)}
       <li
-        class="flex flex-col gap-2 border-l-4 py-3 pl-3 first:pt-0 last:pb-0"
+        class={cn(
+          "flex flex-col gap-2 border-l-4 py-3 pr-3 pl-3 transition-colors",
+          rowTint(p),
+        )}
         style:border-left-color={companyColorVar(colors[p.ticker])}
       >
         <div class="flex items-start justify-between gap-4">
@@ -207,7 +217,7 @@
     <table class="w-full text-sm whitespace-nowrap">
       <thead class="text-left text-muted-foreground">
         <tr
-          class="border-b [&>th]:py-2 [&>th]:pr-4 [&>th]:font-medium [&>th:last-child]:pr-0"
+          class="border-b [&>th]:py-2 [&>th]:pr-4 [&>th]:font-medium [&>th:first-child]:pl-2 [&>th:last-child]:pr-2"
         >
           <th>Bought</th>
           <th>Ticker</th>
@@ -225,7 +235,10 @@
       <tbody>
         {#each visibleRows as p (p.id)}
           <tr
-            class="border-b last:border-0 [&>td]:py-2 [&>td]:pr-4 [&>td:last-child]:pr-0"
+            class={cn(
+              "border-b transition-colors last:border-0 [&>td]:py-2 [&>td]:pr-4 [&>td:first-child]:pl-2 [&>td:last-child]:pr-2",
+              rowTint(p),
+            )}
           >
             <td>{p.boughtOn}</td>
             <td class="font-mono">
