@@ -1,8 +1,9 @@
-import { redirect } from "@sveltejs/kit";
+import { error, redirect } from "@sveltejs/kit";
+import { and, eq } from "drizzle-orm";
 import * as v from "valibot";
 import { db } from "#lib/server/db/index.js";
 import { purchase } from "#lib/server/db/schema.js";
-import { form, getRequestEvent } from "$app/server";
+import { command, form, getRequestEvent } from "$app/server";
 
 const positiveNumber = (label: string) =>
   v.pipe(
@@ -57,3 +58,19 @@ export const addPurchase = form(AddPurchaseSchema, async (data) => {
 
   // no explicit refresh, so SvelteKit re-runs the page's load and the list updates
 });
+
+export const deletePurchase = command(
+  v.pipe(v.number(), v.integer(), v.minValue(1)),
+  async (id) => {
+    const { locals } = getRequestEvent();
+    if (!locals.auth) error(401, "You need to be signed in");
+
+    // scoped to the user so nobody can delete someone else's purchase by id
+    const deleted = await db
+      .delete(purchase)
+      .where(and(eq(purchase.id, id), eq(purchase.userId, locals.auth.user.id)))
+      .returning({ id: purchase.id });
+
+    if (deleted.length === 0) error(404, "Purchase not found");
+  },
+);
