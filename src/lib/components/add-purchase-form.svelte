@@ -9,7 +9,13 @@
   /** Ticker → company name, from the user's existing purchases. */
   let { companies }: { companies: Map<string, string> } = $props();
 
-  const today = new Date().toISOString().slice(0, 10);
+  // local date (not UTC), so late-night entries don't land on the wrong day
+  const now = new Date();
+  const today = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0"),
+  ].join("-");
   const { fields } = addPurchase;
 
   let error = $state<string>();
@@ -92,7 +98,7 @@
         <Label for="boughtAt">Bought on</Label>
         <Input
           id="boughtAt"
-          {...fields.boughtAt.as("date")}
+          {...fields.boughtAt.as("date", today)}
           required
           max={today}
         />

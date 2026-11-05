@@ -33,10 +33,11 @@ const AddPurchaseSchema = v.object({
   boughtAt: v.pipe(
     v.string(),
     v.isoDate("Enter a valid date"),
-    v.check(
-      (d) => d <= new Date().toISOString().slice(0, 10),
-      "Date can't be in the future",
-    ),
+    // the user's "today" can be up to a day ahead of the server's UTC date
+    v.check((d) => {
+      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      return d <= tomorrow.toISOString().slice(0, 10);
+    }, "Date can't be in the future"),
   ),
   pricePerShare: positiveNumber("Price"),
   shares: positiveNumber("Shares"),
