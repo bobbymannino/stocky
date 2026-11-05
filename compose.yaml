@@ -7,11 +7,11 @@ services:
       POSTGRES_PASSWORD: stocky
       POSTGRES_DB: stocky
     ports:
-      - '5449:5432'
+      - "5449:5432"
     volumes:
       - pgdata:/var/lib/postgresql
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U stocky -d stocky']
+      test: ["CMD-SHELL", "pg_isready -U stocky -d stocky"]
       interval: 5s
       timeout: 5s
       retries: 10

@@ -16,7 +16,8 @@ export const actions: Actions = {
     try {
       await auth.api.signInEmail({ body: { email, password } });
     } catch (e) {
-      if (e instanceof APIError) return fail(400, { email, message: e.message });
+      if (e instanceof APIError)
+        return fail(400, { email, message: e.message });
       throw e;
     }
     redirect(303, "/");
@@ -30,7 +31,8 @@ export const actions: Actions = {
     try {
       await auth.api.signUpEmail({ body: { email, password, name } });
     } catch (e) {
-      if (e instanceof APIError) return fail(400, { email, message: e.message });
+      if (e instanceof APIError)
+        return fail(400, { email, message: e.message });
       throw e;
     }
     redirect(303, "/");
