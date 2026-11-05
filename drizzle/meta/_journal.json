@@ -8,6 +8,13 @@
       "when": 1793892627742,
       "tag": "0000_youthful_ultimates",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793897776519,
+      "tag": "0001_mute_annihilus",
+      "breakpoints": true
     }
   ]
 }

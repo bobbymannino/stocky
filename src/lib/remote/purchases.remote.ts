@@ -1,6 +1,7 @@
 import { error, redirect } from "@sveltejs/kit";
 import { and, eq } from "drizzle-orm";
 import * as v from "valibot";
+import { ensureCompanyColors } from "#lib/server/company-colors.js";
 import { db } from "#lib/server/db/index.js";
 import { purchase } from "#lib/server/db/schema.js";
 import { command, form, getRequestEvent } from "$app/server";
@@ -56,6 +57,9 @@ export const addPurchase = form(AddPurchaseSchema, async (data) => {
     pricePerShare: String(data.pricePerShare),
     shares: String(data.shares),
   });
+
+  // a new company gets its colour now; existing ones keep theirs
+  await ensureCompanyColors(locals.auth.user.id, [data.ticker]);
 
   // the client resets the form and navigates to the portfolio itself
 });

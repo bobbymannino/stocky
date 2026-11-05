@@ -1,5 +1,7 @@
 <script lang="ts">
   import TrashIcon from "@lucide/svelte/icons/trash";
+  import { companyColorVar, type CompanyColors } from "#lib/company-colors.js";
+  import CompanySwatch from "#lib/components/company-swatch.svelte";
   import * as AlertDialog from "#lib/components/ui/alert-dialog/index.js";
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Select from "#lib/components/ui/select/index.js";
@@ -14,7 +16,8 @@
   } from "#lib/utils.js";
   import { refreshAll } from "$app/navigation";
 
-  let { purchases }: { purchases: Purchase[] } = $props();
+  let { purchases, colors }: { purchases: Purchase[]; colors: CompanyColors } =
+    $props();
 
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
 
@@ -138,6 +141,7 @@
         <Select.Item value={ALL} label="All tickers">All tickers</Select.Item>
         {#each tickers as t (t.ticker)}
           <Select.Item value={t.ticker} label={t.ticker}>
+            <CompanySwatch color={colors[t.ticker]} />
             <span class="font-mono">{t.ticker}</span>
             <span class="truncate text-muted-foreground">{t.companyName}</span>
           </Select.Item>
@@ -154,10 +158,16 @@
   <!-- Mobile: stacked cards -->
   <ul class="flex flex-col divide-y md:hidden">
     {#each visibleRows as p (p.id)}
-      <li class="flex flex-col gap-2 py-3 first:pt-0 last:pb-0">
+      <li
+        class="flex flex-col gap-2 border-l-4 py-3 pl-3 first:pt-0 last:pb-0"
+        style:border-left-color={companyColorVar(colors[p.ticker])}
+      >
         <div class="flex items-start justify-between gap-4">
           <div class="min-w-0">
-            <p class="font-mono font-medium">{p.ticker}</p>
+            <p class="flex items-center gap-2 font-mono font-medium">
+              <CompanySwatch color={colors[p.ticker]} />
+              {p.ticker}
+            </p>
             <p class="truncate text-sm text-muted-foreground">
               {p.companyName}
             </p>
@@ -218,7 +228,12 @@
             class="border-b last:border-0 [&>td]:py-2 [&>td]:pr-4 [&>td:last-child]:pr-0"
           >
             <td>{p.boughtOn}</td>
-            <td class="font-mono">{p.ticker}</td>
+            <td class="font-mono">
+              <span class="inline-flex items-center gap-2">
+                <CompanySwatch color={colors[p.ticker]} />
+                {p.ticker}
+              </span>
+            </td>
             <td class="max-w-48 truncate" title={p.companyName}>
               {p.companyName}
             </td>

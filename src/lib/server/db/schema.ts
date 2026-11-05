@@ -8,6 +8,7 @@ import {
   date,
   numeric,
   index,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth.schema";
 
@@ -47,5 +48,22 @@ export const purchase = pgTable(
 export const purchaseRelations = relations(purchase, ({ one }) => ({
   user: one(user, { fields: [purchase.userId], references: [user.id] }),
 }));
+
+/** A user's accent colour for each company (ticker) they hold. */
+export const companyColor = pgTable(
+  "company_color",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    ticker: text("ticker").notNull(),
+    /** A Catppuccin palette name, see `COMPANY_COLORS` in `#lib/company-colors` */
+    color: text("color").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.ticker] })],
+);
 
 export * from "./auth.schema";

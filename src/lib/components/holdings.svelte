@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { companyColorVar, type CompanyColors } from "#lib/company-colors.js";
+  import CompanySwatch from "#lib/components/company-swatch.svelte";
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
   import { currentPrices } from "#lib/current-prices.svelte.js";
@@ -10,7 +12,8 @@
     formatSignedMoney,
   } from "#lib/utils.js";
 
-  let { purchases }: { purchases: Purchase[] } = $props();
+  let { purchases, colors }: { purchases: Purchase[]; colors: CompanyColors } =
+    $props();
 
   let holdings = $derived.by(() => {
     const byTicker = new Map<
@@ -70,9 +73,15 @@
       {@const price = currentPrices.get(h.ticker)}
       {@const value = price === undefined ? undefined : price * h.shares}
       {@const gain = value === undefined ? undefined : value - h.cost}
-      <div class="flex flex-col gap-3 rounded-lg border p-4">
+      <div
+        class="flex flex-col gap-3 rounded-lg border border-l-4 p-4"
+        style:border-left-color={companyColorVar(colors[h.ticker])}
+      >
         <div class="min-w-0">
-          <p class="font-mono font-medium">{h.ticker}</p>
+          <p class="flex items-center gap-2 font-mono font-medium">
+            <CompanySwatch color={colors[h.ticker]} />
+            {h.ticker}
+          </p>
           <p class="truncate text-sm text-muted-foreground">
             {h.companyName}
           </p>

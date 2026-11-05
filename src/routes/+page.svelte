@@ -42,7 +42,7 @@
       </Card.Description>
     </Card.Header>
     <Card.Content>
-      <Holdings purchases={data.purchases} />
+      <Holdings purchases={data.purchases} colors={data.colors} />
     </Card.Content>
   </Card.Root>
 
@@ -51,7 +51,7 @@
       <Card.Title>Your purchases</Card.Title>
     </Card.Header>
     <Card.Content>
-      <PurchasesTable purchases={data.purchases} />
+      <PurchasesTable purchases={data.purchases} colors={data.colors} />
     </Card.Content>
   </Card.Root>
 </div>
