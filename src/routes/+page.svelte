@@ -6,6 +6,14 @@
   import type { PageProps } from "./$types";
 
   let { data }: PageProps = $props();
+
+  // purchases are newest first, so keep the first (most recent) name per ticker
+  let companies = $derived(
+    data.purchases.reduce((map, p) => {
+      if (!map.has(p.ticker)) map.set(p.ticker, p.companyName);
+      return map;
+    }, new Map<string, string>()),
+  );
 </script>
 
 <div class="mx-auto flex max-w-4xl flex-col gap-6 p-4">
@@ -21,7 +29,7 @@
     </form>
   </header>
 
-  <AddPurchaseForm />
+  <AddPurchaseForm {companies} />
 
   <Card.Root>
     <Card.Header>

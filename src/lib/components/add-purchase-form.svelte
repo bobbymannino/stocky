@@ -1,14 +1,40 @@
 <script lang="ts">
+  import { untrack } from "svelte";
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Card from "#lib/components/ui/card/index.js";
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
   import { addPurchase } from "#lib/remote/purchases.remote.js";
 
+  /** Ticker → company name, from the user's existing purchases. */
+  let { companies }: { companies: Map<string, string> } = $props();
+
   const today = new Date().toISOString().slice(0, 10);
   const { fields } = addPurchase;
 
   let error = $state<string>();
+  // the company name we last filled in, so we only replace our own value
+  // and never overwrite something the user typed themselves
+  let autofilled = $state<string>();
+
+  $effect(() => {
+    const ticker = (fields.ticker.value() ?? "").trim().toUpperCase();
+    const match = companies.get(ticker);
+
+    untrack(() => {
+      const current = fields.companyName.value() ?? "";
+      const ours = current === "" || current === autofilled;
+      if (!ours) return;
+
+      if (match) {
+        fields.companyName.set(match);
+        autofilled = match;
+      } else if (autofilled) {
+        fields.companyName.set("");
+        autofilled = undefined;
+      }
+    });
+  });
 </script>
 
 {#snippet issues(list: { message: string }[] | undefined)}
@@ -42,7 +68,14 @@
           required
           placeholder="AAPL"
           class="uppercase"
+          autocomplete="off"
+          list="known-tickers"
         />
+        <datalist id="known-tickers">
+          {#each companies as [ticker, name] (ticker)}
+            <option value={ticker}>{name}</option>
+          {/each}
+        </datalist>
         {@render issues(fields.ticker.issues())}
       </div>
       <div class="grid gap-2">
