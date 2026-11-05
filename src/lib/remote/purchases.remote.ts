@@ -56,7 +56,8 @@ export const addPurchase = form(AddPurchaseSchema, async (data) => {
     shares: String(data.shares),
   });
 
-  // no explicit refresh, so SvelteKit re-runs the page's load and the list updates
+  // back to the portfolio, whose load re-runs and shows the new purchase
+  redirect(303, "/");
 });
 
 export const deletePurchase = command(

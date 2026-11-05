@@ -1,6 +1,6 @@
 <script lang="ts">
+  import PlusIcon from "@lucide/svelte/icons/plus";
   import { onMount } from "svelte";
-  import AddPurchaseForm from "#lib/components/add-purchase-form.svelte";
   import Holdings from "#lib/components/holdings.svelte";
   import PurchasesTable from "#lib/components/purchases-table.svelte";
   import { Button } from "#lib/components/ui/button/index.js";
@@ -12,30 +12,26 @@
 
   // today's prices live in sessionStorage, which only exists in the browser
   onMount(() => currentPrices.load());
-
-  // purchases are newest first, so keep the first (most recent) name per ticker
-  let companies = $derived(
-    data.purchases.reduce((map, p) => {
-      if (!map.has(p.ticker)) map.set(p.ticker, p.companyName);
-      return map;
-    }, new Map<string, string>()),
-  );
 </script>
 
 <div class="mx-auto flex w-full max-w-4xl flex-col gap-6 p-4">
-  <header class="flex items-center justify-between">
+  <header class="flex flex-wrap items-center justify-between gap-4">
     <div>
       <h1 class="text-2xl font-semibold">Stocky</h1>
       <p class="text-sm text-muted-foreground">
         Signed in as {data.user.email}
       </p>
     </div>
-    <form method="post" action="?/signOut">
-      <Button type="submit" variant="outline">Sign out</Button>
-    </form>
+    <div class="flex gap-2">
+      <Button href="/purchases/new">
+        <PlusIcon />
+        Add purchase
+      </Button>
+      <form method="post" action="/?/signOut">
+        <Button type="submit" variant="outline">Sign out</Button>
+      </form>
+    </div>
   </header>
-
-  <AddPurchaseForm {companies} />
 
   <Card.Root>
     <Card.Header>
