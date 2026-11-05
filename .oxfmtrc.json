@@ -1,0 +1,26 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "printWidth": 80,
+  "tabWidth": 2,
+  "useTabs": false,
+  "semi": true,
+  "singleQuote": false,
+  "trailingComma": "all",
+  "endOfLine": "lf",
+  "sortPackageJson": true,
+  "sortImports": {
+    "partitionByNewline": true,
+    "newlinesBetween": false,
+    "internalPattern": ["$app/", "$env/", "#lib", "#lib/"]
+  },
+  "sortTailwindcss": {
+    "stylesheet": "./src/routes/layout.css",
+    "functions": ["cn", "tv"]
+  },
+  "svelte": {},
+  "ignorePatterns": [
+    "bun.lock",
+    "drizzle/**",
+    "src/lib/server/db/auth.schema.ts"
+  ]
+}

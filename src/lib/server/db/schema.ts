@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   pgTable,
   serial,
@@ -8,7 +9,6 @@ import {
   numeric,
   index,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
 import { user } from "./auth.schema";
 
 export const task = pgTable("task", {
