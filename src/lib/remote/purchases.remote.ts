@@ -1,5 +1,5 @@
 import { error, redirect } from "@sveltejs/kit";
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import * as v from "valibot";
 import { ensureCompanyColors } from "#lib/server/company-colors.js";
 import { db } from "#lib/server/db/index.js";
@@ -70,10 +70,18 @@ export const deletePurchase = command(
     const { locals } = getRequestEvent();
     if (!locals.auth) error(401, "You need to be signed in");
 
-    // scoped to the user so nobody can delete someone else's purchase by id
+    // archive rather than delete so the row stays in the db, hidden from the user.
+    // scoped to the user so nobody can archive someone else's purchase by id
     const deleted = await db
-      .delete(purchase)
-      .where(and(eq(purchase.id, id), eq(purchase.userId, locals.auth.user.id)))
+      .update(purchase)
+      .set({ archivedAt: new Date() })
+      .where(
+        and(
+          eq(purchase.id, id),
+          eq(purchase.userId, locals.auth.user.id),
+          isNull(purchase.archivedAt),
+        ),
+      )
       .returning({ id: purchase.id });
 
     if (deleted.length === 0) error(404, "Purchase not found");

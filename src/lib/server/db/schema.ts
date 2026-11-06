@@ -41,6 +41,8 @@ export const purchase = pgTable(
     }).notNull(),
     // allows fractional shares
     shares: numeric("shares", { precision: 18, scale: 6 }).notNull(),
+    /** Set when the user deletes the purchase; archived rows are hidden from them. */
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
   },
   (table) => [index("purchase_userId_idx").on(table.userId)],
 );

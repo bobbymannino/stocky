@@ -1,5 +1,5 @@
 import { redirect } from "@sveltejs/kit";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { definePageMetaTags } from "svelte-meta-tags";
 import { auth } from "#lib/server/auth.js";
 import { ensureCompanyColors } from "#lib/server/company-colors.js";
@@ -13,7 +13,12 @@ export const load: PageServerLoad = async ({ locals }) => {
   const purchases = await db
     .select()
     .from(purchase)
-    .where(eq(purchase.userId, locals.auth.user.id))
+    .where(
+      and(
+        eq(purchase.userId, locals.auth.user.id),
+        isNull(purchase.archivedAt),
+      ),
+    )
     .orderBy(desc(purchase.boughtAt), desc(purchase.createdAt));
 
   // also backfills colours for companies added before colours existed
