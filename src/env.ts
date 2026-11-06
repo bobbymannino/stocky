@@ -8,4 +8,9 @@ export const variables = defineEnvVars({
   BETTER_AUTH_URL: {
     description: "The base URL of the app, e.g. http://localhost:5173.",
   },
+  FINNHUB_TOKEN: {
+    description:
+      "Finnhub API key for fetching current share prices. Optional: without it, prices can only be entered by hand.",
+    schema: (value) => value || undefined,
+  },
 });

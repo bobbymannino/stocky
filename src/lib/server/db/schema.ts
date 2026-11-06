@@ -68,4 +68,23 @@ export const companyColor = pgTable(
   (table) => [primaryKey({ columns: [table.userId, table.ticker] })],
 );
 
+/** The latest price per share a user has set for each company (ticker). */
+export const currentPrice = pgTable(
+  "current_price",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    ticker: text("ticker").notNull(),
+    /** Price per share in GBP. */
+    price: numeric("price", { precision: 18, scale: 4 }).notNull(),
+    /** Where the price came from: typed in by the user, or fetched from Finnhub. */
+    source: text("source", { enum: ["manual", "finnhub"] }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.userId, table.ticker] })],
+);
+
 export * from "./auth.schema";

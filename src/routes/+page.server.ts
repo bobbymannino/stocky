@@ -1,10 +1,12 @@
 import { redirect } from "@sveltejs/kit";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { definePageMetaTags } from "svelte-meta-tags";
+import type { SavedPrices } from "#lib/current-prices.svelte.js";
 import { auth } from "#lib/server/auth.js";
 import { ensureCompanyColors } from "#lib/server/company-colors.js";
 import { db } from "#lib/server/db/index.js";
-import { purchase } from "#lib/server/db/schema.js";
+import { currentPrice, purchase } from "#lib/server/db/schema.js";
+import { finnhubEnabled } from "#lib/server/finnhub.js";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -27,10 +29,20 @@ export const load: PageServerLoad = async ({ locals }) => {
     purchases.map((p) => p.ticker),
   );
 
+  const priceRows = await db
+    .select()
+    .from(currentPrice)
+    .where(eq(currentPrice.userId, locals.auth.user.id));
+  const prices: SavedPrices = {};
+  for (const r of priceRows)
+    prices[r.ticker] = { price: Number(r.price), source: r.source };
+
   return {
     user: locals.auth.user,
     purchases,
     colors,
+    prices,
+    finnhubEnabled,
     ...definePageMetaTags({
       title: "Portfolio",
       description: "Your recorded share purchases.",

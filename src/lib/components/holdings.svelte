@@ -1,13 +1,16 @@
 <script lang="ts">
+  import LoaderCircleIcon from "@lucide/svelte/icons/loader-circle";
+  import RefreshCwIcon from "@lucide/svelte/icons/refresh-cw";
   import {
     companyColorVar,
     type CompanyColor,
     type CompanyColors,
   } from "#lib/company-colors.js";
   import CompanySwatch from "#lib/components/company-swatch.svelte";
+  import { Button } from "#lib/components/ui/button/index.js";
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
-  import { currentPrices } from "#lib/current-prices.svelte.js";
+  import type { CurrentPrices } from "#lib/current-prices.svelte.js";
   import { purchaseCosts, type Purchase } from "#lib/purchases.js";
   import {
     cn,
@@ -16,8 +19,18 @@
     formatSignedMoney,
   } from "#lib/utils.js";
 
-  let { purchases, colors }: { purchases: Purchase[]; colors: CompanyColors } =
-    $props();
+  let {
+    purchases,
+    colors,
+    prices,
+    finnhubEnabled,
+  }: {
+    purchases: Purchase[];
+    colors: CompanyColors;
+    prices: CurrentPrices;
+    /** Whether a Finnhub key is configured, so live prices can be fetched. */
+    finnhubEnabled: boolean;
+  } = $props();
 
   /** A faint wash of the company colour, strongest at the bottom of the card. */
   function accentGradient(color: CompanyColor | undefined) {
@@ -64,7 +77,7 @@
   function onPriceInput(ticker: string, e: Event) {
     const raw = (e.currentTarget as HTMLInputElement).value;
     const price = raw === "" ? undefined : Number(raw);
-    currentPrices.set(
+    prices.set(
       ticker,
       price !== undefined && Number.isFinite(price) && price >= 0
         ? price
@@ -80,7 +93,9 @@
 {:else}
   <div class="grid gap-4 sm:grid-cols-2">
     {#each holdings as h (h.ticker)}
-      {@const price = currentPrices.get(h.ticker)}
+      {@const price = prices.get(h.ticker)}
+      {@const fetching = prices.isFetching(h.ticker)}
+      {@const priceError = prices.error(h.ticker)}
       {@const value = price === undefined ? undefined : price * h.shares}
       {@const gain = value === undefined ? undefined : value - h.cost}
       <div
@@ -99,16 +114,48 @@
 
         <div class="grid gap-2">
           <Label for="price-{h.ticker}">Today's price (1 share)</Label>
-          <Input
-            id="price-{h.ticker}"
-            type="number"
-            inputmode="decimal"
-            min="0"
-            step="any"
-            placeholder="0.00"
-            value={price ?? ""}
-            oninput={(e) => onPriceInput(h.ticker, e)}
-          />
+          <div class="flex gap-2">
+            <Input
+              id="price-{h.ticker}"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              step="any"
+              placeholder="0.00"
+              value={price ?? ""}
+              oninput={(e) => onPriceInput(h.ticker, e)}
+              aria-describedby="price-note-{h.ticker}"
+            />
+            {#if finnhubEnabled}
+              <Button
+                type="button"
+                variant="outline"
+                disabled={fetching}
+                onclick={() => prices.fetchLive(h.ticker)}
+              >
+                {#if fetching}
+                  <LoaderCircleIcon class="animate-spin" />
+                {:else}
+                  <RefreshCwIcon />
+                {/if}
+                Use current
+              </Button>
+            {/if}
+          </div>
+          <p
+            id="price-note-{h.ticker}"
+            class={cn(
+              "text-xs",
+              priceError ? "text-destructive" : "text-muted-foreground",
+            )}
+            aria-live="polite"
+          >
+            {#if priceError}
+              {priceError}
+            {:else if prices.source(h.ticker) === "finnhub"}
+              Latest price from Finnhub, in GBP
+            {/if}
+          </p>
         </div>
 
         <dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">

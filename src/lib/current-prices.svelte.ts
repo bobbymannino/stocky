@@ -1,48 +1,92 @@
-const STORAGE_KEY = "stocky:current-prices";
+import {
+  refreshCurrentPrice,
+  setCurrentPrice,
+} from "#lib/remote/prices.remote.js";
+
+export type PriceSource = "manual" | "finnhub";
+
+/** Ticker → saved price per share in GBP, as sent from the server. */
+export type SavedPrices = Record<
+  string,
+  { price: number; source: PriceSource }
+>;
+
+/** How long to wait after the user stops typing before saving their price. */
+const SAVE_DELAY = 600;
 
 /**
- * Today's price per share for each ticker, entered by the user.
- * Kept only in sessionStorage, so it's cleared when the tab is closed.
+ * Today's price per share for each ticker, saved to the user's account.
+ * Create one per page from the server's prices (it's per-user, so never share
+ * an instance between requests).
  */
-class CurrentPrices {
-  #prices = $state<Record<string, number>>({});
+export class CurrentPrices {
+  #prices = $state<SavedPrices>({});
+  /** Tickers currently fetching a live price. */
+  #fetching = $state<Record<string, boolean>>({});
+  /** The last problem saving or fetching each ticker's price. */
+  #errors = $state<Record<string, string>>({});
+  #timers = new Map<string, ReturnType<typeof setTimeout>>();
+
+  constructor(initial: SavedPrices) {
+    this.#prices = initial;
+  }
 
   get(ticker: string): number | undefined {
-    return this.#prices[ticker];
+    return this.#prices[ticker]?.price;
   }
 
+  source(ticker: string): PriceSource | undefined {
+    return this.#prices[ticker]?.source;
+  }
+
+  isFetching(ticker: string): boolean {
+    return this.#fetching[ticker] ?? false;
+  }
+
+  error(ticker: string): string | undefined {
+    return this.#errors[ticker];
+  }
+
+  /** A price the user typed in. Shown straight away, saved once they pause. */
   set(ticker: string, price: number | undefined) {
     if (price === undefined) delete this.#prices[ticker];
-    else this.#prices[ticker] = price;
-    this.#save();
+    else this.#prices[ticker] = { price, source: "manual" };
+    delete this.#errors[ticker];
+
+    clearTimeout(this.#timers.get(ticker));
+    this.#timers.set(
+      ticker,
+      setTimeout(() => {
+        this.#timers.delete(ticker);
+        setCurrentPrice({ ticker, price: price ?? null }).catch(() => {
+          this.#errors[ticker] = "Couldn't save this price. Please try again.";
+        });
+      }, SAVE_DELAY),
+    );
   }
 
-  /** Read saved prices. Call from the browser only (e.g. in `onMount`). */
-  load() {
+  /** Replaces the price with the live one from Finnhub. */
+  async fetchLive(ticker: string) {
+    // a pending typed price would otherwise overwrite the live one when it saves
+    clearTimeout(this.#timers.get(ticker));
+    this.#timers.delete(ticker);
+    this.#fetching[ticker] = true;
+    delete this.#errors[ticker];
     try {
-      const raw = sessionStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed: unknown = JSON.parse(raw);
-      if (typeof parsed !== "object" || parsed === null) return;
-
-      const prices: Record<string, number> = {};
-      for (const [ticker, price] of Object.entries(parsed)) {
-        if (typeof price === "number" && Number.isFinite(price) && price >= 0)
-          prices[ticker] = price;
-      }
-      this.#prices = prices;
-    } catch {
-      // storage blocked or corrupt; start empty
-    }
-  }
-
-  #save() {
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(this.#prices));
-    } catch {
-      // storage blocked; prices still work for this page view
+      const price = await refreshCurrentPrice(ticker);
+      this.#prices[ticker] = { price, source: "finnhub" };
+    } catch (e) {
+      this.#errors[ticker] = errorMessage(e);
+    } finally {
+      this.#fetching[ticker] = false;
     }
   }
 }
 
-export const currentPrices = new CurrentPrices();
+function errorMessage(e: unknown): string {
+  // errors thrown with `error()` on the server arrive with a `body.message`
+  const message = (e as { body?: { message?: unknown } })?.body?.message;
+  return typeof message === "string"
+    ? message
+    : "Couldn't get the latest price. Please try again.";
+}

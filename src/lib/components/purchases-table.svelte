@@ -5,7 +5,7 @@
   import * as AlertDialog from "#lib/components/ui/alert-dialog/index.js";
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Select from "#lib/components/ui/select/index.js";
-  import { currentPrices } from "#lib/current-prices.svelte.js";
+  import type { CurrentPrices } from "#lib/current-prices.svelte.js";
   import { purchaseCosts, type Purchase } from "#lib/purchases.js";
   import { deletePurchase } from "#lib/remote/purchases.remote.js";
   import {
@@ -16,8 +16,15 @@
   } from "#lib/utils.js";
   import { refreshAll } from "$app/navigation";
 
-  let { purchases, colors }: { purchases: Purchase[]; colors: CompanyColors } =
-    $props();
+  let {
+    purchases,
+    colors,
+    prices,
+  }: {
+    purchases: Purchase[];
+    colors: CompanyColors;
+    prices: CurrentPrices;
+  } = $props();
 
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
 
@@ -34,7 +41,7 @@
 
   /** Value at today's price, or undefined if no price has been entered. */
   function currentValue(row: Row) {
-    const price = currentPrices.get(row.ticker);
+    const price = prices.get(row.ticker);
     return price === undefined ? undefined : price * row.shares;
   }
 
