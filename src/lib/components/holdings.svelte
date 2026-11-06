@@ -96,20 +96,25 @@
       {@const value = price === undefined ? undefined : price * h.shares}
       {@const gain = value === undefined ? undefined : value - h.cost}
       <div
-        class="flex flex-col gap-3 rounded-lg border bg-background p-4 shadow-tile inset-shadow-highlight transition-[box-shadow,translate] duration-200 hover:-translate-y-0.5 hover:shadow-tile-raised motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+        class="relative flex flex-col gap-3 rounded-lg border bg-background p-4 shadow-tile inset-shadow-highlight transition-[box-shadow,translate] duration-200 hover:-translate-y-0.5 hover:shadow-tile-raised has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-ring motion-reduce:transition-none motion-reduce:hover:translate-y-0"
         style:background-image={accentGradient(colors[h.ticker])}
       >
         <div class="min-w-0">
-          <p class="flex items-center gap-2 font-mono font-medium">
+          <!-- the link stretches over the whole tile; the price controls sit above it -->
+          <a
+            href="/holdings/{encodeURIComponent(h.ticker)}"
+            class="flex items-center gap-2 font-mono font-medium outline-none after:absolute after:inset-0 after:rounded-lg hover:underline"
+          >
             <CompanySwatch color={colors[h.ticker]} />
             {h.ticker}
-          </p>
+            <span class="sr-only">— view price history</span>
+          </a>
           <p class="truncate text-sm text-muted-foreground">
             {h.companyName}
           </p>
         </div>
 
-        <div class="grid gap-2">
+        <div class="relative z-10 grid gap-2">
           <Label for="price-{h.ticker}">Today's price (1 share)</Label>
           <div class="flex gap-2">
             <Input

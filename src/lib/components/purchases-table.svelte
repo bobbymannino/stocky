@@ -20,10 +20,13 @@
     purchases,
     colors,
     prices,
+    filterable = true,
   }: {
     purchases: Purchase[];
     colors: CompanyColors;
     prices: CurrentPrices;
+    /** Show the ticker filter. Off where there's only one ticker. */
+    filterable?: boolean;
   } = $props();
 
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
@@ -153,28 +156,31 @@
 {#if rows.length === 0}
   <p class="text-sm text-muted-foreground">No purchases yet.</p>
 {:else}
-  <div class="mb-4 flex items-center gap-2">
-    <Select.Root type="single" bind:value={tickerFilter}>
-      <Select.Trigger class="w-full sm:w-56" aria-label="Filter by ticker">
-        {activeTicker === ALL ? "All tickers" : activeTicker}
-      </Select.Trigger>
-      <Select.Content>
-        <Select.Item value={ALL} label="All tickers">All tickers</Select.Item>
-        {#each tickers as t (t.ticker)}
-          <Select.Item value={t.ticker} label={t.ticker}>
-            <CompanySwatch color={colors[t.ticker]} />
-            <span class="font-mono">{t.ticker}</span>
-            <span class="truncate text-muted-foreground">{t.companyName}</span>
-          </Select.Item>
-        {/each}
-      </Select.Content>
-    </Select.Root>
-    {#if activeTicker !== ALL}
-      <Button variant="ghost" size="sm" onclick={() => (tickerFilter = ALL)}>
-        Clear
-      </Button>
-    {/if}
-  </div>
+  {#if filterable}
+    <div class="mb-4 flex items-center gap-2">
+      <Select.Root type="single" bind:value={tickerFilter}>
+        <Select.Trigger class="w-full sm:w-56" aria-label="Filter by ticker">
+          {activeTicker === ALL ? "All tickers" : activeTicker}
+        </Select.Trigger>
+        <Select.Content>
+          <Select.Item value={ALL} label="All tickers">All tickers</Select.Item>
+          {#each tickers as t (t.ticker)}
+            <Select.Item value={t.ticker} label={t.ticker}>
+              <CompanySwatch color={colors[t.ticker]} />
+              <span class="font-mono">{t.ticker}</span>
+              <span class="truncate text-muted-foreground">{t.companyName}</span
+              >
+            </Select.Item>
+          {/each}
+        </Select.Content>
+      </Select.Root>
+      {#if activeTicker !== ALL}
+        <Button variant="ghost" size="sm" onclick={() => (tickerFilter = ALL)}>
+          Clear
+        </Button>
+      {/if}
+    </div>
+  {/if}
 
   <!-- Mobile: stacked cards -->
   <ul class="flex flex-col gap-3 md:hidden">
