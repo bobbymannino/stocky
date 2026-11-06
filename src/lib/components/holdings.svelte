@@ -23,13 +23,10 @@
     purchases,
     colors,
     prices,
-    finnhubEnabled,
   }: {
     purchases: Purchase[];
     colors: CompanyColors;
     prices: CurrentPrices;
-    /** Whether a Finnhub key is configured, so live prices can be fetched. */
-    finnhubEnabled: boolean;
   } = $props();
 
   /** A faint wash of the company colour, strongest at the bottom of the card. */
@@ -126,21 +123,19 @@
               oninput={(e) => onPriceInput(h.ticker, e)}
               aria-describedby="price-note-{h.ticker}"
             />
-            {#if finnhubEnabled}
-              <Button
-                type="button"
-                variant="outline"
-                disabled={fetching}
-                onclick={() => prices.fetchLive(h.ticker)}
-              >
-                {#if fetching}
-                  <LoaderCircleIcon class="animate-spin" />
-                {:else}
-                  <RefreshCwIcon />
-                {/if}
-                Use current
-              </Button>
-            {/if}
+            <Button
+              type="button"
+              variant="outline"
+              disabled={fetching}
+              onclick={() => prices.fetchLive(h.ticker)}
+            >
+              {#if fetching}
+                <LoaderCircleIcon class="animate-spin" />
+              {:else}
+                <RefreshCwIcon />
+              {/if}
+              Use current
+            </Button>
           </div>
           <p
             id="price-note-{h.ticker}"
@@ -154,6 +149,8 @@
               {priceError}
             {:else if prices.source(h.ticker) === "finnhub"}
               Latest price from Finnhub, in GBP
+            {:else if prices.source(h.ticker) === "yahoo"}
+              Latest price from Yahoo Finance, in GBP
             {/if}
           </p>
         </div>

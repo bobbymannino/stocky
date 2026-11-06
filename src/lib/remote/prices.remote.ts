@@ -1,9 +1,14 @@
 import { error } from "@sveltejs/kit";
 import { and, eq } from "drizzle-orm";
 import * as v from "valibot";
+import type { PriceSource } from "#lib/current-prices.svelte.js";
 import { db } from "#lib/server/db/index.js";
 import { currentPrice } from "#lib/server/db/schema.js";
-import { fetchPriceGbp, PriceError } from "#lib/server/finnhub.js";
+import {
+  fetchPriceGbp,
+  PriceError,
+  type LiveSource,
+} from "#lib/server/live-prices.js";
 import { command, getRequestEvent } from "$app/server";
 
 const Ticker = v.pipe(
@@ -25,7 +30,7 @@ async function savePrice(
   userId: string,
   ticker: string,
   price: number,
-  source: "manual" | "finnhub",
+  source: PriceSource,
 ) {
   const values = {
     price: String(price),
@@ -61,12 +66,13 @@ export const setCurrentPrice = command(
   },
 );
 
-/** Fetches the live price from Finnhub, saves it, and returns it in GBP. */
+/** Fetches the live price, saves it, and returns it in GBP with its source. */
 export const refreshCurrentPrice = command(Ticker, async (ticker) => {
   const id = requireUserId();
   let price: number;
+  let source: LiveSource;
   try {
-    price = await fetchPriceGbp(ticker);
+    ({ price, source } = await fetchPriceGbp(ticker));
   } catch (e) {
     if (e instanceof PriceError) error(400, e.message);
     console.error(e);
@@ -74,6 +80,6 @@ export const refreshCurrentPrice = command(Ticker, async (ticker) => {
   }
   // stored at the column's precision so the UI matches what's saved
   price = Math.round(price * 10_000) / 10_000;
-  await savePrice(id, ticker, price, "finnhub");
-  return price;
+  await savePrice(id, ticker, price, source);
+  return { price, source };
 });

@@ -6,7 +6,6 @@ import { auth } from "#lib/server/auth.js";
 import { ensureCompanyColors } from "#lib/server/company-colors.js";
 import { db } from "#lib/server/db/index.js";
 import { currentPrice, purchase } from "#lib/server/db/schema.js";
-import { finnhubEnabled } from "#lib/server/finnhub.js";
 import type { Actions, PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -42,7 +41,6 @@ export const load: PageServerLoad = async ({ locals }) => {
     purchases,
     colors,
     prices,
-    finnhubEnabled,
     ...definePageMetaTags({
       title: "Portfolio",
       description: "Your recorded share purchases.",

@@ -10,7 +10,7 @@ export const variables = defineEnvVars({
   },
   FINNHUB_TOKEN: {
     description:
-      "Finnhub API key for fetching current share prices. Optional: without it, prices can only be entered by hand.",
+      "Finnhub API key for current US share prices. Optional: without it, every live price comes from Yahoo.",
     schema: (value) => value || undefined,
   },
 });

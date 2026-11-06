@@ -43,12 +43,7 @@
       </Card.Description>
     </Card.Header>
     <Card.Content>
-      <Holdings
-        purchases={data.purchases}
-        colors={data.colors}
-        {prices}
-        finnhubEnabled={data.finnhubEnabled}
-      />
+      <Holdings purchases={data.purchases} colors={data.colors} {prices} />
     </Card.Content>
   </Card.Root>
 

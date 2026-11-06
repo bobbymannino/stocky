@@ -3,7 +3,7 @@ import {
   setCurrentPrice,
 } from "#lib/remote/prices.remote.js";
 
-export type PriceSource = "manual" | "finnhub";
+export type PriceSource = "manual" | "finnhub" | "yahoo";
 
 /** Ticker → saved price per share in GBP, as sent from the server. */
 export type SavedPrices = Record<
@@ -65,7 +65,7 @@ export class CurrentPrices {
     );
   }
 
-  /** Replaces the price with the live one from Finnhub. */
+  /** Replaces the price with the live one (Finnhub, or Yahoo for London). */
   async fetchLive(ticker: string) {
     // a pending typed price would otherwise overwrite the live one when it saves
     clearTimeout(this.#timers.get(ticker));
@@ -73,8 +73,7 @@ export class CurrentPrices {
     this.#fetching[ticker] = true;
     delete this.#errors[ticker];
     try {
-      const price = await refreshCurrentPrice(ticker);
-      this.#prices[ticker] = { price, source: "finnhub" };
+      this.#prices[ticker] = await refreshCurrentPrice(ticker);
     } catch (e) {
       this.#errors[ticker] = errorMessage(e);
     } finally {

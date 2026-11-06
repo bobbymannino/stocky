@@ -78,8 +78,8 @@ export const currentPrice = pgTable(
     ticker: text("ticker").notNull(),
     /** Price per share in GBP. */
     price: numeric("price", { precision: 18, scale: 4 }).notNull(),
-    /** Where the price came from: typed in by the user, or fetched from Finnhub. */
-    source: text("source", { enum: ["manual", "finnhub"] }).notNull(),
+    /** Where the price came from: typed in by the user, or fetched live. */
+    source: text("source", { enum: ["manual", "finnhub", "yahoo"] }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
