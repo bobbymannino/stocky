@@ -16,20 +16,44 @@ const moneyFormatter = new Intl.NumberFormat(undefined, {
   currency: "GBP",
 });
 
-/** Formats an amount as GBP in the viewer's locale, e.g. `£1,234.50`. */
-export function formatMoney(amount: number): string {
-  return moneyFormatter.format(amount);
-}
-
 const signedMoneyFormatter = new Intl.NumberFormat(undefined, {
   style: "currency",
   currency: "GBP",
   signDisplay: "exceptZero",
 });
 
-/** Like `formatMoney`, but always shows the sign, e.g. `+£12.00` / `-£3.50`. */
+const penceFormatter = new Intl.NumberFormat(undefined, {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+const signedPenceFormatter = new Intl.NumberFormat(undefined, {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+  signDisplay: "exceptZero",
+});
+
+/**
+ * Amounts under £1 (either sign) read better in pence. Decided on the rounded
+ * pence so 99.999p doesn't show as "100.00p", and zero stays as £0.00.
+ */
+function inPence(amount: number): boolean {
+  const pence = Math.round(Math.abs(amount) * 10_000) / 100;
+  return pence > 0 && pence < 100;
+}
+
+/** Formats an amount as GBP in the viewer's locale: `£1,234.50`, or `12.34p` under £1. */
+export function formatMoney(amount: number): string {
+  return inPence(amount)
+    ? `${penceFormatter.format(amount * 100)}p`
+    : moneyFormatter.format(amount);
+}
+
+/** Like `formatMoney`, but always shows the sign: `+£12.00`, `-£3.50`, `+12.34p`. */
 export function formatSignedMoney(amount: number): string {
-  return signedMoneyFormatter.format(amount);
+  return inPence(amount)
+    ? `${signedPenceFormatter.format(amount * 100)}p`
+    : signedMoneyFormatter.format(amount);
 }
 
 const percentFormatter = new Intl.NumberFormat(undefined, {
