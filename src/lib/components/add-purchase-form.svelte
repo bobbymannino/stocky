@@ -5,6 +5,7 @@
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
   import { addPurchase } from "#lib/remote/purchases.remote.js";
+  import { cn } from "#lib/utils.js";
   import { goto } from "$app/navigation";
 
   /** Ticker → company name, from the user's existing purchases. */
@@ -32,6 +33,66 @@
   }
 
   onMount(resetForm);
+
+  // --- ticker suggestions (an ARIA combobox over the user's own tickers) ------
+
+  /** How many suggestions to show at once. */
+  const MAX_SUGGESTIONS = 8;
+
+  let suggestOpen = $state(false);
+  let highlighted = $state(-1);
+
+  let suggestions = $derived.by(() => {
+    const query = (fields.ticker.value() ?? "").trim().toUpperCase();
+    const all = [...companies].map(([ticker, name]) => ({ ticker, name }));
+    // nothing more to suggest once it already matches a ticker exactly
+    if (companies.has(query)) return [];
+    const matches = query
+      ? all.filter(
+          (c) =>
+            c.ticker.startsWith(query) || c.name.toUpperCase().includes(query),
+        )
+      : all;
+    // ticker-prefix matches first, then A–Z
+    return matches
+      .toSorted(
+        (a, b) =>
+          Number(b.ticker.startsWith(query)) -
+            Number(a.ticker.startsWith(query)) ||
+          a.ticker.localeCompare(b.ticker),
+      )
+      .slice(0, MAX_SUGGESTIONS);
+  });
+
+  let showSuggestions = $derived(suggestOpen && suggestions.length > 0);
+
+  function chooseTicker(ticker: string) {
+    // the company name fills itself in via the effect below
+    fields.ticker.set(ticker);
+    suggestOpen = false;
+    highlighted = -1;
+  }
+
+  function onTickerKeyDown(e: KeyboardEvent) {
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      if (!showSuggestions) {
+        suggestOpen = true;
+        highlighted = e.key === "ArrowDown" ? 0 : suggestions.length - 1;
+        return;
+      }
+      const step = e.key === "ArrowDown" ? 1 : -1;
+      highlighted =
+        (highlighted + step + suggestions.length) % suggestions.length;
+    } else if (e.key === "Enter" && showSuggestions && highlighted >= 0) {
+      // pick the suggestion instead of submitting the form
+      e.preventDefault();
+      chooseTicker(suggestions[highlighted].ticker);
+    } else if (e.key === "Escape" && showSuggestions) {
+      e.preventDefault();
+      suggestOpen = false;
+    }
+  }
 
   $effect(() => {
     const ticker = (fields.ticker.value() ?? "").trim().toUpperCase();
@@ -82,7 +143,7 @@
       })}
       class="grid gap-4 sm:grid-cols-2"
     >
-      <div class="grid gap-2">
+      <div class="relative grid gap-2">
         <Label for="ticker">Ticker</Label>
         <Input
           id="ticker"
@@ -91,13 +152,50 @@
           placeholder="AAPL"
           class="uppercase"
           autocomplete="off"
-          list="known-tickers"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={showSuggestions}
+          aria-controls="ticker-suggestions"
+          aria-activedescendant={showSuggestions && highlighted >= 0
+            ? `ticker-option-${highlighted}`
+            : undefined}
+          onfocus={() => (suggestOpen = true)}
+          onblur={() => (suggestOpen = false)}
+          oninput={() => {
+            suggestOpen = true;
+            highlighted = -1;
+          }}
+          onkeydown={onTickerKeyDown}
         />
-        <datalist id="known-tickers">
-          {#each companies as [ticker, name] (ticker)}
-            <option value={ticker}>{name}</option>
-          {/each}
-        </datalist>
+        {#if showSuggestions}
+          <ul
+            id="ticker-suggestions"
+            role="listbox"
+            aria-label="Your tickers"
+            class="absolute top-full right-0 left-0 z-20 mt-1 max-h-64 overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-tile-raised"
+          >
+            {#each suggestions as s, i (s.ticker)}
+              <!-- mousedown, not click: picking must happen before the input blurs -->
+              <li
+                id="ticker-option-{i}"
+                role="option"
+                aria-selected={i === highlighted}
+                class={cn(
+                  "flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm",
+                  i === highlighted && "bg-accent text-accent-foreground",
+                )}
+                onmousedown={(e) => {
+                  e.preventDefault();
+                  chooseTicker(s.ticker);
+                }}
+                onmousemove={() => (highlighted = i)}
+              >
+                <span class="font-mono font-medium">{s.ticker}</span>
+                <span class="truncate text-muted-foreground">{s.name}</span>
+              </li>
+            {/each}
+          </ul>
+        {/if}
         {@render issues(fields.ticker.issues())}
       </div>
       <div class="grid gap-2">
