@@ -47,16 +47,8 @@
     </Card.Content>
   </Card.Root>
 
-  <Card.Root>
-    <Card.Header>
-      <Card.Title>Your purchases</Card.Title>
-    </Card.Header>
-    <Card.Content>
-      <PurchasesTable
-        purchases={data.purchases}
-        colors={data.colors}
-        {prices}
-      />
-    </Card.Content>
-  </Card.Root>
+  <section aria-labelledby="purchases-heading" class="flex flex-col gap-4">
+    <h2 id="purchases-heading" class="text-lg font-semibold">Your purchases</h2>
+    <PurchasesTable purchases={data.purchases} colors={data.colors} {prices} />
+  </section>
 </div>

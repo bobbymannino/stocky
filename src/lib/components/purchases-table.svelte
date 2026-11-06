@@ -47,12 +47,19 @@
 
   type Row = (typeof rows)[number];
 
-  /** Background tint for a row: green if it's up, red if down, none without a price. */
+  /** A wash across the row's card: green if it's up, red if down, none without a price. */
   function rowTint(row: Row) {
     const value = currentValue(row);
     if (value === undefined || value === row.totalIncTax) return "";
-    return value > row.totalIncTax ? "bg-ctp-green/5" : "bg-ctp-red/5";
+    return cn(
+      "bg-linear-to-r to-transparent",
+      value > row.totalIncTax ? "from-ctp-green/10" : "from-ctp-red/10",
+    );
   }
+
+  /** Each purchase sits on its own raised card, matching the holding tiles. */
+  const rowCard =
+    "rounded-lg border border-l-4 bg-card shadow-tile inset-shadow-highlight transition-shadow hover:shadow-tile-raised";
 
   const ALL = "all";
   let tickerFilter = $state(ALL);
@@ -170,13 +177,10 @@
   </div>
 
   <!-- Mobile: stacked cards -->
-  <ul class="flex flex-col divide-y md:hidden">
+  <ul class="flex flex-col gap-3 md:hidden">
     {#each visibleRows as p (p.id)}
       <li
-        class={cn(
-          "flex flex-col gap-2 border-l-4 py-3 pr-3 pl-3 transition-colors",
-          rowTint(p),
-        )}
+        class={cn("flex flex-col gap-2 p-3", rowCard, rowTint(p))}
         style:border-left-color={companyColorVar(colors[p.ticker])}
       >
         <div class="flex items-start justify-between gap-4">
@@ -219,62 +223,81 @@
     {/each}
   </ul>
 
-  <!-- Desktop: table -->
-  <div class="hidden overflow-x-auto md:block">
-    <table class="w-full text-sm whitespace-nowrap">
-      <thead class="text-left text-muted-foreground">
-        <tr
-          class="border-b [&>th]:py-4 [&>th]:pr-4 [&>th]:font-medium [&>th:first-child]:pl-4 [&>th:last-child]:pr-4"
+  <!-- Desktop: a table whose rows are separate cards. Rows are subgrids of
+       one grid so the columns still line up; ARIA roles keep it a table. -->
+  <!-- padding stops the overflow container from clipping the row shadows -->
+  <div class="-mx-2 hidden overflow-x-auto px-2 pb-3 md:block">
+    <div
+      role="table"
+      aria-label="Your purchases"
+      class="grid grid-cols-[repeat(11,auto)] gap-y-2 text-sm whitespace-nowrap"
+    >
+      <div role="rowgroup" class="contents">
+        <div
+          role="row"
+          class="col-span-full grid grid-cols-subgrid border-l-4 border-transparent px-4 pb-1 text-left font-medium text-muted-foreground *:pr-4 *:last:pr-0"
         >
-          <th>Bought</th>
-          <th>Ticker</th>
-          <th>Company</th>
-          <th class="text-right">Price</th>
-          <th class="text-right">Shares</th>
-          <th class="text-right">Total</th>
-          <th class="text-right">Tax (0.5%)</th>
-          <th class="text-right">Total (inc. tax)</th>
-          <th class="text-right">Current value</th>
-          <th class="text-right">Gain / loss</th>
-          <th><span class="sr-only">Actions</span></th>
-        </tr>
-      </thead>
-      <tbody>
+          <span role="columnheader">Bought</span>
+          <span role="columnheader">Ticker</span>
+          <span role="columnheader">Company</span>
+          <span role="columnheader" class="text-right">Price</span>
+          <span role="columnheader" class="text-right">Shares</span>
+          <span role="columnheader" class="text-right">Total</span>
+          <span role="columnheader" class="text-right">Tax (0.5%)</span>
+          <span role="columnheader" class="text-right">Total (inc. tax)</span>
+          <span role="columnheader" class="text-right">Current value</span>
+          <span role="columnheader" class="text-right">Gain / loss</span>
+          <span role="columnheader"><span class="sr-only">Actions</span></span>
+        </div>
+      </div>
+      <div role="rowgroup" class="contents">
         {#each visibleRows as p (p.id)}
-          <tr
+          <div
+            role="row"
             class={cn(
-              "border-b transition-colors last:border-0 [&>td]:py-4 [&>td]:pr-4 [&>td:first-child]:pl-4 [&>td:last-child]:pr-4",
+              "col-span-full grid grid-cols-subgrid items-center py-2 pr-2 pl-4 *:pr-4 *:last:pr-0",
+              rowCard,
               rowTint(p),
             )}
+            style:border-left-color={companyColorVar(colors[p.ticker])}
           >
-            <td>{p.boughtOn}</td>
-            <td class="font-mono">
+            <span role="cell">{p.boughtOn}</span>
+            <span role="cell" class="font-mono">
               <span class="inline-flex items-center gap-2">
                 <CompanySwatch color={colors[p.ticker]} />
                 {p.ticker}
               </span>
-            </td>
-            <td class="max-w-48 truncate" title={p.companyName}>
+            </span>
+            <span role="cell" class="max-w-48 truncate" title={p.companyName}>
               {p.companyName}
-            </td>
-            <td class="text-right tabular-nums">{formatMoney(p.price)}</td>
-            <td class="text-right tabular-nums">{p.shares}</td>
-            <td class="text-right text-muted-foreground tabular-nums">
+            </span>
+            <span role="cell" class="text-right tabular-nums">
+              {formatMoney(p.price)}
+            </span>
+            <span role="cell" class="text-right tabular-nums">{p.shares}</span>
+            <span
+              role="cell"
+              class="text-right text-muted-foreground tabular-nums"
+            >
               {formatMoney(p.total)}
-            </td>
-            <td class="text-right text-muted-foreground tabular-nums">
+            </span>
+            <span
+              role="cell"
+              class="text-right text-muted-foreground tabular-nums"
+            >
               {formatMoney(p.tax)}
-            </td>
-            <td class="text-right font-medium tabular-nums">
+            </span>
+            <span role="cell" class="text-right font-medium tabular-nums">
               {formatMoney(p.totalIncTax)}
-            </td>
-            <td class="text-right">{@render valueText(p)}</td>
-            <td class="text-right">{@render diffText(p)}</td>
-            <td class="w-0 py-1! text-right">{@render deleteButton(p)}</td>
-          </tr>
+            </span>
+            <span role="cell" class="text-right">{@render valueText(p)}</span>
+            <span role="cell" class="text-right">{@render diffText(p)}</span>
+            <span role="cell" class="text-right">{@render deleteButton(p)}</span
+            >
+          </div>
         {/each}
-      </tbody>
-    </table>
+      </div>
+    </div>
   </div>
 {/if}
 
