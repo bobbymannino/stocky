@@ -128,9 +128,14 @@ async function toGbpRate(currency: string): Promise<number> {
  * first (official, US stocks), then Yahoo for anything it doesn't cover, such
  * as London tickers like `VOD.L`.
  */
-export async function fetchPriceGbp(
-  ticker: string,
-): Promise<{ price: number; source: LiveSource }> {
+export async function fetchPriceGbp(ticker: string): Promise<{
+  /** Price per share in GBP. */
+  price: number;
+  source: LiveSource;
+  /** The price as quoted, in `currency` (e.g. pence for London). */
+  quotedPrice: number;
+  currency: string;
+}> {
   let quote: Quote;
   let source: LiveSource;
   try {
@@ -141,5 +146,10 @@ export async function fetchPriceGbp(
     quote = await yahooQuote(ticker);
     source = "yahoo";
   }
-  return { price: quote.price * (await toGbpRate(quote.currency)), source };
+  return {
+    price: quote.price * (await toGbpRate(quote.currency)),
+    source,
+    quotedPrice: quote.price,
+    currency: quote.currency,
+  };
 }

@@ -29,6 +29,20 @@
       "when": 1793959847430,
       "tag": "0003_flippant_micromax",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793961683141,
+      "tag": "0004_strange_slapstick",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793962058617,
+      "tag": "0005_price_quote_immutable",
+      "breakpoints": true
     }
   ]
 }

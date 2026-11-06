@@ -54,7 +54,10 @@
       </a>
       {#if builtAt}
         <span class="text-xs">
-          Built <time datetime={builtAt.toISOString()} title={builtAt.toISOString()}>{builtAtText}</time>
+          Built <time
+            datetime={builtAt.toISOString()}
+            title={builtAt.toISOString()}>{builtAtText}</time
+          >
         </span>
       {/if}
     </div>

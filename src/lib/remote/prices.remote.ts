@@ -3,12 +3,8 @@ import { and, eq } from "drizzle-orm";
 import * as v from "valibot";
 import type { PriceSource } from "#lib/current-prices.svelte.js";
 import { db } from "#lib/server/db/index.js";
-import { currentPrice } from "#lib/server/db/schema.js";
-import {
-  fetchPriceGbp,
-  PriceError,
-  type LiveSource,
-} from "#lib/server/live-prices.js";
+import { currentPrice, priceQuote } from "#lib/server/db/schema.js";
+import { fetchPriceGbp, PriceError } from "#lib/server/live-prices.js";
 import { command, getRequestEvent } from "$app/server";
 
 const Ticker = v.pipe(
@@ -69,17 +65,32 @@ export const setCurrentPrice = command(
 /** Fetches the live price, saves it, and returns it in GBP with its source. */
 export const refreshCurrentPrice = command(Ticker, async (ticker) => {
   const id = requireUserId();
-  let price: number;
-  let source: LiveSource;
+  let live: Awaited<ReturnType<typeof fetchPriceGbp>>;
   try {
-    ({ price, source } = await fetchPriceGbp(ticker));
+    live = await fetchPriceGbp(ticker);
   } catch (e) {
     if (e instanceof PriceError) error(400, e.message);
     console.error(e);
     error(502, "Couldn't get the latest price, please try again");
   }
+  const { source } = live;
   // stored at the column's precision so the UI matches what's saved
-  price = Math.round(price * 10_000) / 10_000;
-  await savePrice(id, ticker, price, source);
+  const price = Math.round(live.price * 10_000) / 10_000;
+
+  await Promise.all([
+    savePrice(id, ticker, price, source),
+    // shared price history; a failure here shouldn't cost the user their price
+    db
+      .insert(priceQuote)
+      .values({
+        ticker,
+        price: String(price),
+        quotedPrice: String(live.quotedPrice),
+        currency: live.currency,
+        source,
+      })
+      .catch((e: unknown) => console.error("Couldn't record price quote", e)),
+  ]);
+
   return { price, source };
 });

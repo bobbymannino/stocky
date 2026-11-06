@@ -87,4 +87,32 @@ export const currentPrice = pgTable(
   (table) => [primaryKey({ columns: [table.userId, table.ticker] })],
 );
 
+/**
+ * Every live price fetched by anyone, kept as a shared price history. Not tied
+ * to a user. Nothing reads it yet.
+ *
+ * Append-only: database triggers (migration `0005_price_quote_immutable`)
+ * reject any UPDATE, DELETE or TRUNCATE, so only ever insert into it.
+ */
+export const priceQuote = pgTable(
+  "price_quote",
+  {
+    id: serial("id").primaryKey(),
+    ticker: text("ticker").notNull(),
+    /** Price per share converted to GBP, as shown to the user. */
+    price: numeric("price", { precision: 18, scale: 4 }).notNull(),
+    /** The price as the source quoted it, in `currency`. */
+    quotedPrice: numeric("quoted_price", { precision: 18, scale: 4 }).notNull(),
+    /** The source's currency code, e.g. `USD`, or `GBp` for London pence. */
+    currency: text("currency").notNull(),
+    source: text("source", { enum: ["finnhub", "yahoo"] }).notNull(),
+    fetchedAt: timestamp("fetched_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("price_quote_ticker_fetchedAt_idx").on(table.ticker, table.fetchedAt),
+  ],
+);
+
 export * from "./auth.schema";
