@@ -43,7 +43,9 @@
   --sidebar-ring: var(--color-ctp-lavender);
 }
 
-@theme {
+/* static: company colours are referenced at runtime (see #lib/company-colors),
+   so Tailwind can't see them and would otherwise drop the unused variables */
+@theme static {
   --color-ctp-rosewater: light-dark(#dc8a78, #f5e0dc);
   --color-ctp-flamingo: light-dark(#dd7878, #f2cdcd);
   --color-ctp-pink: light-dark(#ea76cb, #f5c2e7);
@@ -70,7 +72,9 @@
   --color-ctp-base: light-dark(#eff1f5, #1e1e2e);
   --color-ctp-mantle: light-dark(#e6e9ef, #181825);
   --color-ctp-crust: light-dark(#dce0e8, #11111b);
+}
 
+@theme {
   --font-sans: "Inter Variable", sans-serif;
 
   --color-sidebar-ring: var(--sidebar-ring);
