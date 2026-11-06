@@ -96,7 +96,7 @@
       {@const value = price === undefined ? undefined : price * h.shares}
       {@const gain = value === undefined ? undefined : value - h.cost}
       <div
-        class="flex flex-col gap-3 rounded-lg border p-4"
+        class="flex flex-col gap-3 rounded-lg border bg-background p-4 shadow-tile inset-shadow-highlight transition-[box-shadow,translate] duration-200 hover:-translate-y-0.5 hover:shadow-tile-raised motion-reduce:transition-none motion-reduce:hover:translate-y-0"
         style:background-image={accentGradient(colors[h.ticker])}
       >
         <div class="min-w-0">
