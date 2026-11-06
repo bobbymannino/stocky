@@ -1,16 +1,14 @@
 /**
  * Accent colours a company can be given. These are Catppuccin palette names,
- * so they adapt to light/dark mode. Red and green are left out so they're
- * never confused with gains and losses.
+ * so they adapt to light/dark mode. Anything that reads as red or green
+ * (red, maroon, rosewater, flamingo, green, teal) is left out so it's never
+ * confused with gains and losses.
  */
 export const COMPANY_COLORS = [
-  "rosewater",
-  "flamingo",
   "pink",
   "mauve",
   "peach",
   "yellow",
-  "teal",
   "sky",
   "sapphire",
   "blue",

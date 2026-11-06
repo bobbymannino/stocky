@@ -30,6 +30,25 @@ export async function ensureCompanyColors(
 
   let rows = await db.select().from(companyColor).where(where);
 
+  // colours removed from the palette (e.g. ones too close to red or green)
+  // get a fresh one, so existing companies don't stay on them
+  const retired = rows.filter((r) => !isCompanyColor(r.color));
+  await Promise.all(
+    retired.map((r) =>
+      db
+        .update(companyColor)
+        .set({ color: randomCompanyColor() })
+        .where(
+          and(
+            eq(companyColor.userId, userId),
+            eq(companyColor.ticker, r.ticker),
+            // only if still retired, so concurrent requests don't both reroll it
+            eq(companyColor.color, r.color),
+          ),
+        ),
+    ),
+  );
+
   const missing = unique.filter((t) => !rows.some((r) => r.ticker === t));
   if (missing.length > 0) {
     await db
@@ -42,8 +61,10 @@ export async function ensureCompanyColors(
         })),
       )
       .onConflictDoNothing();
-    rows = await db.select().from(companyColor).where(where);
   }
+
+  if (missing.length > 0 || retired.length > 0)
+    rows = await db.select().from(companyColor).where(where);
 
   const colors: CompanyColors = {};
   for (const r of rows) if (isCompanyColor(r.color)) colors[r.ticker] = r.color;
