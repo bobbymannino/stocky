@@ -1,8 +1,11 @@
 <script lang="ts">
+  import PlusIcon from "@lucide/svelte/icons/plus";
   import Holdings from "#lib/components/holdings.svelte";
   import PurchasesTable from "#lib/components/purchases-table.svelte";
+  import { Button } from "#lib/components/ui/button/index.js";
   import * as Card from "#lib/components/ui/card/index.js";
   import { CurrentPrices } from "#lib/current-prices.svelte.js";
+  import { stagger } from "#lib/motion.js";
   import type { PageProps } from "./$types";
 
   let { data }: PageProps = $props();
@@ -32,5 +35,27 @@
   <section aria-labelledby="purchases-heading" class="flex flex-col gap-4">
     <h2 id="purchases-heading" class="text-lg font-semibold">Your purchases</h2>
     <PurchasesTable purchases={data.purchases} colors={data.colors} {prices} />
+  </section>
+
+  <section aria-labelledby="wishlist-heading" class="flex flex-col gap-4">
+    <div class="flex flex-wrap items-center justify-between gap-2">
+      <div>
+        <h2 id="wishlist-heading" class="text-lg font-semibold">Wishlist</h2>
+        <p class="text-sm text-muted-foreground">
+          Pretend trades. They don't count towards your holdings.
+        </p>
+      </div>
+      <Button href="/purchases/new?wishlist" variant="outline" size="sm">
+        <PlusIcon />
+        Add wishlist trade
+      </Button>
+    </div>
+    <PurchasesTable
+      purchases={data.wishlist}
+      colors={data.colors}
+      {prices}
+      wishlist
+      delay={stagger(data.purchases.length)}
+    />
   </section>
 </div>

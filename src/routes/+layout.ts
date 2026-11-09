@@ -1,7 +1,8 @@
 import { defineBaseMetaTags } from "svelte-meta-tags";
 import type { LayoutLoad } from "./$types";
 
-export const load: LayoutLoad = () => ({
+export const load: LayoutLoad = ({ data }) => ({
+  ...data,
   ...defineBaseMetaTags({
     title: "Stocky",
     titleTemplate: "%s | Stocky",

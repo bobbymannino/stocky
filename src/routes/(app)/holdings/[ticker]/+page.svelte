@@ -70,6 +70,11 @@
     };
   });
 
+  // one top-to-bottom cascade: the four stat tiles, then the purchase rows,
+  // then the wishlist rows. The stats only show when there are purchases.
+  let purchasesDelay = $derived(data.purchases.length > 0 ? stagger(4) : 0);
+  let wishlistDelay = $derived(purchasesDelay + stagger(data.purchases.length));
+
   let buys = $derived(
     data.purchases.map((p) => {
       const c = purchaseCosts(p);
@@ -269,6 +274,15 @@
         >
           Add a purchase
         </a>
+        or
+        <a
+          href="/purchases/new?ticker={encodeURIComponent(
+            data.ticker,
+          )}&wishlist"
+          class="underline underline-offset-4"
+        >
+          a wishlist trade
+        </a>
       </p>
     {:else}
       <PurchasesTable
@@ -277,7 +291,30 @@
         {prices}
         filterable={false}
         linkTickers={false}
+        delay={purchasesDelay}
       />
     {/if}
   </section>
+
+  {#if data.wishlist.length > 0}
+    <section aria-labelledby="wishlist-heading" class="flex flex-col gap-4">
+      <div>
+        <h2 id="wishlist-heading" class="text-lg font-semibold">
+          Your {data.ticker} wishlist
+        </h2>
+        <p class="text-sm text-muted-foreground">
+          Pretend trades. They're left out of the totals and chart above.
+        </p>
+      </div>
+      <PurchasesTable
+        purchases={data.wishlist}
+        colors={data.colors}
+        {prices}
+        filterable={false}
+        linkTickers={false}
+        wishlist
+        delay={wishlistDelay}
+      />
+    </section>
+  {/if}
 </div>

@@ -13,6 +13,7 @@
   let {
     companies,
     initialTicker,
+    initialWishlist = false,
     purchase,
     returnTo = "/",
   }: {
@@ -20,6 +21,8 @@
     companies: Map<string, string>;
     /** Pre-fills the ticker; a known company's name then fills itself in. */
     initialTicker?: string;
+    /** Starts a new purchase as a wishlist trade. */
+    initialWishlist?: boolean;
     /** The purchase being edited; leave out to add a new one. */
     purchase?: Purchase;
     /** Where to go after saving, or on cancel when editing. */
@@ -52,6 +55,7 @@
         boughtAt: purchase.boughtAt,
         pricePerShare: Number(purchase.pricePerShare),
         shares: Number(purchase.shares),
+        wishlist: purchase.wishlist,
       });
       // treat a name matching our suggestion as ours, so changing the ticker
       // swaps it; a name the user wrote themselves is left alone
@@ -61,11 +65,19 @@
           : undefined;
       return;
     }
-    fields.set({ boughtAt: today, ticker: initialTicker ?? "" });
+    fields.set({
+      boughtAt: today,
+      ticker: initialTicker ?? "",
+      wishlist: initialWishlist,
+    });
     autofilled = undefined;
   }
 
   onMount(resetForm);
+
+  // the headings follow the checkbox, so it's clear what's being recorded
+  let wishlist = $derived(fields.wishlist.value() ?? false);
+  let noun = $derived(wishlist ? "wishlist trade" : "purchase");
 
   // --- ticker suggestions (an ARIA combobox over the user's own tickers) ------
 
@@ -155,11 +167,19 @@
 
 <Card.Root>
   <Card.Header>
-    <Card.Title>{purchase ? "Edit purchase" : "Add purchase"}</Card.Title>
+    <Card.Title>
+      {purchase ? "Edit" : "Add"}
+      {noun}
+    </Card.Title>
     <Card.Description>
-      {purchase
-        ? "Correct the details of shares you've bought."
-        : "Record shares you've bought."}
+      {#if wishlist}
+        Track shares you're thinking of buying. Wishlist trades don't count
+        towards your portfolio.
+      {:else if purchase}
+        Correct the details of shares you've bought.
+      {:else}
+        Record shares you've bought.
+      {/if}
     </Card.Description>
   </Card.Header>
   <Card.Content>
@@ -250,7 +270,7 @@
         {@render issues(fields.companyName.issues())}
       </div>
       <div class="grid gap-2">
-        <Label for="boughtAt">Bought on</Label>
+        <Label for="boughtAt">{wishlist ? "Price on" : "Bought on"}</Label>
         <Input
           id="boughtAt"
           {...fields.boughtAt.as("date", today)}
@@ -283,7 +303,22 @@
         />
         {@render issues(fields.shares.issues())}
       </div>
-      <div class="flex items-end gap-2">
+      <div class="flex items-start gap-3 sm:col-span-2">
+        <input
+          id="wishlist"
+          {...fields.wishlist.as("checkbox")}
+          aria-describedby="wishlist-hint"
+          class="mt-0.5 size-4 shrink-0 accent-primary"
+        />
+        <div class="grid gap-1">
+          <Label for="wishlist">Wishlist trade</Label>
+          <p id="wishlist-hint" class="text-sm text-muted-foreground">
+            A pretend trade to keep an eye on. It's listed separately and
+            doesn't count towards your holdings or totals.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-end gap-2 sm:col-start-2">
         {#if purchase}
           <Button href={returnTo} variant="outline" class="flex-1">
             Cancel

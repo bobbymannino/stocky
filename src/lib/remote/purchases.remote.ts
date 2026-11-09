@@ -47,6 +47,8 @@ const PurchaseSchema = v.object({
     positiveNumber("Shares"),
     v.maxValue(10_000_000, "Max shares is 10 million"),
   ),
+  /** A pretend trade that doesn't count towards the user's real holdings. */
+  wishlist: v.optional(v.boolean(), false),
 });
 
 /** Adds a purchase, or updates one of the user's own when `id` is set. */
@@ -62,6 +64,7 @@ export const savePurchase = form(PurchaseSchema, async ({ id, ...data }) => {
     // numeric columns take strings to keep precision
     pricePerShare: String(data.pricePerShare),
     shares: String(data.shares),
+    wishlist: data.wishlist,
   };
 
   if (id === undefined) {

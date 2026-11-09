@@ -6,6 +6,7 @@ import type { SavedPrices } from "#lib/current-prices.svelte.js";
 import { ensureCompanyColors } from "#lib/server/company-colors.js";
 import { db } from "#lib/server/db/index.js";
 import { currentPrice, priceQuote, purchase } from "#lib/server/db/schema.js";
+import { splitWishlist } from "#lib/server/portfolio.js";
 import { parseTicker } from "#lib/ticker.js";
 import type { PageServerLoad } from "./$types";
 
@@ -18,7 +19,7 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   const ticker = parseTicker(params.ticker);
   if (!ticker) error(404, "Not found");
 
-  const purchases = await db
+  const all = await db
     .select()
     .from(purchase)
     .where(
@@ -31,6 +32,8 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     .orderBy(desc(purchase.boughtAt), desc(purchase.createdAt));
 
   if (params.ticker !== ticker) redirect(307, `/holdings/${ticker}`);
+
+  const { purchases, wishlist } = splitWishlist(all);
 
   const [quotes, saved, colors] = await Promise.all([
     // the shared history from every user's live fetches; newest kept if capped
@@ -46,8 +49,8 @@ export const load: PageServerLoad = async ({ locals, params }) => {
       .where(
         and(eq(currentPrice.userId, userId), eq(currentPrice.ticker, ticker)),
       ),
-    // any company can be viewed; only ones the user holds get a saved colour
-    purchases.length > 0
+    // any company can be viewed; only ones the user has added get a saved colour
+    all.length > 0
       ? ensureCompanyColors(userId, [ticker])
       : ({} as CompanyColors),
   ]);
@@ -63,8 +66,9 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   return {
     ticker,
     // names come from the user's own purchases, so unheld companies have none
-    companyName: purchases[0]?.companyName,
+    companyName: all[0]?.companyName,
     purchases,
+    wishlist,
     colors,
     prices,
     history: quotes

@@ -9,6 +9,7 @@ import {
   numeric,
   index,
   primaryKey,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { CURRENCY_MODES } from "../../preferences";
 import { user } from "./auth.schema";
@@ -42,6 +43,11 @@ export const purchase = pgTable(
     }).notNull(),
     // allows fractional shares
     shares: numeric("shares", { precision: 18, scale: 6 }).notNull(),
+    /**
+     * A pretend trade the user is watching. Wishlist purchases are shown on
+     * their own and never count towards holdings or portfolio totals.
+     */
+    wishlist: boolean("wishlist").notNull().default(false),
     /** Set when the user deletes the purchase; archived rows are hidden from them. */
     archivedAt: timestamp("archived_at", { withTimezone: true }),
   },
