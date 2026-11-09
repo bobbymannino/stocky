@@ -1,5 +1,6 @@
 <script lang="ts">
   import ArrowLeftIcon from "@lucide/svelte/icons/arrow-left";
+  import ExternalLinkIcon from "@lucide/svelte/icons/external-link";
   import LoaderCircleIcon from "@lucide/svelte/icons/loader-circle";
   import RefreshCwIcon from "@lucide/svelte/icons/refresh-cw";
   import { onMount } from "svelte";
@@ -19,6 +20,7 @@
   import { rise, stagger } from "#lib/motion.js";
   import { useNow } from "#lib/now.svelte.js";
   import { purchaseCosts } from "#lib/purchases.js";
+  import { trading212Url } from "#lib/trading212.js";
   import { cn, formatPercent, formatUpdatedAt } from "#lib/utils.js";
   import { refreshAll } from "$app/navigation";
   import type { PageProps } from "./$types";
@@ -115,6 +117,18 @@
           {data.companyName}
         </p>
       {/if}
+      <Button
+        href={trading212Url(data.ticker)}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mt-1 p-0"
+        variant="link"
+        size="xs"
+      >
+        Open in Trading 212
+        <ExternalLinkIcon class="size-3.5" aria-hidden="true" />
+        <span class="sr-only">(opens in a new tab)</span>
+      </Button>
     </div>
     <div class="flex flex-col items-end gap-1">
       <div class="flex items-center gap-3">
