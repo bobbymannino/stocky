@@ -9,12 +9,14 @@
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Card from "#lib/components/ui/card/index.js";
   import { CurrentPrices } from "#lib/current-prices.svelte.js";
+  import { useNow } from "#lib/now.svelte.js";
   import { purchaseCosts } from "#lib/purchases.js";
   import {
     cn,
     formatMoney,
     formatPercent,
     formatSignedMoney,
+    formatUpdatedAt,
   } from "#lib/utils.js";
   import { invalidateAll } from "$app/navigation";
   import type { PageProps } from "./$types";
@@ -29,6 +31,14 @@
   let price = $derived(prices.get(data.ticker));
   let fetching = $derived(prices.isFetching(data.ticker));
   let priceError = $derived(prices.error(data.ticker));
+  let source = $derived(prices.source(data.ticker));
+  let updatedAt = $derived(prices.updatedAt(data.ticker));
+
+  // undefined until mounted: times show in the viewer's time zone
+  const now = useNow();
+  let cooldown = $derived(
+    now.current === undefined ? 0 : prices.cooldown(data.ticker, now.current),
+  );
 
   let totals = $derived.by(() => {
     let shares = 0;
@@ -89,13 +99,19 @@
         <p class="text-3xl font-semibold">
           {price === undefined ? "—" : formatMoney(price)}
         </p>
-        <Button variant="outline" disabled={fetching} onclick={useCurrent}>
+        <Button
+          variant="outline"
+          disabled={fetching || cooldown > 0}
+          onclick={useCurrent}
+        >
           {#if fetching}
             <LoaderCircleIcon class="animate-spin" />
           {:else}
             <RefreshCwIcon />
           {/if}
-          Use current
+          {cooldown > 0
+            ? `Again in ${Math.ceil(cooldown / 1000)}s`
+            : "Use current"}
         </Button>
       </div>
       <p
@@ -105,7 +121,19 @@
         )}
         aria-live="polite"
       >
-        {priceError ?? "Your current price per share"}
+        {#if priceError}
+          {priceError}
+        {:else if source === "finnhub" || source === "yahoo"}
+          Live price from {source === "finnhub" ? "Finnhub" : "Yahoo Finance"}
+          {#if now.current !== undefined && updatedAt !== undefined}
+            · updated
+            <time datetime={new Date(updatedAt).toISOString()}>
+              {formatUpdatedAt(updatedAt, now.current)}
+            </time>
+          {/if}
+        {:else}
+          Your current price per share
+        {/if}
       </p>
     </div>
   </header>
@@ -146,7 +174,7 @@
     <Card.Header>
       <Card.Title>Price history</Card.Title>
       <Card.Description>
-        Live prices in GBP, recorded each time anyone uses “Use current” for
+        Live prices in GBP, recorded when anyone uses “Use current” for
         {data.ticker}, with the price you paid for each purchase.
       </Card.Description>
     </Card.Header>

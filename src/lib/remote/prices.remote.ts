@@ -1,7 +1,8 @@
 import { error } from "@sveltejs/kit";
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq, gt } from "drizzle-orm";
 import * as v from "valibot";
 import type { PriceSource } from "#lib/current-prices.svelte.js";
+import { LIVE_PRICE_COOLDOWN } from "#lib/live-price-cooldown.js";
 import { db } from "#lib/server/db/index.js";
 import { currentPrice, priceQuote } from "#lib/server/db/schema.js";
 import { fetchPriceGbp, PriceError } from "#lib/server/live-prices.js";
@@ -59,37 +60,90 @@ export const setCurrentPrice = command(
   },
 );
 
-/** Fetches the live price, saves it, and returns it in GBP with its source and time. */
+type LivePrice = { price: number; source: "finnhub" | "yahoo" };
+
+/** Calls the price APIs and adds the result to the shared price history. */
+async function fetchAndRecord(ticker: string): Promise<LivePrice> {
+  const live = await fetchPriceGbp(ticker);
+  // stored at the column's precision so the UI matches what's saved
+  const price = Math.round(live.price * 10_000) / 10_000;
+  await db
+    .insert(priceQuote)
+    .values({
+      ticker,
+      price: String(price),
+      quotedPrice: String(live.quotedPrice),
+      currency: live.currency,
+      source: live.source,
+    })
+    // a failure here shouldn't cost the user their price
+    .catch((e: unknown) => console.error("Couldn't record price quote", e));
+  return { price, source: live.source };
+}
+
+/** Lookups in progress per ticker, so simultaneous checks share one API call. */
+const inFlight = new Map<string, Promise<LivePrice>>();
+
+/**
+ * The live price, reusing anyone's quote from the last minute rather than
+ * calling the price APIs again.
+ */
+function livePrice(ticker: string): Promise<LivePrice> {
+  let pending = inFlight.get(ticker);
+  if (!pending) {
+    pending = (async () => {
+      const [recent] = await db
+        .select({ price: priceQuote.price, source: priceQuote.source })
+        .from(priceQuote)
+        .where(
+          and(
+            eq(priceQuote.ticker, ticker),
+            gt(
+              priceQuote.fetchedAt,
+              new Date(Date.now() - LIVE_PRICE_COOLDOWN),
+            ),
+          ),
+        )
+        .orderBy(desc(priceQuote.fetchedAt))
+        .limit(1);
+      if (recent) return { price: Number(recent.price), source: recent.source };
+      return fetchAndRecord(ticker);
+    })().finally(() => inFlight.delete(ticker));
+    inFlight.set(ticker, pending);
+  }
+  return pending;
+}
+
+/**
+ * Gets the live price, saves it, and returns it in GBP with its source and
+ * time. Each user can check a ticker once a minute.
+ */
 export const refreshCurrentPrice = command(Ticker, async (ticker) => {
   const id = requireUserId();
-  let live: Awaited<ReturnType<typeof fetchPriceGbp>>;
+
+  const [mine] = await db
+    .select({ source: currentPrice.source, updatedAt: currentPrice.updatedAt })
+    .from(currentPrice)
+    .where(and(eq(currentPrice.userId, id), eq(currentPrice.ticker, ticker)));
+  if (mine && mine.source !== "manual") {
+    const wait = mine.updatedAt.getTime() + LIVE_PRICE_COOLDOWN - Date.now();
+    if (wait > 0)
+      error(
+        429,
+        `You can check ${ticker} again in ${Math.ceil(wait / 1000)} seconds`,
+      );
+  }
+
+  let live: LivePrice;
   try {
-    live = await fetchPriceGbp(ticker);
+    live = await livePrice(ticker);
   } catch (e) {
     if (e instanceof PriceError) error(400, e.message);
     console.error(e);
     error(502, "Couldn't get the latest price, please try again");
   }
-  const { source } = live;
-  // stored at the column's precision so the UI matches what's saved
-  const price = Math.round(live.price * 10_000) / 10_000;
+
   const updatedAt = new Date();
-
-  await Promise.all([
-    savePrice(id, ticker, price, source, updatedAt),
-    // shared price history; a failure here shouldn't cost the user their price
-    db
-      .insert(priceQuote)
-      .values({
-        ticker,
-        price: String(price),
-        quotedPrice: String(live.quotedPrice),
-        currency: live.currency,
-        source,
-        fetchedAt: updatedAt,
-      })
-      .catch((e: unknown) => console.error("Couldn't record price quote", e)),
-  ]);
-
-  return { price, source, updatedAt: updatedAt.getTime() };
+  await savePrice(id, ticker, live.price, live.source, updatedAt);
+  return { ...live, updatedAt: updatedAt.getTime() };
 });

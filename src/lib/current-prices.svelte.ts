@@ -1,3 +1,4 @@
+import { LIVE_PRICE_COOLDOWN } from "#lib/live-price-cooldown.js";
 import {
   refreshCurrentPrice,
   setCurrentPrice,
@@ -46,6 +47,16 @@ export class CurrentPrices {
   /** When the price was last set, in epoch ms. */
   updatedAt(ticker: string): number | undefined {
     return this.#prices[ticker]?.updatedAt;
+  }
+
+  /**
+   * How many ms until the user can check this ticker's live price again (one
+   * check a minute), or 0 if they can now.
+   */
+  cooldown(ticker: string, now: number): number {
+    const saved = this.#prices[ticker];
+    if (!saved || saved.source === "manual") return 0;
+    return Math.max(0, saved.updatedAt + LIVE_PRICE_COOLDOWN - now);
   }
 
   isFetching(ticker: string): boolean {

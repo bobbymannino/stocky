@@ -1,7 +1,6 @@
 <script lang="ts">
   import LoaderCircleIcon from "@lucide/svelte/icons/loader-circle";
   import RefreshCwIcon from "@lucide/svelte/icons/refresh-cw";
-  import { onMount } from "svelte";
   import {
     companyColorVar,
     type CompanyColor,
@@ -12,6 +11,7 @@
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
   import type { CurrentPrices } from "#lib/current-prices.svelte.js";
+  import { useNow } from "#lib/now.svelte.js";
   import { purchaseCosts, type Purchase } from "#lib/purchases.js";
   import {
     cn,
@@ -31,11 +31,8 @@
     prices: CurrentPrices;
   } = $props();
 
-  // times are shown in the viewer's time zone, which the server doesn't know
-  let mounted = $state(false);
-  onMount(() => {
-    mounted = true;
-  });
+  // undefined until mounted: times show in the viewer's time zone
+  const now = useNow();
 
   /** A faint wash of the company colour, strongest at the bottom of the card. */
   function accentGradient(color: CompanyColor | undefined) {
@@ -101,6 +98,9 @@
       {@const price = prices.get(h.ticker)}
       {@const fetching = prices.isFetching(h.ticker)}
       {@const priceError = prices.error(h.ticker)}
+      {@const updatedAt = prices.updatedAt(h.ticker)}
+      {@const cooldown =
+        now.current === undefined ? 0 : prices.cooldown(h.ticker, now.current)}
       {@const value = price === undefined ? undefined : price * h.shares}
       {@const gain = value === undefined ? undefined : value - h.cost}
       <div
@@ -139,7 +139,7 @@
             <Button
               type="button"
               variant="outline"
-              disabled={fetching}
+              disabled={fetching || cooldown > 0}
               onclick={() => prices.fetchLive(h.ticker)}
             >
               {#if fetching}
@@ -147,7 +147,9 @@
               {:else}
                 <RefreshCwIcon />
               {/if}
-              Use current
+              {cooldown > 0
+                ? `Again in ${Math.ceil(cooldown / 1000)}s`
+                : "Use current"}
             </Button>
           </div>
           <p
@@ -165,14 +167,11 @@
             {:else if prices.source(h.ticker) === "yahoo"}
               Latest price from Yahoo Finance, in GBP
             {/if}
-            {#if !priceError && mounted && prices.source(h.ticker) !== "manual"}
-              {@const updatedAt = prices.updatedAt(h.ticker)}
-              {#if updatedAt !== undefined}
-                · updated
-                <time datetime={new Date(updatedAt).toISOString()}>
-                  {formatUpdatedAt(updatedAt)}
-                </time>
-              {/if}
+            {#if !priceError && now.current !== undefined && updatedAt !== undefined && prices.source(h.ticker) !== "manual"}
+              · updated
+              <time datetime={new Date(updatedAt).toISOString()}>
+                {formatUpdatedAt(updatedAt, now.current)}
+              </time>
             {/if}
           </p>
         </div>
