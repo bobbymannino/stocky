@@ -51,7 +51,11 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
   const prices: SavedPrices = {};
   for (const r of saved)
-    prices[r.ticker] = { price: Number(r.price), source: r.source };
+    prices[r.ticker] = {
+      price: Number(r.price),
+      source: r.source,
+      updatedAt: r.updatedAt.getTime(),
+    };
 
   return {
     ticker,

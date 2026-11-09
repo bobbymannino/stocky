@@ -27,12 +27,9 @@ async function savePrice(
   ticker: string,
   price: number,
   source: PriceSource,
+  updatedAt: Date,
 ) {
-  const values = {
-    price: String(price),
-    source,
-    updatedAt: new Date(),
-  } as const;
+  const values = { price: String(price), source, updatedAt } as const;
   await db
     .insert(currentPrice)
     .values({ userId, ticker, ...values })
@@ -57,12 +54,12 @@ export const setCurrentPrice = command(
           and(eq(currentPrice.userId, id), eq(currentPrice.ticker, ticker)),
         );
     } else {
-      await savePrice(id, ticker, price, "manual");
+      await savePrice(id, ticker, price, "manual", new Date());
     }
   },
 );
 
-/** Fetches the live price, saves it, and returns it in GBP with its source. */
+/** Fetches the live price, saves it, and returns it in GBP with its source and time. */
 export const refreshCurrentPrice = command(Ticker, async (ticker) => {
   const id = requireUserId();
   let live: Awaited<ReturnType<typeof fetchPriceGbp>>;
@@ -76,9 +73,10 @@ export const refreshCurrentPrice = command(Ticker, async (ticker) => {
   const { source } = live;
   // stored at the column's precision so the UI matches what's saved
   const price = Math.round(live.price * 10_000) / 10_000;
+  const updatedAt = new Date();
 
   await Promise.all([
-    savePrice(id, ticker, price, source),
+    savePrice(id, ticker, price, source, updatedAt),
     // shared price history; a failure here shouldn't cost the user their price
     db
       .insert(priceQuote)
@@ -88,9 +86,10 @@ export const refreshCurrentPrice = command(Ticker, async (ticker) => {
         quotedPrice: String(live.quotedPrice),
         currency: live.currency,
         source,
+        fetchedAt: updatedAt,
       })
       .catch((e: unknown) => console.error("Couldn't record price quote", e)),
   ]);
 
-  return { price, source };
+  return { price, source, updatedAt: updatedAt.getTime() };
 });

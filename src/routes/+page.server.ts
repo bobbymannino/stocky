@@ -34,7 +34,11 @@ export const load: PageServerLoad = async ({ locals }) => {
     .where(eq(currentPrice.userId, locals.auth.user.id));
   const prices: SavedPrices = {};
   for (const r of priceRows)
-    prices[r.ticker] = { price: Number(r.price), source: r.source };
+    prices[r.ticker] = {
+      price: Number(r.price),
+      source: r.source,
+      updatedAt: r.updatedAt.getTime(),
+    };
 
   return {
     user: locals.auth.user,

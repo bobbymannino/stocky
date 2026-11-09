@@ -5,11 +5,15 @@ import {
 
 export type PriceSource = "manual" | "finnhub" | "yahoo";
 
-/** Ticker → saved price per share in GBP, as sent from the server. */
-export type SavedPrices = Record<
-  string,
-  { price: number; source: PriceSource }
->;
+/** A saved price per share in GBP, with when it was last set (epoch ms). */
+export type SavedPrice = {
+  price: number;
+  source: PriceSource;
+  updatedAt: number;
+};
+
+/** Ticker → saved price, as sent from the server. */
+export type SavedPrices = Record<string, SavedPrice>;
 
 /** How long to wait after the user stops typing before saving their price. */
 const SAVE_DELAY = 600;
@@ -39,6 +43,11 @@ export class CurrentPrices {
     return this.#prices[ticker]?.source;
   }
 
+  /** When the price was last set, in epoch ms. */
+  updatedAt(ticker: string): number | undefined {
+    return this.#prices[ticker]?.updatedAt;
+  }
+
   isFetching(ticker: string): boolean {
     return this.#fetching[ticker] ?? false;
   }
@@ -50,7 +59,8 @@ export class CurrentPrices {
   /** A price the user typed in. Shown straight away, saved once they pause. */
   set(ticker: string, price: number | undefined) {
     if (price === undefined) delete this.#prices[ticker];
-    else this.#prices[ticker] = { price, source: "manual" };
+    else
+      this.#prices[ticker] = { price, source: "manual", updatedAt: Date.now() };
     delete this.#errors[ticker];
 
     clearTimeout(this.#timers.get(ticker));

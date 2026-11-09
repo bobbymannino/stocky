@@ -1,6 +1,7 @@
 <script lang="ts">
   import LoaderCircleIcon from "@lucide/svelte/icons/loader-circle";
   import RefreshCwIcon from "@lucide/svelte/icons/refresh-cw";
+  import { onMount } from "svelte";
   import {
     companyColorVar,
     type CompanyColor,
@@ -17,6 +18,7 @@
     formatMoney,
     formatPercent,
     formatSignedMoney,
+    formatUpdatedAt,
   } from "#lib/utils.js";
 
   let {
@@ -28,6 +30,12 @@
     colors: CompanyColors;
     prices: CurrentPrices;
   } = $props();
+
+  // times are shown in the viewer's time zone, which the server doesn't know
+  let mounted = $state(false);
+  onMount(() => {
+    mounted = true;
+  });
 
   /** A faint wash of the company colour, strongest at the bottom of the card. */
   function accentGradient(color: CompanyColor | undefined) {
@@ -156,6 +164,15 @@
               Latest price from Finnhub, in GBP
             {:else if prices.source(h.ticker) === "yahoo"}
               Latest price from Yahoo Finance, in GBP
+            {/if}
+            {#if !priceError && mounted && prices.source(h.ticker) !== "manual"}
+              {@const updatedAt = prices.updatedAt(h.ticker)}
+              {#if updatedAt !== undefined}
+                · updated
+                <time datetime={new Date(updatedAt).toISOString()}>
+                  {formatUpdatedAt(updatedAt)}
+                </time>
+              {/if}
             {/if}
           </p>
         </div>

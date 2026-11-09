@@ -66,3 +66,20 @@ const percentFormatter = new Intl.NumberFormat(undefined, {
 export function formatPercent(fraction: number): string {
   return percentFormatter.format(fraction);
 }
+
+const timeFormatter = new Intl.DateTimeFormat(undefined, {
+  timeStyle: "short",
+});
+
+const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
+/** Formats a moment in the viewer's time zone: `today at 14:05`, or `6 Nov 2026, 14:05`. */
+export function formatUpdatedAt(ms: number, now = Date.now()): string {
+  const sameDay = new Date(ms).toDateString() === new Date(now).toDateString();
+  return sameDay
+    ? `today at ${timeFormatter.format(ms)}`
+    : dateTimeFormatter.format(ms);
+}
