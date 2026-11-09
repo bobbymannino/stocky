@@ -21,12 +21,15 @@
     colors,
     prices,
     filterable = true,
+    linkTickers = true,
   }: {
     purchases: Purchase[];
     colors: CompanyColors;
     prices: CurrentPrices;
     /** Show the ticker filter. Off where there's only one ticker. */
     filterable?: boolean;
+    /** Link each ticker to its holding page. Off on that page itself. */
+    linkTickers?: boolean;
   } = $props();
 
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
@@ -110,6 +113,24 @@
   }
 </script>
 
+{#snippet ticker(t: string)}
+  {#if linkTickers}
+    <a
+      href="/holdings/{encodeURIComponent(t)}"
+      class="inline-flex items-center gap-2 rounded-sm hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+    >
+      <CompanySwatch color={colors[t]} />
+      {t}
+      <span class="sr-only">— view holding</span>
+    </a>
+  {:else}
+    <span class="inline-flex items-center gap-2">
+      <CompanySwatch color={colors[t]} />
+      {t}
+    </span>
+  {/if}
+{/snippet}
+
 {#snippet valueText(row: Row)}
   {@const value = currentValue(row)}
   <span
@@ -191,9 +212,8 @@
       >
         <div class="flex items-start justify-between gap-4">
           <div class="min-w-0">
-            <p class="flex items-center gap-2 font-mono font-medium">
-              <CompanySwatch color={colors[p.ticker]} />
-              {p.ticker}
+            <p class="font-mono font-medium">
+              {@render ticker(p.ticker)}
             </p>
             <p class="truncate text-sm text-muted-foreground">
               {p.companyName}
@@ -269,10 +289,7 @@
           >
             <span role="cell">{p.boughtOn}</span>
             <span role="cell" class="font-mono">
-              <span class="inline-flex items-center gap-2">
-                <CompanySwatch color={colors[p.ticker]} />
-                {p.ticker}
-              </span>
+              {@render ticker(p.ticker)}
             </span>
             <span role="cell" class="max-w-48 truncate" title={p.companyName}>
               {p.companyName}

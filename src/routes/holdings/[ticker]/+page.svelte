@@ -238,6 +238,7 @@
       colors={data.colors}
       {prices}
       filterable={false}
+      linkTickers={false}
     />
   </section>
 </div>
