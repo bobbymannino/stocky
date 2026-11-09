@@ -1,7 +1,7 @@
 import type { FlipParams } from "svelte/animate";
-import { backOut, quintOut } from "svelte/easing";
+import { backOut, cubicInOut, quintOut } from "svelte/easing";
 import { prefersReducedMotion } from "svelte/motion";
-import type { TransitionConfig } from "svelte/transition";
+import { draw, type TransitionConfig } from "svelte/transition";
 
 /** Close to the `--ease-out` curve in layout.css: quick to respond, gentle to settle. */
 export const easeOut = quintOut;
@@ -55,6 +55,20 @@ export function pop(
     css: (t, u) =>
       `opacity: ${Math.min(1, t * 2)}; scale: ${scale + (1 - scale) * t}; rotate: ${u * rotate}deg`,
   };
+}
+
+/**
+ * Traces an SVG path from its start to its end, like a pen. Eases in and out,
+ * as a hand would. With reduced motion it just fades.
+ */
+export function drawIn(
+  node: SVGElement & { getTotalLength(): number },
+  { delay = 0, duration = 700 } = {},
+): TransitionConfig {
+  if (prefersReducedMotion.current) {
+    return { duration: 150, css: (t) => `opacity: ${t}` };
+  }
+  return draw(node, { delay, duration, easing: cubicInOut });
 }
 
 /** Settings for `animate:flip`, so reordered items glide (or jump, for reduced motion). */
