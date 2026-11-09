@@ -1,6 +1,7 @@
 <script lang="ts">
   import LoaderCircleIcon from "@lucide/svelte/icons/loader-circle";
   import RefreshCwIcon from "@lucide/svelte/icons/refresh-cw";
+  import { onMount } from "svelte";
   import {
     companyColorVar,
     type CompanyColor,
@@ -33,6 +34,10 @@
 
   // undefined until mounted: times show in the viewer's time zone
   const now = useNow();
+
+  onMount(() => {
+    for (const h of holdings) void prices.autoFetch(h.ticker);
+  });
 
   /** A faint wash of the company colour, strongest at the bottom of the card. */
   function accentGradient(color: CompanyColor | undefined) {

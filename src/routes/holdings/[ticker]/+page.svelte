@@ -2,6 +2,7 @@
   import ArrowLeftIcon from "@lucide/svelte/icons/arrow-left";
   import LoaderCircleIcon from "@lucide/svelte/icons/loader-circle";
   import RefreshCwIcon from "@lucide/svelte/icons/refresh-cw";
+  import { onMount } from "svelte";
   import { companyColorVar } from "#lib/company-colors.js";
   import CompanySwatch from "#lib/components/company-swatch.svelte";
   import PriceChart from "#lib/components/price-chart.svelte";
@@ -36,6 +37,11 @@
 
   // undefined until mounted: times show in the viewer's time zone
   const now = useNow();
+
+  onMount(async () => {
+    // a fresh fetch adds a point to the shared history, so redraw the chart
+    if (await prices.autoFetch(data.ticker)) await invalidateAll();
+  });
   let cooldown = $derived(
     now.current === undefined ? 0 : prices.cooldown(data.ticker, now.current),
   );

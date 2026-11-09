@@ -101,6 +101,21 @@ export class CurrentPrices {
       this.#fetching[ticker] = false;
     }
   }
+
+  /**
+   * Fetches the live price on page load, unless it's still in its cooldown or
+   * the user typed their own price (which this would overwrite). Failures stay
+   * quiet, since the user didn't ask. Resolves whether a new price arrived.
+   */
+  async autoFetch(ticker: string): Promise<boolean> {
+    if (this.source(ticker) === "manual") return false;
+    if (this.cooldown(ticker, Date.now()) > 0) return false;
+    if (this.isFetching(ticker)) return false;
+    await this.fetchLive(ticker);
+    if (!this.#errors[ticker]) return true;
+    delete this.#errors[ticker];
+    return false;
+  }
 }
 
 function errorMessage(e: unknown): string {
