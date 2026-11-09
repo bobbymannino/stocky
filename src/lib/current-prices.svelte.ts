@@ -1,4 +1,5 @@
 import { LIVE_PRICE_COOLDOWN } from "#lib/live-price-cooldown.js";
+import { isMarketWeekend } from "#lib/market-hours.js";
 import {
   refreshCurrentPrice,
   setCurrentPrice,
@@ -103,11 +104,12 @@ export class CurrentPrices {
   }
 
   /**
-   * Fetches the live price on page load, unless it's still in its cooldown or
-   * the user typed their own price (which this would overwrite). Failures stay
+   * Fetches the live price on page load, unless it's the weekend, it's still in
+   * its cooldown, or the user typed their own price (which this would overwrite). Failures stay
    * quiet, since the user didn't ask. Resolves whether a new price arrived.
    */
   async autoFetch(ticker: string): Promise<boolean> {
+    if (isMarketWeekend()) return false;
     if (this.source(ticker) === "manual") return false;
     if (this.cooldown(ticker, Date.now()) > 0) return false;
     if (this.isFetching(ticker)) return false;

@@ -10,6 +10,10 @@
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Card from "#lib/components/ui/card/index.js";
   import { CurrentPrices } from "#lib/current-prices.svelte.js";
+  import {
+    isMarketWeekend,
+    MARKETS_CLOSED_MESSAGE,
+  } from "#lib/market-hours.js";
   import { useNow } from "#lib/now.svelte.js";
   import { purchaseCosts } from "#lib/purchases.js";
   import {
@@ -37,6 +41,10 @@
 
   // undefined until mounted: times show in the viewer's time zone
   const now = useNow();
+  // false until mounted (like `now`); the server refuses weekend fetches too
+  let marketsClosed = $derived(
+    now.current !== undefined && isMarketWeekend(now.current),
+  );
 
   onMount(async () => {
     // a fresh fetch adds a point to the shared history, so redraw the chart
@@ -111,7 +119,8 @@
         </p>
         <Button
           variant="outline"
-          disabled={fetching || cooldown > 0}
+          disabled={fetching || cooldown > 0 || marketsClosed}
+          title={marketsClosed ? MARKETS_CLOSED_MESSAGE : undefined}
           onclick={useCurrent}
         >
           {#if fetching}
@@ -119,9 +128,11 @@
           {:else}
             <RefreshCwIcon />
           {/if}
-          {cooldown > 0
-            ? `Again in ${Math.ceil(cooldown / 1000)}s`
-            : "Use current"}
+          {marketsClosed
+            ? "Markets closed"
+            : cooldown > 0
+              ? `Again in ${Math.ceil(cooldown / 1000)}s`
+              : "Use current"}
         </Button>
       </div>
       <p

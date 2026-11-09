@@ -3,6 +3,7 @@ import { and, desc, eq, gt } from "drizzle-orm";
 import * as v from "valibot";
 import type { PriceSource } from "#lib/current-prices.svelte.js";
 import { LIVE_PRICE_COOLDOWN } from "#lib/live-price-cooldown.js";
+import { isMarketWeekend, MARKETS_CLOSED_MESSAGE } from "#lib/market-hours.js";
 import { db } from "#lib/server/db/index.js";
 import { currentPrice, priceQuote } from "#lib/server/db/schema.js";
 import { fetchPriceGbp, PriceError } from "#lib/server/live-prices.js";
@@ -116,10 +117,11 @@ function livePrice(ticker: string): Promise<LivePrice> {
 
 /**
  * Gets the live price, saves it, and returns it in GBP with its source and
- * time. Each user can check a ticker once a minute.
+ * time. Each user can check a ticker once a minute, and not at weekends.
  */
 export const refreshCurrentPrice = command(Ticker, async (ticker) => {
   const id = requireUserId();
+  if (isMarketWeekend()) error(409, MARKETS_CLOSED_MESSAGE);
 
   const [mine] = await db
     .select({ source: currentPrice.source, updatedAt: currentPrice.updatedAt })

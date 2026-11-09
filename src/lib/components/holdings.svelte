@@ -12,6 +12,10 @@
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
   import type { CurrentPrices } from "#lib/current-prices.svelte.js";
+  import {
+    isMarketWeekend,
+    MARKETS_CLOSED_MESSAGE,
+  } from "#lib/market-hours.js";
   import { useNow } from "#lib/now.svelte.js";
   import { purchaseCosts, type Purchase } from "#lib/purchases.js";
   import {
@@ -34,6 +38,10 @@
 
   // undefined until mounted: times show in the viewer's time zone
   const now = useNow();
+  // false until mounted (like `now`); the server refuses weekend fetches too
+  let marketsClosed = $derived(
+    now.current !== undefined && isMarketWeekend(now.current),
+  );
 
   onMount(() => {
     for (const h of holdings) void prices.autoFetch(h.ticker);
@@ -144,7 +152,8 @@
             <Button
               type="button"
               variant="outline"
-              disabled={fetching || cooldown > 0}
+              disabled={fetching || cooldown > 0 || marketsClosed}
+              title={marketsClosed ? MARKETS_CLOSED_MESSAGE : undefined}
               onclick={() => prices.fetchLive(h.ticker)}
             >
               {#if fetching}
@@ -152,9 +161,11 @@
               {:else}
                 <RefreshCwIcon />
               {/if}
-              {cooldown > 0
-                ? `Again in ${Math.ceil(cooldown / 1000)}s`
-                : "Use current"}
+              {marketsClosed
+                ? "Markets closed"
+                : cooldown > 0
+                  ? `Again in ${Math.ceil(cooldown / 1000)}s`
+                  : "Use current"}
             </Button>
           </div>
           <p
