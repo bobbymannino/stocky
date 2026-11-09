@@ -352,7 +352,11 @@
       </AlertDialog.Description>
     </AlertDialog.Header>
     {#if deleteError}
-      <p class="text-sm text-destructive">{deleteError}</p>
+      <p
+        class="text-sm text-destructive transition-[opacity,translate] duration-150 ease-out starting:-translate-y-1 starting:opacity-0 motion-reduce:starting:translate-y-0"
+      >
+        {deleteError}
+      </p>
     {/if}
     <AlertDialog.Footer>
       <AlertDialog.Cancel disabled={deleting}>Cancel</AlertDialog.Cancel>

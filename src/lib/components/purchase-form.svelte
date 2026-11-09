@@ -300,7 +300,11 @@
         </Button>
       </div>
       {#if error}
-        <p class="text-sm text-destructive sm:col-span-2">{error}</p>
+        <p
+          class="text-sm text-destructive transition-[opacity,translate] duration-150 ease-out sm:col-span-2 starting:-translate-y-1 starting:opacity-0 motion-reduce:starting:translate-y-0"
+        >
+          {error}
+        </p>
       {/if}
     </form>
   </Card.Content>
