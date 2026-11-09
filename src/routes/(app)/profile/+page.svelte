@@ -7,6 +7,7 @@
   import { Label } from "#lib/components/ui/label/index.js";
   import * as Select from "#lib/components/ui/select/index.js";
   import VipBadge from "#lib/components/vip-badge.svelte";
+  import { rise, stagger } from "#lib/motion.js";
   import {
     CURRENCY_MODE_LABELS,
     CURRENCY_MODES,
@@ -153,8 +154,9 @@
   </Card.Root>
 
   <dl class="grid grid-cols-2 gap-4">
-    {#each [{ label: "Purchases", value: data.totals.purchases }, { label: "Companies", value: data.totals.companies }] as stat (stat.label)}
+    {#each [{ label: "Purchases", value: data.totals.purchases }, { label: "Companies", value: data.totals.companies }] as stat, i (stat.label)}
       <div
+        in:rise|global={{ delay: stagger(i) }}
         class="rounded-lg border bg-card p-4 shadow-tile inset-shadow-highlight"
       >
         <dt class="text-xs text-muted-foreground">{stat.label}</dt>

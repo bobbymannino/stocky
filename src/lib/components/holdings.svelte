@@ -2,6 +2,7 @@
   import LoaderCircleIcon from "@lucide/svelte/icons/loader-circle";
   import RefreshCwIcon from "@lucide/svelte/icons/refresh-cw";
   import { onMount } from "svelte";
+  import { flip } from "svelte/animate";
   import {
     companyColorVar,
     type CompanyColor,
@@ -17,6 +18,7 @@
     MARKETS_CLOSED_MESSAGE,
   } from "#lib/market-hours.js";
   import { useMoney } from "#lib/money.svelte.js";
+  import { flipParams, rise, stagger } from "#lib/motion.js";
   import { useNow } from "#lib/now.svelte.js";
   import { purchaseCosts, type Purchase } from "#lib/purchases.js";
   import { cn, formatPercent, formatUpdatedAt } from "#lib/utils.js";
@@ -142,7 +144,7 @@
   </p>
 {:else}
   <div class="grid gap-4 sm:grid-cols-2">
-    {#each holdings as h (h.ticker)}
+    {#each holdings as h, i (h.ticker)}
       {@const price = prices.get(h.ticker)}
       {@const fetching = prices.isFetching(h.ticker)}
       {@const priceError = prices.error(h.ticker)}
@@ -151,7 +153,10 @@
         now.current === undefined ? 0 : prices.cooldown(h.ticker, now.current)}
       {@const value = price === undefined ? undefined : price * h.shares}
       {@const gain = value === undefined ? undefined : value - h.cost}
+      <!-- tiles rise in one after another, and glide when one is removed -->
       <div
+        in:rise|global={{ delay: stagger(i) }}
+        animate:flip={flipParams()}
         class="relative flex flex-col gap-3 rounded-lg border bg-background p-4 shadow-tile inset-shadow-highlight transition-[box-shadow,translate] duration-200 hover:-translate-y-0.5 hover:shadow-tile-raised has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-ring motion-reduce:transition-none motion-reduce:hover:translate-y-0"
         style:background-image={accentGradient(colors[h.ticker])}
       >

@@ -1,6 +1,8 @@
 <script lang="ts">
   import PencilIcon from "@lucide/svelte/icons/pencil";
   import TrashIcon from "@lucide/svelte/icons/trash";
+  import { flip } from "svelte/animate";
+  import { fade } from "svelte/transition";
   import { companyColorVar, type CompanyColors } from "#lib/company-colors.js";
   import CompanySwatch from "#lib/components/company-swatch.svelte";
   import * as AlertDialog from "#lib/components/ui/alert-dialog/index.js";
@@ -8,6 +10,7 @@
   import * as Select from "#lib/components/ui/select/index.js";
   import type { CurrentPrices } from "#lib/current-prices.svelte.js";
   import { useMoney } from "#lib/money.svelte.js";
+  import { flipParams, rise, stagger } from "#lib/motion.js";
   import { purchaseCosts, type Purchase } from "#lib/purchases.js";
   import { deletePurchase } from "#lib/remote/purchases.remote.js";
   import { cn, formatPercent } from "#lib/utils.js";
@@ -209,17 +212,25 @@
         </Select.Content>
       </Select.Root>
       {#if activeTicker !== ALL}
-        <Button variant="ghost" size="sm" onclick={() => (tickerFilter = ALL)}>
-          Clear
-        </Button>
+        <span transition:fade={{ duration: 120 }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onclick={() => (tickerFilter = ALL)}
+          >
+            Clear
+          </Button>
+        </span>
       {/if}
     </div>
   {/if}
 
   <!-- Mobile: stacked cards -->
   <ul class="flex flex-col gap-3 md:hidden">
-    {#each visibleRows as p (p.id)}
+    {#each visibleRows as p, i (p.id)}
       <li
+        in:rise|global={{ delay: stagger(i) }}
+        animate:flip={flipParams()}
         class={cn("flex flex-col gap-2 p-3", rowCard, rowTint(p))}
         style:border-left-color={companyColorVar(colors[p.ticker])}
       >
@@ -290,8 +301,12 @@
         </div>
       </div>
       <div role="rowgroup" class="contents">
-        {#each visibleRows as p (p.id)}
+        <!-- rows rise in one after another, and glide as the filter or a delete
+             moves them; leaving rows go at once so the subgrid never breaks -->
+        {#each visibleRows as p, i (p.id)}
           <div
+            in:rise|global={{ delay: stagger(i) }}
+            animate:flip={flipParams()}
             role="row"
             class={cn(
               "col-span-full grid grid-cols-subgrid items-center py-2 pr-2 pl-4 *:pr-4 *:last:pr-0",

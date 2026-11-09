@@ -3,6 +3,7 @@
   import { Button } from "#lib/components/ui/button/index.js";
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
+  import { rise } from "#lib/motion.js";
   import type { PageProps } from "./$types";
 
   let { data }: PageProps = $props();
@@ -41,7 +42,7 @@
       </Button>
     </div>
     {#if data.invalid}
-      <p id="ticker-error" class="text-sm text-destructive">
+      <p id="ticker-error" class="text-sm text-destructive" in:rise={{ y: -4 }}>
         Tickers are up to 10 letters, numbers, dots or dashes.
       </p>
     {/if}

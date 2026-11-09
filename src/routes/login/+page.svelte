@@ -3,6 +3,7 @@
   import * as Card from "#lib/components/ui/card/index.js";
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
+  import { rise } from "#lib/motion.js";
   import { enhance } from "$app/forms";
   import type { PageProps } from "./$types";
 
@@ -51,7 +52,9 @@
           />
         </div>
         {#if form?.message}
-          <p class="text-sm text-destructive">{form.message}</p>
+          <p class="text-sm text-destructive" in:rise={{ y: -4 }}>
+            {form.message}
+          </p>
         {/if}
       </form>
     </Card.Content>

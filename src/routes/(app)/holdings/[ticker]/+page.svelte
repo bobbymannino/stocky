@@ -15,6 +15,7 @@
     MARKETS_CLOSED_MESSAGE,
   } from "#lib/market-hours.js";
   import { useMoney } from "#lib/money.svelte.js";
+  import { rise, stagger } from "#lib/motion.js";
   import { useNow } from "#lib/now.svelte.js";
   import { purchaseCosts } from "#lib/purchases.js";
   import { cn, formatPercent, formatUpdatedAt } from "#lib/utils.js";
@@ -159,8 +160,9 @@
   <!-- stats only mean something once you hold the company -->
   {#if data.purchases.length > 0}
     <dl class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-      {#each [{ label: "Shares", value: String(totals.shares) }, { label: "Cost (inc. tax)", value: money.format(totals.cost) }, { label: "Value", value: totals.value === undefined ? "—" : money.format(totals.value) }] as stat (stat.label)}
+      {#each [{ label: "Shares", value: String(totals.shares) }, { label: "Cost (inc. tax)", value: money.format(totals.cost) }, { label: "Value", value: totals.value === undefined ? "—" : money.format(totals.value) }] as stat, i (stat.label)}
         <div
+          in:rise|global={{ delay: stagger(i) }}
           class="rounded-lg border bg-card p-4 shadow-tile inset-shadow-highlight"
         >
           <dt class="text-xs text-muted-foreground">{stat.label}</dt>
@@ -168,6 +170,7 @@
         </div>
       {/each}
       <div
+        in:rise|global={{ delay: stagger(3) }}
         class="rounded-lg border bg-card p-4 shadow-tile inset-shadow-highlight"
       >
         <dt class="text-xs text-muted-foreground">Gain / loss</dt>

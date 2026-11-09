@@ -4,6 +4,7 @@
   import * as Card from "#lib/components/ui/card/index.js";
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
+  import { rise } from "#lib/motion.js";
   import type { Purchase } from "#lib/purchases.js";
   import { savePurchase } from "#lib/remote/purchases.remote.js";
   import { cn } from "#lib/utils.js";
@@ -148,7 +149,7 @@
 
 {#snippet issues(list: { message: string }[] | undefined)}
   {#each list ?? [] as issue (issue.message)}
-    <p class="text-sm text-destructive">{issue.message}</p>
+    <p class="text-sm text-destructive" in:rise={{ y: -4 }}>{issue.message}</p>
   {/each}
 {/snippet}
 

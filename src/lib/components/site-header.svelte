@@ -6,6 +6,7 @@
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Sheet from "#lib/components/ui/sheet/index.js";
   import VipBadge from "#lib/components/vip-badge.svelte";
+  import { rise, stagger } from "#lib/motion.js";
   import { cn } from "#lib/utils.js";
   import { afterNavigate } from "$app/navigation";
   import { page } from "$app/state";
@@ -28,21 +29,35 @@
 </script>
 
 {#snippet navLinks(stacked: boolean, items = NAV)}
-  {#each items as item (item.href)}
+  {#each items as item, i (item.href)}
     {@const current = page.url.pathname === item.href}
-    <Button
-      href={item.href}
-      variant="ghost"
-      size={stacked ? "default" : "sm"}
-      aria-current={current ? "page" : undefined}
-      class={cn(
-        stacked && "justify-start",
-        current ? "bg-accent text-foreground" : "text-muted-foreground",
-      )}
-    >
-      {item.label}
-    </Button>
+    {#if stacked}
+      <!-- the menu's links follow the sheet in, one after another -->
+      <div
+        class="flex flex-col"
+        in:rise|global={{ delay: stagger(i, 60), x: 8, y: 0 }}
+      >
+        {@render link(item, current, stacked)}
+      </div>
+    {:else}
+      {@render link(item, current, stacked)}
+    {/if}
   {/each}
+{/snippet}
+
+{#snippet link(item: (typeof NAV)[number], current: boolean, stacked: boolean)}
+  <Button
+    href={item.href}
+    variant="ghost"
+    size={stacked ? "default" : "sm"}
+    aria-current={current ? "page" : undefined}
+    class={cn(
+      stacked && "justify-start",
+      current ? "bg-accent text-foreground" : "text-muted-foreground",
+    )}
+  >
+    {item.label}
+  </Button>
 {/snippet}
 
 <header class={cn("relative border-b", vip && "border-transparent")}>
