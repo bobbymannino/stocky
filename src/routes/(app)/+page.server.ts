@@ -41,7 +41,6 @@ export const load: PageServerLoad = async ({ locals }) => {
     };
 
   return {
-    user: locals.auth.user,
     purchases,
     colors,
     prices,
