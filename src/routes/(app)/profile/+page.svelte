@@ -42,9 +42,9 @@
     }
   }
 
-  /** e.g. "£0.45, £12.30" or "45.00p, £12.30". */
+  /** e.g. "45.00p, £1.23", or "£0.4500, £1.2345" for always £. */
   const example = (mode: CurrencyMode) =>
-    [0.45, 12.3].map((n) => formatMoney(n, mode)).join(", ");
+    [0.45, 1.2345].map((n) => formatMoney(n, mode)).join(", ");
 
   /** Up to two letters from the name (or email), for the avatar. */
   let initials = $derived(

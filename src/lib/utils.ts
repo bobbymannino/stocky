@@ -24,6 +24,22 @@ const signedMoneyFormatter = new Intl.NumberFormat(undefined, {
   signDisplay: "exceptZero",
 });
 
+/** "Always £" shows prices as precisely as they're stored (4dp). */
+const preciseMoneyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "GBP",
+  minimumFractionDigits: 4,
+  maximumFractionDigits: 4,
+});
+
+const signedPreciseMoneyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "GBP",
+  minimumFractionDigits: 4,
+  maximumFractionDigits: 4,
+  signDisplay: "exceptZero",
+});
+
 const penceFormatter = new Intl.NumberFormat(undefined, {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
@@ -45,25 +61,28 @@ function inPence(amount: number): boolean {
 }
 
 /**
- * Formats an amount as GBP in the viewer's locale: `£1,234.50`, and `12.34p`
- * under £1 unless `mode` is `"pounds"`. Components should use `useMoney()`,
- * which passes the user's preference.
+ * Formats an amount as GBP in the viewer's locale. In `"pence"` mode that's
+ * `£1,234.50`, or `12.34p` under £1; in `"pounds"` mode it's always pounds to
+ * 4dp, e.g. `£1.2345`. Components should use `useMoney()`, which passes the
+ * user's preference.
  */
 export function formatMoney(
   amount: number,
   mode: CurrencyMode = "pence",
 ): string {
-  return mode === "pence" && inPence(amount)
+  if (mode === "pounds") return preciseMoneyFormatter.format(amount);
+  return inPence(amount)
     ? `${penceFormatter.format(amount * 100)}p`
     : moneyFormatter.format(amount);
 }
 
-/** Like `formatMoney`, but always shows the sign: `+£12.00`, `-£3.50`, `+12.34p`. */
+/** Like `formatMoney`, but always shows the sign: `+£12.00`, `-£3.50`, `+12.34p`, `+£1.2345`. */
 export function formatSignedMoney(
   amount: number,
   mode: CurrencyMode = "pence",
 ): string {
-  return mode === "pence" && inPence(amount)
+  if (mode === "pounds") return signedPreciseMoneyFormatter.format(amount);
+  return inPence(amount)
     ? `${signedPenceFormatter.format(amount * 100)}p`
     : signedMoneyFormatter.format(amount);
 }
