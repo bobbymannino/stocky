@@ -63,7 +63,8 @@ function inPence(amount: number): boolean {
 /**
  * Formats an amount as GBP in the viewer's locale. In `"pence"` mode that's
  * `£1,234.50`, or `12.34p` under £1; in `"pounds"` mode it's always pounds to
- * 4dp, e.g. `£1.2345`. Components should use `useMoney()`, which passes the
+ * 4dp, e.g. `£1.2345`; in `"alwaysPence"` mode it's always pence to 2dp (the
+ * same precision), e.g. `123.45p`. Components should use `useMoney()`, which passes the
  * user's preference.
  */
 export function formatMoney(
@@ -71,7 +72,7 @@ export function formatMoney(
   mode: CurrencyMode = "pence",
 ): string {
   if (mode === "pounds") return preciseMoneyFormatter.format(amount);
-  return inPence(amount)
+  return mode === "alwaysPence" || inPence(amount)
     ? `${penceFormatter.format(amount * 100)}p`
     : moneyFormatter.format(amount);
 }
@@ -82,7 +83,7 @@ export function formatSignedMoney(
   mode: CurrencyMode = "pence",
 ): string {
   if (mode === "pounds") return signedPreciseMoneyFormatter.format(amount);
-  return inPence(amount)
+  return mode === "alwaysPence" || inPence(amount)
     ? `${signedPenceFormatter.format(amount * 100)}p`
     : signedMoneyFormatter.format(amount);
 }
