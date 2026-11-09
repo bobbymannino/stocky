@@ -7,7 +7,7 @@
   import { Label } from "#lib/components/ui/label/index.js";
   import * as Select from "#lib/components/ui/select/index.js";
   import VipBadge from "#lib/components/vip-badge.svelte";
-  import { rise, stagger } from "#lib/motion.js";
+  import { pop, rise, stagger } from "#lib/motion.js";
   import {
     CURRENCY_MODE_LABELS,
     CURRENCY_MODES,
@@ -106,12 +106,17 @@
   </div>
 
   {#if vipSince}
-    <!-- a gold-edged card: the gradient shows through as a 1px border -->
-    <div class="rounded-xl bg-gold-gradient p-px shadow-lg shadow-gold/20">
+    <!-- a gold-edged card: the gradient shows through as a 1px border. It rises
+         in, then its crown pops in once it has nearly landed -->
+    <div
+      in:rise|global={{ y: 8, duration: 320 }}
+      class="rounded-xl bg-gold-gradient p-px shadow-lg shadow-gold/20"
+    >
       <div
         class="relative flex items-center gap-4 overflow-hidden rounded-[calc(var(--radius-xl)-1px)] bg-card bg-linear-to-br from-gold/15 via-card to-card p-5"
       >
         <span
+          in:pop|global={{ delay: 160 }}
           class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gold-gradient text-gold-ink shadow-inner"
           aria-hidden="true"
         >
@@ -156,7 +161,7 @@
   <dl class="grid grid-cols-2 gap-4">
     {#each [{ label: "Purchases", value: data.totals.purchases }, { label: "Companies", value: data.totals.companies }] as stat, i (stat.label)}
       <div
-        in:rise|global={{ delay: stagger(i) }}
+        in:rise|global={{ delay: stagger(i, vipSince ? 80 : 0) }}
         class="rounded-lg border bg-card p-4 shadow-tile inset-shadow-highlight"
       >
         <dt class="text-xs text-muted-foreground">{stat.label}</dt>

@@ -1,5 +1,5 @@
 import type { FlipParams } from "svelte/animate";
-import { quintOut } from "svelte/easing";
+import { backOut, quintOut } from "svelte/easing";
 import { prefersReducedMotion } from "svelte/motion";
 import type { TransitionConfig } from "svelte/transition";
 
@@ -33,6 +33,27 @@ export function rise(
     duration,
     easing: easeOut,
     css: (t, u) => `opacity: ${t * opacity}; translate: ${u * x}px ${u * y}px`,
+  };
+}
+
+/**
+ * Pops a small badge or icon in: it grows from slightly small with a little
+ * overshoot, untilting as it lands. With reduced motion it just fades.
+ */
+export function pop(
+  node: Element,
+  { delay = 0, duration = 420, scale = 0.6, rotate = -14 } = {},
+): TransitionConfig {
+  if (prefersReducedMotion.current) {
+    return { duration: 150, css: (t) => `opacity: ${t}` };
+  }
+  return {
+    delay,
+    duration,
+    // overshoot on scale and rotation; opacity follows its own, plain ramp
+    easing: backOut,
+    css: (t, u) =>
+      `opacity: ${Math.min(1, t * 2)}; scale: ${scale + (1 - scale) * t}; rotate: ${u * rotate}deg`,
   };
 }
 
