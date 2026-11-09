@@ -50,7 +50,7 @@
       <enhanced:img
         src={logo}
         alt="Stocky logo"
-        class="size-7"
+        class="size-5"
         fetchpriority="high"
         loading="eager"
       />
