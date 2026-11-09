@@ -23,5 +23,5 @@
     </Button>
   </div>
 
-  <AddPurchaseForm companies={data.companies} />
+  <AddPurchaseForm companies={data.companies} initialTicker={data.ticker} />
 </div>

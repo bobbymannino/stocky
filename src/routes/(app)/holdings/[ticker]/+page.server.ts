@@ -1,6 +1,7 @@
-import { redirect } from "@sveltejs/kit";
+import { error, redirect } from "@sveltejs/kit";
 import { and, desc, eq, isNull } from "drizzle-orm";
 import { definePageMetaTags } from "svelte-meta-tags";
+import type { CompanyColors } from "#lib/company-colors.js";
 import type { SavedPrices } from "#lib/current-prices.svelte.js";
 import { ensureCompanyColors } from "#lib/server/company-colors.js";
 import { db } from "#lib/server/db/index.js";
@@ -10,10 +11,14 @@ import type { PageServerLoad } from "./$types";
 /** Enough points for a detailed line without sending an unbounded history. */
 const MAX_QUOTES = 2000;
 
+/** Same shape the price commands accept. */
+const TICKER = /^[A-Z0-9.-]{1,10}$/;
+
 export const load: PageServerLoad = async ({ locals, params }) => {
   if (!locals.auth) redirect(303, "/login");
   const userId = locals.auth.user.id;
   const ticker = params.ticker.toUpperCase();
+  if (!TICKER.test(ticker)) error(404, "Not found");
 
   const purchases = await db
     .select()
@@ -28,9 +33,6 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     .orderBy(desc(purchase.boughtAt), desc(purchase.createdAt));
 
   if (params.ticker !== ticker) redirect(307, `/holdings/${ticker}`);
-  // only holdings the user actually has; this is also where you land after
-  // deleting your last purchase of it here, so go back to the portfolio
-  if (purchases.length === 0) redirect(303, "/");
 
   const [quotes, saved, colors] = await Promise.all([
     // the shared history from every user's live fetches; newest kept if capped
@@ -46,7 +48,10 @@ export const load: PageServerLoad = async ({ locals, params }) => {
       .where(
         and(eq(currentPrice.userId, userId), eq(currentPrice.ticker, ticker)),
       ),
-    ensureCompanyColors(userId, [ticker]),
+    // any company can be viewed; only ones the user holds get a saved colour
+    purchases.length > 0
+      ? ensureCompanyColors(userId, [ticker])
+      : ({} as CompanyColors),
   ]);
 
   const prices: SavedPrices = {};
@@ -59,7 +64,8 @@ export const load: PageServerLoad = async ({ locals, params }) => {
 
   return {
     ticker,
-    companyName: purchases[0].companyName,
+    // names come from the user's own purchases, so unheld companies have none
+    companyName: purchases[0]?.companyName,
     purchases,
     colors,
     prices,

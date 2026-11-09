@@ -19,7 +19,7 @@
     formatSignedMoney,
     formatUpdatedAt,
   } from "#lib/utils.js";
-  import { invalidateAll } from "$app/navigation";
+  import { refreshAll } from "$app/navigation";
   import type { PageProps } from "./$types";
 
   let { data }: PageProps = $props();
@@ -40,7 +40,7 @@
 
   onMount(async () => {
     // a fresh fetch adds a point to the shared history, so redraw the chart
-    if (await prices.autoFetch(data.ticker)) await invalidateAll();
+    if (await prices.autoFetch(data.ticker)) await refreshAll();
   });
   let cooldown = $derived(
     now.current === undefined ? 0 : prices.cooldown(data.ticker, now.current),
@@ -75,7 +75,7 @@
   async function useCurrent() {
     await prices.fetchLive(data.ticker);
     // the fetch adds a point to the shared history, so redraw the chart
-    if (!prices.error(data.ticker)) await invalidateAll();
+    if (!prices.error(data.ticker)) await refreshAll();
   }
 
   const historyDate = new Intl.DateTimeFormat(undefined, {
@@ -98,7 +98,11 @@
         <CompanySwatch color={data.colors[data.ticker]} class="size-3" />
         {data.ticker}
       </h1>
-      <p class="truncate text-sm text-muted-foreground">{data.companyName}</p>
+      {#if data.companyName}
+        <p class="truncate text-sm text-muted-foreground">
+          {data.companyName}
+        </p>
+      {/if}
     </div>
     <div class="flex flex-col items-end gap-1">
       <div class="flex items-center gap-3">
@@ -144,37 +148,40 @@
     </div>
   </header>
 
-  <dl class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-    {#each [{ label: "Shares", value: String(totals.shares) }, { label: "Cost (inc. tax)", value: formatMoney(totals.cost) }, { label: "Value", value: totals.value === undefined ? "—" : formatMoney(totals.value) }] as stat (stat.label)}
+  <!-- stats only mean something once you hold the company -->
+  {#if data.purchases.length > 0}
+    <dl class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      {#each [{ label: "Shares", value: String(totals.shares) }, { label: "Cost (inc. tax)", value: formatMoney(totals.cost) }, { label: "Value", value: totals.value === undefined ? "—" : formatMoney(totals.value) }] as stat (stat.label)}
+        <div
+          class="rounded-lg border bg-card p-4 shadow-tile inset-shadow-highlight"
+        >
+          <dt class="text-xs text-muted-foreground">{stat.label}</dt>
+          <dd class="text-lg font-semibold">{stat.value}</dd>
+        </div>
+      {/each}
       <div
         class="rounded-lg border bg-card p-4 shadow-tile inset-shadow-highlight"
       >
-        <dt class="text-xs text-muted-foreground">{stat.label}</dt>
-        <dd class="text-lg font-semibold">{stat.value}</dd>
+        <dt class="text-xs text-muted-foreground">Gain / loss</dt>
+        <dd
+          class={cn(
+            "text-lg font-semibold",
+            totals.gain !== undefined && totals.gain > 0 && "text-ctp-green",
+            totals.gain !== undefined && totals.gain < 0 && "text-ctp-red",
+          )}
+        >
+          {#if totals.gain === undefined}
+            —
+          {:else}
+            {formatSignedMoney(totals.gain)}
+            <span class="text-xs"
+              >({formatPercent(totals.gain / totals.cost)})</span
+            >
+          {/if}
+        </dd>
       </div>
-    {/each}
-    <div
-      class="rounded-lg border bg-card p-4 shadow-tile inset-shadow-highlight"
-    >
-      <dt class="text-xs text-muted-foreground">Gain / loss</dt>
-      <dd
-        class={cn(
-          "text-lg font-semibold",
-          totals.gain !== undefined && totals.gain > 0 && "text-ctp-green",
-          totals.gain !== undefined && totals.gain < 0 && "text-ctp-red",
-        )}
-      >
-        {#if totals.gain === undefined}
-          —
-        {:else}
-          {formatSignedMoney(totals.gain)}
-          <span class="text-xs"
-            >({formatPercent(totals.gain / totals.cost)})</span
-          >
-        {/if}
-      </dd>
-    </div>
-  </dl>
+    </dl>
+  {/if}
 
   <Card.Root>
     <Card.Header>
@@ -233,12 +240,24 @@
     <h2 id="purchases-heading" class="text-lg font-semibold">
       Your {data.ticker} purchases
     </h2>
-    <PurchasesTable
-      purchases={data.purchases}
-      colors={data.colors}
-      {prices}
-      filterable={false}
-      linkTickers={false}
-    />
+    {#if data.purchases.length === 0}
+      <p class="text-sm text-muted-foreground">
+        You haven't bought any {data.ticker} yet.
+        <a
+          href="/purchases/new?ticker={encodeURIComponent(data.ticker)}"
+          class="underline underline-offset-4"
+        >
+          Add a purchase
+        </a>
+      </p>
+    {:else}
+      <PurchasesTable
+        purchases={data.purchases}
+        colors={data.colors}
+        {prices}
+        filterable={false}
+        linkTickers={false}
+      />
+    {/if}
   </section>
 </div>

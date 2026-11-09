@@ -8,8 +8,15 @@
   import { cn } from "#lib/utils.js";
   import { goto } from "$app/navigation";
 
-  /** Ticker → company name, from the user's existing purchases. */
-  let { companies }: { companies: Map<string, string> } = $props();
+  let {
+    companies,
+    initialTicker,
+  }: {
+    /** Ticker → company name, from the user's existing purchases. */
+    companies: Map<string, string>;
+    /** Pre-fills the ticker; a known company's name then fills itself in. */
+    initialTicker?: string;
+  } = $props();
 
   // local date (not UTC), so late-night entries don't land on the wrong day
   const now = new Date();
@@ -28,7 +35,7 @@
   // Remote form state outlives the page, so start each visit with an empty form.
   // A back/forward visit then restores its snapshot on top of this (see the page).
   function resetForm() {
-    fields.set({ boughtAt: today });
+    fields.set({ boughtAt: today, ticker: initialTicker ?? "" });
     autofilled = undefined;
   }
 
