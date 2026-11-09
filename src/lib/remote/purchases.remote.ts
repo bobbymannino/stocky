@@ -43,7 +43,10 @@ const PurchaseSchema = v.object({
     }, "Date can't be in the future"),
   ),
   pricePerShare: positiveNumber("Price"),
-  shares: positiveNumber("Shares"),
+  shares: v.pipe(
+    positiveNumber("Shares"),
+    v.maxValue(10_000_000, "Max shares is 10 million"),
+  ),
 });
 
 /** Adds a purchase, or updates one of the user's own when `id` is set. */
