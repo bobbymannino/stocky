@@ -1,17 +1,19 @@
 <script lang="ts">
+  import CrownIcon from "@lucide/svelte/icons/crown";
   import LogOutIcon from "@lucide/svelte/icons/log-out";
   import { onMount } from "svelte";
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Card from "#lib/components/ui/card/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
   import * as Select from "#lib/components/ui/select/index.js";
+  import VipBadge from "#lib/components/vip-badge.svelte";
   import {
     CURRENCY_MODE_LABELS,
     CURRENCY_MODES,
     type CurrencyMode,
   } from "#lib/preferences.js";
   import { setCurrencyMode } from "#lib/remote/preferences.remote.js";
-  import { formatMoney } from "#lib/utils.js";
+  import { cn, formatMoney } from "#lib/utils.js";
   import { refreshAll } from "$app/navigation";
   import type { PageProps } from "./$types";
 
@@ -55,39 +57,79 @@
       .join(""),
   );
 
-  const formatJoined = (timeZone?: string) =>
-    user.createdAt.toLocaleDateString(undefined, {
-      dateStyle: "long",
-      timeZone,
-    });
+  const formatDate = (date: Date, timeZone?: string) =>
+    date.toLocaleDateString(undefined, { dateStyle: "long", timeZone });
+
+  let vipSince = $derived(user.vipSince ?? undefined);
 
   // the server renders in UTC; switch to the viewer's timezone in the browser
-  // svelte-ignore state_referenced_locally
-  let joined = $state(formatJoined("UTC"));
-  onMount(() => (joined = formatJoined()));
+  let timeZone = $state<string | undefined>("UTC");
+  onMount(() => (timeZone = undefined));
+  let joined = $derived(formatDate(user.createdAt, timeZone));
+  let vipSinceText = $derived(vipSince && formatDate(vipSince, timeZone));
 </script>
 
 <div class="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4">
   <div class="flex items-center gap-4">
-    {#if user.image}
-      <img
-        src={user.image}
-        alt=""
-        class="size-16 rounded-full border object-cover"
-      />
-    {:else}
-      <span
-        aria-hidden="true"
-        class="flex size-16 items-center justify-center rounded-full border bg-accent text-xl font-semibold"
-      >
-        {initials}
-      </span>
-    {/if}
+    <!-- VIPs get a gold ring around their avatar -->
+    <div
+      class={cn(
+        "shrink-0 rounded-full",
+        vipSince && "bg-gold-gradient p-0.75 shadow-md shadow-gold/30",
+      )}
+    >
+      {#if user.image}
+        <img
+          src={user.image}
+          alt=""
+          class="size-16 rounded-full border object-cover"
+        />
+      {:else}
+        <span
+          aria-hidden="true"
+          class="flex size-16 items-center justify-center rounded-full border bg-accent text-xl font-semibold"
+        >
+          {initials}
+        </span>
+      {/if}
+    </div>
     <div class="min-w-0">
-      <h1 class="truncate text-2xl font-semibold">{user.name}</h1>
+      <div class="flex items-center gap-2">
+        <h1 class="truncate text-2xl font-semibold">{user.name}</h1>
+        {#if vipSince}
+          <VipBadge />
+        {/if}
+      </div>
       <p class="truncate text-sm text-muted-foreground">{user.email}</p>
     </div>
   </div>
+
+  {#if vipSince}
+    <!-- a gold-edged card: the gradient shows through as a 1px border -->
+    <div class="rounded-xl bg-gold-gradient p-px shadow-lg shadow-gold/20">
+      <div
+        class="relative flex items-center gap-4 overflow-hidden rounded-[calc(var(--radius-xl)-1px)] bg-card bg-linear-to-br from-gold/15 via-card to-card p-5"
+      >
+        <span
+          class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gold-gradient text-gold-ink shadow-inner"
+          aria-hidden="true"
+        >
+          <CrownIcon class="size-6" />
+        </span>
+        <div class="min-w-0">
+          <p class="text-gold-gradient text-lg font-semibold">VIP member</p>
+          <p class="text-sm text-muted-foreground">
+            Since <time datetime={vipSince.toISOString()}>{vipSinceText}</time>.
+            Thanks for being one of our best.
+          </p>
+        </div>
+        <span
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 animate-gold-shine bg-linear-to-r from-transparent via-gold-light/20 to-transparent"
+        ></span>
+      </div>
+    </div>
+  {/if}
 
   <Card.Root>
     <Card.Header>

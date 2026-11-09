@@ -5,11 +5,14 @@
   import logo from "#lib/assets/stocky-logo.png?enhanced";
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Sheet from "#lib/components/ui/sheet/index.js";
+  import VipBadge from "#lib/components/vip-badge.svelte";
   import { cn } from "#lib/utils.js";
   import { afterNavigate } from "$app/navigation";
   import { page } from "$app/state";
 
-  let { user }: { user: { email: string } } = $props();
+  let { user }: { user: { email: string; vipSince?: Date | null } } = $props();
+
+  let vip = $derived(Boolean(user.vipSince));
 
   const NAV = [
     { href: "/", label: "Portfolio" },
@@ -42,7 +45,14 @@
   {/each}
 {/snippet}
 
-<header class="border-b">
+<header class={cn("relative border-b", vip && "border-transparent")}>
+  {#if vip}
+    <!-- VIPs get a gold rule in place of the plain border -->
+    <div
+      aria-hidden="true"
+      class="absolute inset-x-0 bottom-0 h-0.5 bg-gold-gradient opacity-80"
+    ></div>
+  {/if}
   <div
     class="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 p-4"
   >
@@ -54,7 +64,10 @@
         fetchpriority="high"
         loading="eager"
       />
-      Stocky
+      <span class={cn(vip && "text-gold-gradient")}>Stocky</span>
+      {#if vip}
+        <VipBadge />
+      {/if}
     </a>
 
     <!-- wide screens: everything inline -->
@@ -73,7 +86,10 @@
         aria-label="Profile"
         title="Profile"
         aria-current={page.url.pathname === PROFILE.href ? "page" : undefined}
-        class={cn(page.url.pathname === PROFILE.href && "bg-accent")}
+        class={cn(
+          page.url.pathname === PROFILE.href && "bg-accent",
+          vip && "text-gold ring-2 ring-gold/70",
+        )}
       >
         <UserIcon />
       </Button>
@@ -91,7 +107,12 @@
       </Sheet.Trigger>
       <Sheet.Content side="right" class="w-72">
         <Sheet.Header>
-          <Sheet.Title>Menu</Sheet.Title>
+          <Sheet.Title class="flex items-center gap-2">
+            Menu
+            {#if vip}
+              <VipBadge />
+            {/if}
+          </Sheet.Title>
         </Sheet.Header>
         <nav aria-label="Main" class="flex flex-col gap-1 px-4">
           {@render navLinks(true, [...NAV, PROFILE])}

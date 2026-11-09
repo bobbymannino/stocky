@@ -144,3 +144,54 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* VIP gold: deeper in light mode so it reads on white, softer in dark mode */
+@theme {
+  --color-gold-light: light-dark(#e0b449, #fbe7b0);
+  --color-gold: light-dark(#b8860b, #f0c46a);
+  --color-gold-dark: light-dark(#a87a0f, #c9952d);
+  /* text on gold, dark in both modes */
+  --color-gold-ink: #2b1f00;
+}
+
+/* a metallic gold sweep, for backgrounds and borders */
+@utility bg-gold-gradient {
+  background-image: linear-gradient(
+    135deg,
+    var(--color-gold-dark),
+    var(--color-gold-light) 45%,
+    var(--color-gold) 60%,
+    var(--color-gold-dark)
+  );
+}
+
+/* the same sweep clipped to text */
+@utility text-gold-gradient {
+  background-image: linear-gradient(
+    135deg,
+    var(--color-gold-dark),
+    var(--color-gold) 40%,
+    var(--color-gold-light) 60%,
+    var(--color-gold)
+  );
+  background-clip: text;
+  color: transparent;
+}
+
+/* a slow glint passing over gold, skipped for reduced motion */
+@keyframes gold-shine {
+  0%,
+  70% {
+    translate: -120% 0;
+  }
+  100% {
+    translate: 120% 0;
+  }
+}
+@utility animate-gold-shine {
+  animation: gold-shine 4s ease-in-out infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+    opacity: 0;
+  }
+}
