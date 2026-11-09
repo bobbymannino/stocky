@@ -7,6 +7,9 @@
   import { version as buildId } from "$app/env";
   import { version } from "../../../package.json";
 
+  /** `NODE_ENV` when it isn't production; left out in production. */
+  let { nodeEnv }: { nodeEnv?: string } = $props();
+
   const REPO_URL = "https://github.com/bobbymannino/stocky";
   const year = new Date().getFullYear();
 
@@ -52,6 +55,14 @@
       >
         v{version}
       </a>
+      {#if nodeEnv}
+        <span
+          class="rounded-full bg-ctp-peach/15 px-2 py-0.5 font-mono text-xs font-medium text-ctp-peach ring-1 ring-ctp-peach/40"
+          title="NODE_ENV is {nodeEnv === 'unset' ? 'not set' : nodeEnv}"
+        >
+          {nodeEnv}
+        </span>
+      {/if}
       {#if builtAt}
         <span class="text-xs">
           Built <time
