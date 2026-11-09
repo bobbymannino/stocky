@@ -12,6 +12,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
     companies: await loadCompanyNames(locals.auth.user.id),
     // `?ticker=AAPL` pre-fills the form, e.g. from a company's page
     ticker: parseTicker(url.searchParams.get("ticker")),
+    // `?wishlist` starts the form as a wishlist trade
+    wishlist: url.searchParams.has("wishlist"),
     ...definePageMetaTags({
       title: "Add purchase",
       description: "Record shares you've bought.",

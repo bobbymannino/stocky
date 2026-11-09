@@ -1,0 +1,1 @@
+ALTER TABLE "purchase" ADD COLUMN "wishlist" boolean DEFAULT false NOT NULL;

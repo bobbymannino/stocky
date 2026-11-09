@@ -4,9 +4,12 @@ import { ensureCompanyColors } from "#lib/server/company-colors.js";
 import { db } from "#lib/server/db/index.js";
 import { currentPrice, purchase } from "#lib/server/db/schema.js";
 
-/** A user's current purchases, newest first, with their colours and prices. */
+/**
+ * A user's current purchases, newest first, with their colours and prices.
+ * Wishlist trades come back separately so they never mix into real totals.
+ */
 export async function loadPortfolio(userId: string) {
-  const purchases = await db
+  const all = await db
     .select()
     .from(purchase)
     .where(and(eq(purchase.userId, userId), isNull(purchase.archivedAt)))
@@ -15,7 +18,7 @@ export async function loadPortfolio(userId: string) {
   // also backfills colours for companies added before colours existed
   const colors = await ensureCompanyColors(
     userId,
-    purchases.map((p) => p.ticker),
+    all.map((p) => p.ticker),
   );
 
   const priceRows = await db
@@ -30,7 +33,16 @@ export async function loadPortfolio(userId: string) {
       updatedAt: r.updatedAt.getTime(),
     };
 
-  return { purchases, colors, prices };
+  const { purchases, wishlist } = splitWishlist(all);
+  return { purchases, wishlist, colors, prices };
+}
+
+/** Separates real purchases from wishlist trades, keeping their order. */
+export function splitWishlist<T extends { wishlist: boolean }>(rows: T[]) {
+  return {
+    purchases: rows.filter((p) => !p.wishlist),
+    wishlist: rows.filter((p) => p.wishlist),
+  };
 }
 
 /** Ticker → most recent company name, from all the user's purchases. */

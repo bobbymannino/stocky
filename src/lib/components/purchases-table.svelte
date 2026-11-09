@@ -24,6 +24,7 @@
     prices,
     filterable = true,
     linkTickers = true,
+    wishlist = false,
   }: {
     purchases: Purchase[];
     colors: CompanyColors;
@@ -32,7 +33,11 @@
     filterable?: boolean;
     /** Link each ticker to its holding page. Off on that page itself. */
     linkTickers?: boolean;
+    /** These are wishlist trades, not real purchases; only changes the wording. */
+    wishlist?: boolean;
   } = $props();
+
+  let noun = $derived(wishlist ? "wishlist trade" : "purchase");
 
   const money = useMoney();
 
@@ -110,7 +115,7 @@
       await refreshAll();
       dialogOpen = false;
     } catch {
-      deleteError = "Couldn't delete this purchase. Please try again.";
+      deleteError = `Couldn't delete this ${noun}. Please try again.`;
     } finally {
       deleting = false;
     }
@@ -178,14 +183,14 @@
       )}"
       variant="outline"
       size="icon-sm"
-      aria-label="Edit {row.ticker} purchase from {row.boughtOn}"
+      aria-label="Edit {row.ticker} {noun} from {row.boughtOn}"
     >
       <PencilIcon />
     </Button>
     <Button
       variant="destructive"
       size="icon-sm"
-      aria-label="Delete {row.ticker} purchase from {row.boughtOn}"
+      aria-label="Delete {row.ticker} {noun} from {row.boughtOn}"
       onclick={() => askToDelete(row)}
     >
       <TrashIcon />
@@ -194,7 +199,9 @@
 {/snippet}
 
 {#if rows.length === 0}
-  <p class="text-sm text-muted-foreground">No purchases yet.</p>
+  <p class="text-sm text-muted-foreground">
+    {wishlist ? "No wishlist trades yet." : "No purchases yet."}
+  </p>
 {:else}
   {#if filterable}
     <div class="mb-4 flex items-center gap-2">
@@ -282,7 +289,7 @@
   <div class="-mx-2 hidden overflow-x-auto px-2 pb-3 md:block">
     <div
       role="table"
-      aria-label="Your purchases"
+      aria-label={wishlist ? "Your wishlist trades" : "Your purchases"}
       class="grid grid-cols-[repeat(11,auto)] gap-y-2 text-sm whitespace-nowrap"
     >
       <div role="rowgroup" class="contents">
@@ -357,15 +364,19 @@
 <AlertDialog.Root bind:open={dialogOpen}>
   <AlertDialog.Content>
     <AlertDialog.Header>
-      <AlertDialog.Title>Delete this purchase?</AlertDialog.Title>
+      <AlertDialog.Title>Delete this {noun}?</AlertDialog.Title>
       <AlertDialog.Description>
         {#if pendingDelete}
-          This will permanently remove {pendingDelete.shares}
+          This will permanently remove {wishlist
+            ? "your wishlist trade for"
+            : ""}
+          {pendingDelete.shares}
           {pendingDelete.shares === 1 ? "share" : "shares"} of
           <span class="font-medium text-foreground"
             >{pendingDelete.companyName} ({pendingDelete.ticker})</span
           >
-          bought on {pendingDelete.boughtOn}. This can't be undone.
+          {wishlist ? "priced on" : "bought on"}
+          {pendingDelete.boughtOn}. This can't be undone.
         {/if}
       </AlertDialog.Description>
     </AlertDialog.Header>
