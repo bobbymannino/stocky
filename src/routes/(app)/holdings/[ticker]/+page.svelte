@@ -14,19 +14,16 @@
     isMarketWeekend,
     MARKETS_CLOSED_MESSAGE,
   } from "#lib/market-hours.js";
+  import { useMoney } from "#lib/money.svelte.js";
   import { useNow } from "#lib/now.svelte.js";
   import { purchaseCosts } from "#lib/purchases.js";
-  import {
-    cn,
-    formatMoney,
-    formatPercent,
-    formatSignedMoney,
-    formatUpdatedAt,
-  } from "#lib/utils.js";
+  import { cn, formatPercent, formatUpdatedAt } from "#lib/utils.js";
   import { refreshAll } from "$app/navigation";
   import type { PageProps } from "./$types";
 
   let { data }: PageProps = $props();
+
+  const money = useMoney();
 
   // one per page view: prices are per-user, so this must not be module state
   // svelte-ignore state_referenced_locally
@@ -115,7 +112,7 @@
     <div class="flex flex-col items-end gap-1">
       <div class="flex items-center gap-3">
         <p class="text-3xl font-semibold">
-          {price === undefined ? "—" : formatMoney(price)}
+          {price === undefined ? "—" : money.format(price)}
         </p>
         <Button
           variant="outline"
@@ -162,7 +159,7 @@
   <!-- stats only mean something once you hold the company -->
   {#if data.purchases.length > 0}
     <dl class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-      {#each [{ label: "Shares", value: String(totals.shares) }, { label: "Cost (inc. tax)", value: formatMoney(totals.cost) }, { label: "Value", value: totals.value === undefined ? "—" : formatMoney(totals.value) }] as stat (stat.label)}
+      {#each [{ label: "Shares", value: String(totals.shares) }, { label: "Cost (inc. tax)", value: money.format(totals.cost) }, { label: "Value", value: totals.value === undefined ? "—" : money.format(totals.value) }] as stat (stat.label)}
         <div
           class="rounded-lg border bg-card p-4 shadow-tile inset-shadow-highlight"
         >
@@ -184,7 +181,7 @@
           {#if totals.gain === undefined}
             —
           {:else}
-            {formatSignedMoney(totals.gain)}
+            {money.signed(totals.gain)}
             <span class="text-xs"
               >({formatPercent(totals.gain / totals.cost)})</span
             >
@@ -238,7 +235,7 @@
                   <tr class="border-t">
                     <td class="py-1">{historyDate.format(h.t)}</td>
                     <td class="py-1 text-right tabular-nums">
-                      {formatMoney(h.price)}
+                      {money.format(h.price)}
                     </td>
                   </tr>
                 {/each}

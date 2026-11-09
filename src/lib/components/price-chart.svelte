@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatMoney } from "#lib/utils.js";
+  import { useMoney } from "#lib/money.svelte.js";
 
   type Point = { t: number; price: number };
   type Buy = Point & { shares: number };
@@ -19,6 +19,8 @@
     /** Accessible name for the chart. */
     label: string;
   } = $props();
+
+  const money = useMoney();
 
   const HEIGHT = 280;
   const M = { top: 16, right: 16, bottom: 28, left: 56 };
@@ -198,7 +200,7 @@
             text-anchor="end"
             class="fill-muted-foreground text-xs tabular-nums"
           >
-            {formatMoney(v)}
+            {money.format(v)}
           </text>
         {/each}
 
@@ -292,14 +294,14 @@
               {fullDate.format(target.point.t)}
             </p>
             <p class="font-medium tabular-nums">
-              {formatMoney(target.point.price)}
+              {money.format(target.point.price)}
             </p>
           {:else}
             <p class="text-muted-foreground">
               Bought {dayDate.format(target.point.t)}
             </p>
             <p class="font-medium tabular-nums">
-              {target.point.shares} × {formatMoney(target.point.price)}
+              {target.point.shares} × {money.format(target.point.price)}
             </p>
           {/if}
         </div>
@@ -310,10 +312,10 @@
   <!-- what the tooltip says, for screen readers moving with the arrow keys -->
   <p id="chart-readout" class="sr-only" aria-live="polite">
     {#if target?.kind === "price"}
-      {fullDate.format(target.point.t)}: {formatMoney(target.point.price)}
+      {fullDate.format(target.point.t)}: {money.format(target.point.price)}
     {:else if target?.kind === "buy"}
       Bought {target.point.shares} shares on {dayDate.format(target.point.t)} at
-      {formatMoney(target.point.price)}
+      {money.format(target.point.price)}
     {:else}
       Use the left and right arrow keys to read each point.
     {/if}

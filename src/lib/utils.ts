@@ -1,3 +1,5 @@
+import type { CurrencyMode } from "#lib/preferences.js";
+
 export { cn } from "cn";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,16 +44,26 @@ function inPence(amount: number): boolean {
   return pence > 0 && pence < 100;
 }
 
-/** Formats an amount as GBP in the viewer's locale: `£1,234.50`, or `12.34p` under £1. */
-export function formatMoney(amount: number): string {
-  return inPence(amount)
+/**
+ * Formats an amount as GBP in the viewer's locale: `£1,234.50`, and `12.34p`
+ * under £1 unless `mode` is `"pounds"`. Components should use `useMoney()`,
+ * which passes the user's preference.
+ */
+export function formatMoney(
+  amount: number,
+  mode: CurrencyMode = "pence",
+): string {
+  return mode === "pence" && inPence(amount)
     ? `${penceFormatter.format(amount * 100)}p`
     : moneyFormatter.format(amount);
 }
 
 /** Like `formatMoney`, but always shows the sign: `+£12.00`, `-£3.50`, `+12.34p`. */
-export function formatSignedMoney(amount: number): string {
-  return inPence(amount)
+export function formatSignedMoney(
+  amount: number,
+  mode: CurrencyMode = "pence",
+): string {
+  return mode === "pence" && inPence(amount)
     ? `${signedPenceFormatter.format(amount * 100)}p`
     : signedMoneyFormatter.format(amount);
 }

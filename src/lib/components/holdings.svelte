@@ -16,15 +16,10 @@
     isMarketWeekend,
     MARKETS_CLOSED_MESSAGE,
   } from "#lib/market-hours.js";
+  import { useMoney } from "#lib/money.svelte.js";
   import { useNow } from "#lib/now.svelte.js";
   import { purchaseCosts, type Purchase } from "#lib/purchases.js";
-  import {
-    cn,
-    formatMoney,
-    formatPercent,
-    formatSignedMoney,
-    formatUpdatedAt,
-  } from "#lib/utils.js";
+  import { cn, formatPercent, formatUpdatedAt } from "#lib/utils.js";
 
   let {
     purchases,
@@ -35,6 +30,8 @@
     colors: CompanyColors;
     prices: CurrentPrices;
   } = $props();
+
+  const money = useMoney();
 
   // undefined until mounted: times show in the viewer's time zone
   const now = useNow();
@@ -197,13 +194,13 @@
           <dd class="text-right tabular-nums">{h.shares}</dd>
           <dt class="text-muted-foreground">Avg. share price</dt>
           <dd class="text-right tabular-nums">
-            {formatMoney(h.spent / h.shares)}
+            {money.format(h.spent / h.shares)}
           </dd>
           <dt class="text-muted-foreground">Cost (inc. tax)</dt>
-          <dd class="text-right tabular-nums">{formatMoney(h.cost)}</dd>
+          <dd class="text-right tabular-nums">{money.format(h.cost)}</dd>
           <dt class="text-muted-foreground">Value</dt>
           <dd class="text-right tabular-nums">
-            {value === undefined ? "—" : formatMoney(value)}
+            {value === undefined ? "—" : money.format(value)}
           </dd>
           <dt class="font-medium">Gain / loss</dt>
           <dd
@@ -216,7 +213,7 @@
             {#if gain === undefined}
               —
             {:else}
-              {formatSignedMoney(gain)}
+              {money.signed(gain)}
               <span class="text-xs">({formatPercent(gain / h.cost)})</span>
             {/if}
           </dd>

@@ -43,6 +43,13 @@
       "when": 1793962058617,
       "tag": "0005_price_quote_immutable",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794251588154,
+      "tag": "0006_user_preference",
+      "breakpoints": true
     }
   ]
 }

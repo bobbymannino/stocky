@@ -10,6 +10,7 @@ import {
   index,
   primaryKey,
 } from "drizzle-orm/pg-core";
+import { CURRENCY_MODES } from "../../preferences";
 import { user } from "./auth.schema";
 
 export const task = pgTable("task", {
@@ -114,5 +115,19 @@ export const priceQuote = pgTable(
     index("price_quote_ticker_fetchedAt_idx").on(table.ticker, table.fetchedAt),
   ],
 );
+
+/** Each user's settings; a missing row means all the defaults. */
+export const userPreference = pgTable("user_preference", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  /** See `CURRENCY_MODES` in `#lib/preferences`. */
+  currencyMode: text("currency_mode", { enum: CURRENCY_MODES })
+    .notNull()
+    .default("pence"),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
 
 export * from "./auth.schema";

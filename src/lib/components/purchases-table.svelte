@@ -7,14 +7,10 @@
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Select from "#lib/components/ui/select/index.js";
   import type { CurrentPrices } from "#lib/current-prices.svelte.js";
+  import { useMoney } from "#lib/money.svelte.js";
   import { purchaseCosts, type Purchase } from "#lib/purchases.js";
   import { deletePurchase } from "#lib/remote/purchases.remote.js";
-  import {
-    cn,
-    formatMoney,
-    formatPercent,
-    formatSignedMoney,
-  } from "#lib/utils.js";
+  import { cn, formatPercent } from "#lib/utils.js";
   import { refreshAll } from "$app/navigation";
   import { page } from "$app/state";
 
@@ -33,6 +29,8 @@
     /** Link each ticker to its holding page. Off on that page itself. */
     linkTickers?: boolean;
   } = $props();
+
+  const money = useMoney();
 
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
 
@@ -142,7 +140,7 @@
       value !== undefined && value < row.totalIncTax && "text-ctp-red",
     )}
   >
-    {value === undefined ? "—" : formatMoney(value)}
+    {value === undefined ? "—" : money.format(value)}
   </span>
 {/snippet}
 
@@ -159,7 +157,7 @@
     {#if diff === undefined}
       —
     {:else}
-      {formatSignedMoney(diff)}
+      {money.signed(diff)}
       <span class="text-xs">({formatPercent(diff / row.totalIncTax)})</span>
     {/if}
   </span>
@@ -237,7 +235,7 @@
           <div class="flex items-start gap-2">
             <div class="text-right">
               <p class="font-medium tabular-nums">
-                {formatMoney(p.totalIncTax)}
+                {money.format(p.totalIncTax)}
               </p>
               <p class="text-xs text-muted-foreground">inc. tax</p>
             </div>
@@ -249,12 +247,12 @@
           <dd class="text-right">{p.boughtOn}</dd>
           <dt class="text-muted-foreground">Shares</dt>
           <dd class="text-right tabular-nums">
-            {p.shares} × {formatMoney(p.price)}
+            {p.shares} × {money.format(p.price)}
           </dd>
           <dt class="text-muted-foreground">Total</dt>
-          <dd class="text-right tabular-nums">{formatMoney(p.total)}</dd>
+          <dd class="text-right tabular-nums">{money.format(p.total)}</dd>
           <dt class="text-muted-foreground">Tax (0.5%)</dt>
-          <dd class="text-right tabular-nums">{formatMoney(p.tax)}</dd>
+          <dd class="text-right tabular-nums">{money.format(p.tax)}</dd>
           <dt class="text-muted-foreground">Current value</dt>
           <dd class="text-right">{@render valueText(p)}</dd>
           <dt class="text-muted-foreground">Gain / loss</dt>
@@ -310,23 +308,23 @@
               {p.companyName}
             </span>
             <span role="cell" class="text-right tabular-nums">
-              {formatMoney(p.price)}
+              {money.format(p.price)}
             </span>
             <span role="cell" class="text-right tabular-nums">{p.shares}</span>
             <span
               role="cell"
               class="text-right text-muted-foreground tabular-nums"
             >
-              {formatMoney(p.total)}
+              {money.format(p.total)}
             </span>
             <span
               role="cell"
               class="text-right text-muted-foreground tabular-nums"
             >
-              {formatMoney(p.tax)}
+              {money.format(p.tax)}
             </span>
             <span role="cell" class="text-right font-medium tabular-nums">
-              {formatMoney(p.totalIncTax)}
+              {money.format(p.totalIncTax)}
             </span>
             <span role="cell" class="text-right">{@render valueText(p)}</span>
             <span role="cell" class="text-right">{@render diffText(p)}</span>
