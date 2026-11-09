@@ -86,6 +86,26 @@
     );
   });
 
+  /** Bumped each time a fetched price lands, so its values flash once. */
+  let flashes = $state<
+    Record<string, { n: number; move: "up" | "down" | "same" }>
+  >({});
+
+  /** Fetches the live price, then flashes the values it changed. Typed prices don't flash. */
+  async function useCurrent(ticker: string) {
+    const before = prices.get(ticker);
+    await prices.fetchLive(ticker);
+    const after = prices.get(ticker);
+    if (prices.error(ticker) || after === undefined) return;
+    const move =
+      before === undefined || after === before
+        ? "same"
+        : after > before
+          ? "up"
+          : "down";
+    flashes[ticker] = { n: (flashes[ticker]?.n ?? 0) + 1, move };
+  }
+
   function onPriceInput(ticker: string, e: Event) {
     const raw = (e.currentTarget as HTMLInputElement).value;
     const price = raw === "" ? undefined : Number(raw);
@@ -97,6 +117,24 @@
     );
   }
 </script>
+
+{#snippet flash(ticker: string)}
+  {@const f = flashes[ticker]}
+  {#if f}
+    <!-- keyed so each new price restarts the fade -->
+    {#key f.n}
+      <span
+        aria-hidden="true"
+        class={cn(
+          "pointer-events-none absolute -inset-x-1 inset-y-0 -z-10 animate-value-flash rounded-sm",
+          f.move === "up" && "bg-ctp-green/15",
+          f.move === "down" && "bg-ctp-red/15",
+          f.move === "same" && "bg-accent",
+        )}
+      ></span>
+    {/key}
+  {/if}
+{/snippet}
 
 {#if holdings.length === 0}
   <p class="text-sm text-muted-foreground">
@@ -151,7 +189,7 @@
               variant="outline"
               disabled={fetching || cooldown > 0 || marketsClosed}
               title={marketsClosed ? MARKETS_CLOSED_MESSAGE : undefined}
-              onclick={() => prices.fetchLive(h.ticker)}
+              onclick={() => useCurrent(h.ticker)}
             >
               {#if fetching}
                 <LoaderCircleIcon class="animate-spin" />
@@ -199,17 +237,19 @@
           <dt class="text-muted-foreground">Cost (inc. tax)</dt>
           <dd class="text-right tabular-nums">{money.format(h.cost)}</dd>
           <dt class="text-muted-foreground">Value</dt>
-          <dd class="text-right tabular-nums">
+          <dd class="relative isolate text-right tabular-nums">
+            {@render flash(h.ticker)}
             {value === undefined ? "—" : money.format(value)}
           </dd>
           <dt class="font-medium">Gain / loss</dt>
           <dd
             class={cn(
-              "text-right font-medium tabular-nums",
+              "relative isolate text-right font-medium tabular-nums",
               gain !== undefined && gain > 0 && "text-ctp-green",
               gain !== undefined && gain < 0 && "text-ctp-red",
             )}
           >
+            {@render flash(h.ticker)}
             {#if gain === undefined}
               —
             {:else}

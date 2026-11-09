@@ -77,6 +77,9 @@
 @theme {
   --font-sans: "Inter Variable", sans-serif;
 
+  /* a strong ease-out: quick to respond, gentle to settle */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+
   /* Depth. Shadows are tinted with Catppuccin text in light mode and near-black
      in dark mode, where they need to be stronger to show against the base. */
   --shadow-card:
@@ -176,6 +179,20 @@
   );
   background-clip: text;
   color: transparent;
+}
+
+/* a wash that fades out behind a value, to show it just changed. Only opacity
+   changes, so it stays for reduced motion */
+@keyframes value-flash {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@utility animate-value-flash {
+  animation: value-flash 600ms var(--ease-out) forwards;
 }
 
 /* a slow glint passing over gold, skipped for reduced motion */
