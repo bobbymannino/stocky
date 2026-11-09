@@ -121,6 +121,7 @@
           disabled={fetching || cooldown > 0 || marketsClosed}
           title={marketsClosed ? MARKETS_CLOSED_MESSAGE : undefined}
           onclick={useCurrent}
+          class="tabular-nums"
         >
           {#if fetching}
             <LoaderCircleIcon class="animate-spin" />
@@ -241,7 +242,7 @@
               <tbody>
                 {#each data.history.toReversed() as h, i (i)}
                   <tr class="border-t">
-                    <td class="py-1">{historyDate.format(h.t)}</td>
+                    <td class="py-1 tabular-nums">{historyDate.format(h.t)}</td>
                     <td class="py-1 text-right tabular-nums">
                       {money.format(h.price)}
                     </td>

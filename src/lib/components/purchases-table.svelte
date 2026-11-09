@@ -258,7 +258,7 @@
         </div>
         <dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
           <dt class="text-muted-foreground">Bought</dt>
-          <dd class="text-right">{p.boughtOn}</dd>
+          <dd class="text-right tabular-nums">{p.boughtOn}</dd>
           <dt class="text-muted-foreground">Shares</dt>
           <dd class="text-right tabular-nums">
             {p.shares} × {money.format(p.price)}
@@ -318,7 +318,7 @@
             )}
             style:border-left-color={companyColorVar(colors[p.ticker])}
           >
-            <span role="cell">{p.boughtOn}</span>
+            <span role="cell" class="tabular-nums">{p.boughtOn}</span>
             <span role="cell" class="font-mono">
               {@render ticker(p.ticker)}
             </span>

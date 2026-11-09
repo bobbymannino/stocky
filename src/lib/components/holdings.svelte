@@ -196,6 +196,7 @@
               disabled={fetching || cooldown > 0 || marketsClosed}
               title={marketsClosed ? MARKETS_CLOSED_MESSAGE : undefined}
               onclick={() => useCurrent(h.ticker)}
+              class="tabular-nums"
             >
               {#if fetching}
                 <LoaderCircleIcon class="animate-spin" />
