@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { fade } from "svelte/transition";
   import { useMoney } from "#lib/money.svelte.js";
+  import { drawIn, pop } from "#lib/motion.js";
 
   type Point = { t: number; price: number };
   type Buy = Point & { shares: number };
@@ -108,6 +110,16 @@
     history.length > 1 && lastPoint
       ? `${linePath}L${x(lastPoint.t)},${M.top + innerH}L${x(history[0].t)},${M.top + innerH}Z`
       : "",
+  );
+
+  // --- entrance -----------------------------------------------------------------
+
+  /** How long the line takes to draw in; the marks land in step with it. */
+  const DRAW_MS = 700;
+
+  /** When the drawing line reaches `t`, so a purchase pops in as it passes. */
+  let reachedAt = $derived(
+    (t: number) => DRAW_MS * Math.min(1, Math.max(0, (x(t) - M.left) / innerW)),
   );
 
   // --- hover / keyboard ---------------------------------------------------------
@@ -222,10 +234,17 @@
 
         <!-- price: a wash, then the 2px line -->
         {#if areaPath}
-          <path d={areaPath} fill={color} fill-opacity="0.1" />
+          <path
+            d={areaPath}
+            fill={color}
+            fill-opacity="0.1"
+            in:fade|global={{ delay: DRAW_MS / 2, duration: DRAW_MS / 2 }}
+          />
         {/if}
         {#if history.length > 1}
+          <!-- the line draws itself in once the chart has a width to draw at -->
           <path
+            in:drawIn|global={{ duration: DRAW_MS }}
             d={linePath}
             fill="none"
             stroke={color}
@@ -241,7 +260,8 @@
             cy={y(lastPoint.price)}
             r="4"
             fill={color}
-            class="stroke-card"
+            class="origin-center stroke-card [transform-box:fill-box]"
+            in:pop|global={{ delay: DRAW_MS - 80, scale: 0, rotate: 0 }}
             stroke-width="2"
           />
         {/if}
@@ -265,7 +285,8 @@
             cx={x(b.t)}
             cy={y(b.price)}
             r={isActive ? 6 : 5}
-            class="fill-foreground stroke-card"
+            class="origin-center fill-foreground stroke-card [transform-box:fill-box]"
+            in:pop|global={{ delay: reachedAt(b.t), scale: 0, rotate: 0 }}
             stroke-width="2"
           />
         {/each}

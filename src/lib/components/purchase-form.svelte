@@ -4,6 +4,7 @@
   import * as Card from "#lib/components/ui/card/index.js";
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
+  import { rise } from "#lib/motion.js";
   import type { Purchase } from "#lib/purchases.js";
   import { savePurchase } from "#lib/remote/purchases.remote.js";
   import { cn } from "#lib/utils.js";
@@ -148,7 +149,7 @@
 
 {#snippet issues(list: { message: string }[] | undefined)}
   {#each list ?? [] as issue (issue.message)}
-    <p class="text-sm text-destructive">{issue.message}</p>
+    <p class="text-sm text-destructive" in:rise={{ y: -4 }}>{issue.message}</p>
   {/each}
 {/snippet}
 
@@ -207,11 +208,12 @@
           onkeydown={onTickerKeyDown}
         />
         {#if showSuggestions}
+          <!-- eases in on open, like the selects; filtering while typing stays instant -->
           <ul
             id="ticker-suggestions"
             role="listbox"
             aria-label="Your tickers"
-            class="absolute top-full right-0 left-0 z-20 mt-1 max-h-64 overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-tile-raised"
+            class="absolute top-full right-0 left-0 z-20 mt-1 max-h-64 origin-top overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-tile-raised transition-[opacity,scale] duration-150 ease-out starting:scale-97 starting:opacity-0 motion-reduce:starting:scale-100"
           >
             {#each suggestions as s, i (s.ticker)}
               <!-- mousedown, not click: picking must happen before the input blurs -->
@@ -300,7 +302,11 @@
         </Button>
       </div>
       {#if error}
-        <p class="text-sm text-destructive sm:col-span-2">{error}</p>
+        <p
+          class="text-sm text-destructive transition-[opacity,translate] duration-150 ease-out sm:col-span-2 starting:-translate-y-1 starting:opacity-0 motion-reduce:starting:translate-y-0"
+        >
+          {error}
+        </p>
       {/if}
     </form>
   </Card.Content>

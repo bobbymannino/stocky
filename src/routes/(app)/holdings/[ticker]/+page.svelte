@@ -5,6 +5,7 @@
   import { onMount } from "svelte";
   import { companyColorVar } from "#lib/company-colors.js";
   import CompanySwatch from "#lib/components/company-swatch.svelte";
+  import NumberRoll from "#lib/components/number-roll.svelte";
   import PriceChart from "#lib/components/price-chart.svelte";
   import PurchasesTable from "#lib/components/purchases-table.svelte";
   import { Button } from "#lib/components/ui/button/index.js";
@@ -15,6 +16,7 @@
     MARKETS_CLOSED_MESSAGE,
   } from "#lib/market-hours.js";
   import { useMoney } from "#lib/money.svelte.js";
+  import { rise, stagger } from "#lib/motion.js";
   import { useNow } from "#lib/now.svelte.js";
   import { purchaseCosts } from "#lib/purchases.js";
   import { cn, formatPercent, formatUpdatedAt } from "#lib/utils.js";
@@ -112,13 +114,14 @@
     <div class="flex flex-col items-end gap-1">
       <div class="flex items-center gap-3">
         <p class="text-3xl font-semibold">
-          {price === undefined ? "—" : money.format(price)}
+          <NumberRoll value={price === undefined ? "—" : money.format(price)} />
         </p>
         <Button
           variant="outline"
           disabled={fetching || cooldown > 0 || marketsClosed}
           title={marketsClosed ? MARKETS_CLOSED_MESSAGE : undefined}
           onclick={useCurrent}
+          class="tabular-nums"
         >
           {#if fetching}
             <LoaderCircleIcon class="animate-spin" />
@@ -159,15 +162,19 @@
   <!-- stats only mean something once you hold the company -->
   {#if data.purchases.length > 0}
     <dl class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-      {#each [{ label: "Shares", value: String(totals.shares) }, { label: "Cost (inc. tax)", value: money.format(totals.cost) }, { label: "Value", value: totals.value === undefined ? "—" : money.format(totals.value) }] as stat (stat.label)}
+      {#each [{ label: "Shares", value: String(totals.shares) }, { label: "Cost (inc. tax)", value: money.format(totals.cost) }, { label: "Value", value: totals.value === undefined ? "—" : money.format(totals.value) }] as stat, i (stat.label)}
         <div
+          in:rise|global={{ delay: stagger(i) }}
           class="rounded-lg border bg-card p-4 shadow-tile inset-shadow-highlight"
         >
           <dt class="text-xs text-muted-foreground">{stat.label}</dt>
-          <dd class="text-lg font-semibold">{stat.value}</dd>
+          <dd class="text-lg font-semibold">
+            <NumberRoll value={stat.value} />
+          </dd>
         </div>
       {/each}
       <div
+        in:rise|global={{ delay: stagger(3) }}
         class="rounded-lg border bg-card p-4 shadow-tile inset-shadow-highlight"
       >
         <dt class="text-xs text-muted-foreground">Gain / loss</dt>
@@ -181,10 +188,12 @@
           {#if totals.gain === undefined}
             —
           {:else}
-            {money.signed(totals.gain)}
-            <span class="text-xs"
-              >({formatPercent(totals.gain / totals.cost)})</span
-            >
+            <NumberRoll value={money.signed(totals.gain)} />
+            <span class="text-xs">
+              <NumberRoll
+                value="({formatPercent(totals.gain / totals.cost)})"
+              />
+            </span>
           {/if}
         </dd>
       </div>
@@ -233,7 +242,7 @@
               <tbody>
                 {#each data.history.toReversed() as h, i (i)}
                   <tr class="border-t">
-                    <td class="py-1">{historyDate.format(h.t)}</td>
+                    <td class="py-1 tabular-nums">{historyDate.format(h.t)}</td>
                     <td class="py-1 text-right tabular-nums">
                       {money.format(h.price)}
                     </td>

@@ -7,6 +7,7 @@
   import { Label } from "#lib/components/ui/label/index.js";
   import * as Select from "#lib/components/ui/select/index.js";
   import VipBadge from "#lib/components/vip-badge.svelte";
+  import { pop, rise, stagger } from "#lib/motion.js";
   import {
     CURRENCY_MODE_LABELS,
     CURRENCY_MODES,
@@ -67,10 +68,13 @@
   onMount(() => (timeZone = undefined));
   let joined = $derived(formatDate(user.createdAt, timeZone));
   let vipSinceText = $derived(vipSince && formatDate(vipSince, timeZone));
+
+  /** The page's sections rise in top to bottom; this is each one's place in line. */
+  let step = $derived((n: number) => stagger(n + (vipSince ? 1 : 0)));
 </script>
 
 <div class="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4">
-  <div class="flex items-center gap-4">
+  <div class="flex items-center gap-4" in:rise|global>
     <!-- VIPs get a gold ring around their avatar -->
     <div
       class={cn(
@@ -105,12 +109,17 @@
   </div>
 
   {#if vipSince}
-    <!-- a gold-edged card: the gradient shows through as a 1px border -->
-    <div class="rounded-xl bg-gold-gradient p-px shadow-lg shadow-gold/20">
+    <!-- a gold-edged card: the gradient shows through as a 1px border. It rises
+         in, then its crown pops in once it has nearly landed -->
+    <div
+      in:rise|global={{ delay: stagger(1), y: 8, duration: 320 }}
+      class="rounded-xl bg-gold-gradient p-px shadow-lg shadow-gold/20"
+    >
       <div
         class="relative flex items-center gap-4 overflow-hidden rounded-[calc(var(--radius-xl)-1px)] bg-card bg-linear-to-br from-gold/15 via-card to-card p-5"
       >
         <span
+          in:pop|global={{ delay: stagger(1, 160) }}
           class="flex size-12 shrink-0 items-center justify-center rounded-full bg-gold-gradient text-gold-ink shadow-inner"
           aria-hidden="true"
         >
@@ -131,30 +140,33 @@
     </div>
   {/if}
 
-  <Card.Root>
-    <Card.Header>
-      <Card.Title>Account details</Card.Title>
-    </Card.Header>
-    <Card.Content>
-      <dl class="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-[auto_1fr]">
-        <dt class="text-muted-foreground">Name</dt>
-        <dd class="font-medium">{user.name}</dd>
-        <dt class="text-muted-foreground">Email</dt>
-        <dd class="font-medium">{user.email}</dd>
-        <dt class="text-muted-foreground">Member since</dt>
-        <dd class="font-medium">
-          <time
-            datetime={user.createdAt.toISOString()}
-            title={user.createdAt.toISOString()}>{joined}</time
-          >
-        </dd>
-      </dl>
-    </Card.Content>
-  </Card.Root>
+  <div in:rise|global={{ delay: step(1) }}>
+    <Card.Root>
+      <Card.Header>
+        <Card.Title>Account details</Card.Title>
+      </Card.Header>
+      <Card.Content>
+        <dl class="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-[auto_1fr]">
+          <dt class="text-muted-foreground">Name</dt>
+          <dd class="font-medium">{user.name}</dd>
+          <dt class="text-muted-foreground">Email</dt>
+          <dd class="font-medium">{user.email}</dd>
+          <dt class="text-muted-foreground">Member since</dt>
+          <dd class="font-medium">
+            <time
+              datetime={user.createdAt.toISOString()}
+              title={user.createdAt.toISOString()}>{joined}</time
+            >
+          </dd>
+        </dl>
+      </Card.Content>
+    </Card.Root>
+  </div>
 
   <dl class="grid grid-cols-2 gap-4">
-    {#each [{ label: "Purchases", value: data.totals.purchases }, { label: "Companies", value: data.totals.companies }] as stat (stat.label)}
+    {#each [{ label: "Purchases", value: data.totals.purchases }, { label: "Companies", value: data.totals.companies }] as stat, i (stat.label)}
       <div
+        in:rise|global={{ delay: step(2 + i) }}
         class="rounded-lg border bg-card p-4 shadow-tile inset-shadow-highlight"
       >
         <dt class="text-xs text-muted-foreground">{stat.label}</dt>
@@ -163,53 +175,62 @@
     {/each}
   </dl>
 
-  <Card.Root>
-    <Card.Header>
-      <Card.Title>Preferences</Card.Title>
-      <Card.Description
-        >Saved to your account as soon as you change them.</Card.Description
-      >
-    </Card.Header>
-    <Card.Content class="grid gap-2">
-      <Label for="currency-mode">Currency</Label>
-      <Select.Root
-        type="single"
-        value={currencyMode}
-        onValueChange={changeCurrencyMode}
-        disabled={saving}
-      >
-        <Select.Trigger
-          id="currency-mode"
-          class="w-full sm:w-72"
-          aria-describedby="currency-mode-note"
+  <div in:rise|global={{ delay: step(4) }}>
+    <Card.Root>
+      <Card.Header>
+        <Card.Title>Preferences</Card.Title>
+        <Card.Description
+          >Saved to your account as soon as you change them.</Card.Description
         >
-          {CURRENCY_MODE_LABELS[currencyMode]}
-        </Select.Trigger>
-        <Select.Content>
-          {#each CURRENCY_MODES as mode (mode)}
-            <Select.Item value={mode} label={CURRENCY_MODE_LABELS[mode]}>
-              {CURRENCY_MODE_LABELS[mode]}
-              <span class="ml-auto text-xs text-muted-foreground tabular-nums">
-                {example(mode)}
-              </span>
-            </Select.Item>
-          {/each}
-        </Select.Content>
-      </Select.Root>
-      <p
-        id="currency-mode-note"
-        class={saveError
-          ? "text-xs text-destructive"
-          : "text-xs text-muted-foreground"}
-        aria-live="polite"
-      >
-        {saveError ??
-          (saving ? "Saving…" : `Amounts look like ${example(currencyMode)}`)}
-      </p>
-    </Card.Content>
-  </Card.Root>
+      </Card.Header>
+      <Card.Content class="grid gap-2">
+        <Label for="currency-mode">Currency</Label>
+        <Select.Root
+          type="single"
+          value={currencyMode}
+          onValueChange={changeCurrencyMode}
+          disabled={saving}
+        >
+          <Select.Trigger
+            id="currency-mode"
+            class="w-full sm:w-72"
+            aria-describedby="currency-mode-note"
+          >
+            {CURRENCY_MODE_LABELS[currencyMode]}
+          </Select.Trigger>
+          <Select.Content>
+            {#each CURRENCY_MODES as mode (mode)}
+              <Select.Item value={mode} label={CURRENCY_MODE_LABELS[mode]}>
+                {CURRENCY_MODE_LABELS[mode]}
+                <span
+                  class="ml-auto text-xs text-muted-foreground tabular-nums"
+                >
+                  {example(mode)}
+                </span>
+              </Select.Item>
+            {/each}
+          </Select.Content>
+        </Select.Root>
+        <p
+          id="currency-mode-note"
+          class={saveError
+            ? "text-xs text-destructive"
+            : "text-xs text-muted-foreground"}
+          aria-live="polite"
+        >
+          {saveError ??
+            (saving ? "Saving…" : `Amounts look like ${example(currencyMode)}`)}
+        </p>
+      </Card.Content>
+    </Card.Root>
+  </div>
 
-  <form method="post" action="?/signOut" class="flex justify-end">
+  <form
+    method="post"
+    action="?/signOut"
+    class="flex justify-end"
+    in:rise|global={{ delay: step(5) }}
+  >
     <Button type="submit" variant="destructive">
       <LogOutIcon />
       Sign out
