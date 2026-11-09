@@ -6,6 +6,7 @@ import type { SavedPrices } from "#lib/current-prices.svelte.js";
 import { ensureCompanyColors } from "#lib/server/company-colors.js";
 import { db } from "#lib/server/db/index.js";
 import { currentPrice, priceQuote, purchase } from "#lib/server/db/schema.js";
+import { OG_HEIGHT, OG_WIDTH } from "#lib/server/og-image.js";
 import { splitWishlist } from "#lib/server/portfolio.js";
 import { parseTicker } from "#lib/ticker.js";
 import type { PageServerLoad } from "./$types";
@@ -13,7 +14,7 @@ import type { PageServerLoad } from "./$types";
 /** Enough points for a detailed line without sending an unbounded history. */
 const MAX_QUOTES = 2000;
 
-export const load: PageServerLoad = async ({ locals, params }) => {
+export const load: PageServerLoad = async ({ locals, params, url }) => {
   if (!locals.auth) redirect(303, "/login");
   const userId = locals.auth.user.id;
   const ticker = parseTicker(params.ticker);
@@ -77,6 +78,17 @@ export const load: PageServerLoad = async ({ locals, params }) => {
     ...definePageMetaTags({
       title: ticker,
       description: `Price history and your purchases of ${ticker}.`,
+      openGraph: {
+        images: [
+          {
+            url: new URL(`/holdings/${ticker}/og.png`, url.origin).href,
+            width: OG_WIDTH,
+            height: OG_HEIGHT,
+            alt: `${ticker} price over time`,
+          },
+        ],
+      },
+      twitter: { cardType: "summary_large_image" },
     }),
   };
 };
