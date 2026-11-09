@@ -3,6 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import { definePageMetaTags } from "svelte-meta-tags";
 import { db } from "#lib/server/db/index.js";
 import { purchase } from "#lib/server/db/schema.js";
+import { parseTicker } from "#lib/ticker.js";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals, url }) => {
@@ -21,11 +22,10 @@ export const load: PageServerLoad = async ({ locals, url }) => {
     if (!companies.has(ticker)) companies.set(ticker, companyName);
 
   // `?ticker=AAPL` pre-fills the form, e.g. from a company's page
-  const ticker = url.searchParams.get("ticker")?.trim().toUpperCase();
 
   return {
     companies,
-    ticker: ticker && /^[A-Z0-9.-]{1,10}$/.test(ticker) ? ticker : undefined,
+    ticker: parseTicker(url.searchParams.get("ticker")),
     ...definePageMetaTags({
       title: "Add purchase",
       description: "Record shares you've bought.",

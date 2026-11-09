@@ -6,19 +6,17 @@ import type { SavedPrices } from "#lib/current-prices.svelte.js";
 import { ensureCompanyColors } from "#lib/server/company-colors.js";
 import { db } from "#lib/server/db/index.js";
 import { currentPrice, priceQuote, purchase } from "#lib/server/db/schema.js";
+import { parseTicker } from "#lib/ticker.js";
 import type { PageServerLoad } from "./$types";
 
 /** Enough points for a detailed line without sending an unbounded history. */
 const MAX_QUOTES = 2000;
 
-/** Same shape the price commands accept. */
-const TICKER = /^[A-Z0-9.-]{1,10}$/;
-
 export const load: PageServerLoad = async ({ locals, params }) => {
   if (!locals.auth) redirect(303, "/login");
   const userId = locals.auth.user.id;
-  const ticker = params.ticker.toUpperCase();
-  if (!TICKER.test(ticker)) error(404, "Not found");
+  const ticker = parseTicker(params.ticker);
+  if (!ticker) error(404, "Not found");
 
   const purchases = await db
     .select()

@@ -14,6 +14,7 @@
   const NAV = [
     { href: "/", label: "Portfolio" },
     { href: "/purchases", label: "Purchases" },
+    { href: "/search", label: "Search" },
   ];
 
   let menuOpen = $state(false);
