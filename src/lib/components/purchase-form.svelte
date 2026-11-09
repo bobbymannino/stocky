@@ -207,11 +207,12 @@
           onkeydown={onTickerKeyDown}
         />
         {#if showSuggestions}
+          <!-- eases in on open, like the selects; filtering while typing stays instant -->
           <ul
             id="ticker-suggestions"
             role="listbox"
             aria-label="Your tickers"
-            class="absolute top-full right-0 left-0 z-20 mt-1 max-h-64 overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-tile-raised"
+            class="absolute top-full right-0 left-0 z-20 mt-1 max-h-64 origin-top overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-tile-raised transition-[opacity,scale] duration-150 ease-out starting:scale-97 starting:opacity-0 motion-reduce:starting:scale-100"
           >
             {#each suggestions as s, i (s.ticker)}
               <!-- mousedown, not click: picking must happen before the input blurs -->
