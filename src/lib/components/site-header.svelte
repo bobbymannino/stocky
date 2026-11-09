@@ -1,7 +1,7 @@
 <script lang="ts">
-  import LogOutIcon from "@lucide/svelte/icons/log-out";
   import MenuIcon from "@lucide/svelte/icons/menu";
   import PlusIcon from "@lucide/svelte/icons/plus";
+  import UserIcon from "@lucide/svelte/icons/user";
   import logo from "#lib/assets/stocky-logo.png?enhanced";
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Sheet from "#lib/components/ui/sheet/index.js";
@@ -16,6 +16,7 @@
     { href: "/purchases", label: "Purchases" },
     { href: "/search", label: "Search" },
   ];
+  const PROFILE = { href: "/profile", label: "Profile" };
 
   let menuOpen = $state(false);
 
@@ -23,8 +24,8 @@
   afterNavigate(() => (menuOpen = false));
 </script>
 
-{#snippet navLinks(stacked: boolean)}
-  {#each NAV as item (item.href)}
+{#snippet navLinks(stacked: boolean, items = NAV)}
+  {#each items as item (item.href)}
     {@const current = page.url.pathname === item.href}
     <Button
       href={item.href}
@@ -39,21 +40,6 @@
       {item.label}
     </Button>
   {/each}
-{/snippet}
-
-{#snippet signOut(stacked: boolean)}
-  <form method="post" action="/?/signOut" class={cn(stacked && "w-full")}>
-    <Button
-      type="submit"
-      variant="destructive"
-      size={stacked ? "default" : "sm"}
-      class={cn(stacked && "w-full")}
-      title="Sign out of {user.email}"
-    >
-      <LogOutIcon />
-      Sign out
-    </Button>
-  </form>
 {/snippet}
 
 <header class="border-b">
@@ -80,7 +66,17 @@
         <PlusIcon />
         Add purchase
       </Button>
-      {@render signOut(false)}
+      <Button
+        href={PROFILE.href}
+        variant="ghost"
+        size="icon-sm"
+        aria-label="Profile"
+        title="Profile"
+        aria-current={page.url.pathname === PROFILE.href ? "page" : undefined}
+        class={cn(page.url.pathname === PROFILE.href && "bg-accent")}
+      >
+        <UserIcon />
+      </Button>
     </div>
 
     <!-- narrow screens: the same links in a slide-in menu -->
@@ -96,17 +92,15 @@
       <Sheet.Content side="right" class="w-72">
         <Sheet.Header>
           <Sheet.Title>Menu</Sheet.Title>
-          <Sheet.Description class="truncate">{user.email}</Sheet.Description>
         </Sheet.Header>
         <nav aria-label="Main" class="flex flex-col gap-1 px-4">
-          {@render navLinks(true)}
+          {@render navLinks(true, [...NAV, PROFILE])}
         </nav>
         <Sheet.Footer>
           <Button href="/purchases/new">
             <PlusIcon />
             Add purchase
           </Button>
-          {@render signOut(true)}
         </Sheet.Footer>
       </Sheet.Content>
     </Sheet.Root>
