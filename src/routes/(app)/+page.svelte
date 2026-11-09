@@ -5,6 +5,7 @@
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Card from "#lib/components/ui/card/index.js";
   import { CurrentPrices } from "#lib/current-prices.svelte.js";
+  import { stagger } from "#lib/motion.js";
   import type { PageProps } from "./$types";
 
   let { data }: PageProps = $props();
@@ -54,6 +55,7 @@
       colors={data.colors}
       {prices}
       wishlist
+      delay={stagger(data.purchases.length)}
     />
   </section>
 </div>

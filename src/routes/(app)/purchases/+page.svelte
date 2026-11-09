@@ -1,6 +1,7 @@
 <script lang="ts">
   import PurchasesTable from "#lib/components/purchases-table.svelte";
   import { CurrentPrices } from "#lib/current-prices.svelte.js";
+  import { stagger } from "#lib/motion.js";
   import type { PageProps } from "./$types";
 
   let { data }: PageProps = $props();
@@ -27,6 +28,7 @@
         colors={data.colors}
         {prices}
         wishlist
+        delay={stagger(data.purchases.length)}
       />
     </section>
   {/if}

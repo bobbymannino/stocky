@@ -25,6 +25,7 @@
     filterable = true,
     linkTickers = true,
     wishlist = false,
+    delay = 0,
   }: {
     purchases: Purchase[];
     colors: CompanyColors;
@@ -35,6 +36,11 @@
     linkTickers?: boolean;
     /** These are wishlist trades, not real purchases; only changes the wording. */
     wishlist?: boolean;
+    /**
+     * When (ms) the first row starts rising, so a table further down the page
+     * picks up the stagger where the content above it left off.
+     */
+    delay?: number;
   } = $props();
 
   let noun = $derived(wishlist ? "wishlist trade" : "purchase");
@@ -239,7 +245,7 @@
   <ul class="flex flex-col gap-3 md:hidden">
     {#each visibleRows as p, i (p.id)}
       <li
-        in:rise|global={{ delay: stagger(i) }}
+        in:rise|global={{ delay: stagger(i, delay) }}
         animate:flip={flipParams()}
         class={cn("flex flex-col gap-2 p-3", rowCard, rowTint(p))}
         style:border-left-color={companyColorVar(colors[p.ticker])}
@@ -315,7 +321,7 @@
              moves them; leaving rows go at once so the subgrid never breaks -->
         {#each visibleRows as p, i (p.id)}
           <div
-            in:rise|global={{ delay: stagger(i) }}
+            in:rise|global={{ delay: stagger(i, delay) }}
             animate:flip={flipParams()}
             role="row"
             class={cn(

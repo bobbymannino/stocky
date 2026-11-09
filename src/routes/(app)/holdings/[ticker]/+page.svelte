@@ -70,6 +70,11 @@
     };
   });
 
+  // one top-to-bottom cascade: the four stat tiles, then the purchase rows,
+  // then the wishlist rows. The stats only show when there are purchases.
+  let purchasesDelay = $derived(data.purchases.length > 0 ? stagger(4) : 0);
+  let wishlistDelay = $derived(purchasesDelay + stagger(data.purchases.length));
+
   let buys = $derived(
     data.purchases.map((p) => {
       const c = purchaseCosts(p);
@@ -286,6 +291,7 @@
         {prices}
         filterable={false}
         linkTickers={false}
+        delay={purchasesDelay}
       />
     {/if}
   </section>
@@ -307,6 +313,7 @@
         filterable={false}
         linkTickers={false}
         wishlist
+        delay={wishlistDelay}
       />
     </section>
   {/if}
