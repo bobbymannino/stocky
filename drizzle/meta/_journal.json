@@ -50,6 +50,13 @@
       "when": 1794251588154,
       "tag": "0006_user_preference",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794252127969,
+      "tag": "0007_user_vip_since",
+      "breakpoints": true
     }
   ]
 }
