@@ -5,6 +5,7 @@
   import { onMount } from "svelte";
   import { companyColorVar } from "#lib/company-colors.js";
   import CompanySwatch from "#lib/components/company-swatch.svelte";
+  import NumberRoll from "#lib/components/number-roll.svelte";
   import PriceChart from "#lib/components/price-chart.svelte";
   import PurchasesTable from "#lib/components/purchases-table.svelte";
   import { Button } from "#lib/components/ui/button/index.js";
@@ -113,7 +114,7 @@
     <div class="flex flex-col items-end gap-1">
       <div class="flex items-center gap-3">
         <p class="text-3xl font-semibold">
-          {price === undefined ? "—" : money.format(price)}
+          <NumberRoll value={price === undefined ? "—" : money.format(price)} />
         </p>
         <Button
           variant="outline"
@@ -166,7 +167,9 @@
           class="rounded-lg border bg-card p-4 shadow-tile inset-shadow-highlight"
         >
           <dt class="text-xs text-muted-foreground">{stat.label}</dt>
-          <dd class="text-lg font-semibold">{stat.value}</dd>
+          <dd class="text-lg font-semibold">
+            <NumberRoll value={stat.value} />
+          </dd>
         </div>
       {/each}
       <div
@@ -184,10 +187,12 @@
           {#if totals.gain === undefined}
             —
           {:else}
-            {money.signed(totals.gain)}
-            <span class="text-xs"
-              >({formatPercent(totals.gain / totals.cost)})</span
-            >
+            <NumberRoll value={money.signed(totals.gain)} />
+            <span class="text-xs">
+              <NumberRoll
+                value="({formatPercent(totals.gain / totals.cost)})"
+              />
+            </span>
           {/if}
         </dd>
       </div>

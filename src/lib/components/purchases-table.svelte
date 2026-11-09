@@ -5,6 +5,7 @@
   import { fade } from "svelte/transition";
   import { companyColorVar, type CompanyColors } from "#lib/company-colors.js";
   import CompanySwatch from "#lib/components/company-swatch.svelte";
+  import NumberRoll from "#lib/components/number-roll.svelte";
   import * as AlertDialog from "#lib/components/ui/alert-dialog/index.js";
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Select from "#lib/components/ui/select/index.js";
@@ -143,7 +144,7 @@
       value !== undefined && value < row.totalIncTax && "text-ctp-red",
     )}
   >
-    {value === undefined ? "—" : money.format(value)}
+    <NumberRoll value={value === undefined ? "—" : money.format(value)} />
   </span>
 {/snippet}
 
@@ -160,8 +161,10 @@
     {#if diff === undefined}
       —
     {:else}
-      {money.signed(diff)}
-      <span class="text-xs">({formatPercent(diff / row.totalIncTax)})</span>
+      <NumberRoll value={money.signed(diff)} />
+      <span class="text-xs">
+        <NumberRoll value="({formatPercent(diff / row.totalIncTax)})" />
+      </span>
     {/if}
   </span>
 {/snippet}

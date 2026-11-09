@@ -9,6 +9,7 @@
     type CompanyColors,
   } from "#lib/company-colors.js";
   import CompanySwatch from "#lib/components/company-swatch.svelte";
+  import NumberRoll from "#lib/components/number-roll.svelte";
   import { Button } from "#lib/components/ui/button/index.js";
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
@@ -244,7 +245,9 @@
           <dt class="text-muted-foreground">Value</dt>
           <dd class="relative isolate text-right tabular-nums">
             {@render flash(h.ticker)}
-            {value === undefined ? "—" : money.format(value)}
+            <NumberRoll
+              value={value === undefined ? "—" : money.format(value)}
+            />
           </dd>
           <dt class="font-medium">Gain / loss</dt>
           <dd
@@ -258,8 +261,10 @@
             {#if gain === undefined}
               —
             {:else}
-              {money.signed(gain)}
-              <span class="text-xs">({formatPercent(gain / h.cost)})</span>
+              <NumberRoll value={money.signed(gain)} />
+              <span class="text-xs">
+                <NumberRoll value="({formatPercent(gain / h.cost)})" />
+              </span>
             {/if}
           </dd>
         </dl>
