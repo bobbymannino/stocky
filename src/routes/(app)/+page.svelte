@@ -1,5 +1,6 @@
 <script lang="ts">
   import PlusIcon from "@lucide/svelte/icons/plus";
+  import { onMount } from "svelte";
   import Holdings from "#lib/components/holdings.svelte";
   import PurchasesTable from "#lib/components/purchases-table.svelte";
   import { Button } from "#lib/components/ui/button/index.js";
@@ -14,6 +15,15 @@
   // it keeps its own copy after this, so typed prices aren't reset on refresh
   // svelte-ignore state_referenced_locally
   const prices = new CurrentPrices(data.prices);
+
+  // Holdings fetches its own tickers on mount; this covers wishlist-only ones
+  onMount(() => {
+    const held = new Set(data.purchases.map((p) => p.ticker));
+    const wishlistOnly = new Set(
+      data.wishlist.map((p) => p.ticker).filter((t) => !held.has(t)),
+    );
+    for (const ticker of wishlistOnly) void prices.autoFetch(ticker);
+  });
 </script>
 
 <div class="mx-auto flex w-full max-w-6xl flex-col gap-6 p-4">
