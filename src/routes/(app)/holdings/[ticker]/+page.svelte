@@ -197,12 +197,15 @@
           No live prices recorded yet. Use “Use current” to add the first one.
         </p>
       {/if}
-      <PriceChart
-        history={data.history}
-        {buys}
-        {color}
-        label="{data.ticker} price over time, with your purchases"
-      />
+      <!-- a company nobody has fetched or bought has nothing to plot -->
+      {#if data.history.length > 0 || buys.length > 0}
+        <PriceChart
+          history={data.history}
+          {buys}
+          {color}
+          label="{data.ticker} price over time, with your purchases"
+        />
+      {/if}
 
       {#if data.history.length > 0}
         <details class="text-sm">
