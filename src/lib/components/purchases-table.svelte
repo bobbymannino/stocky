@@ -1,4 +1,5 @@
 <script lang="ts">
+  import PencilIcon from "@lucide/svelte/icons/pencil";
   import TrashIcon from "@lucide/svelte/icons/trash";
   import { companyColorVar, type CompanyColors } from "#lib/company-colors.js";
   import CompanySwatch from "#lib/components/company-swatch.svelte";
@@ -15,6 +16,7 @@
     formatSignedMoney,
   } from "#lib/utils.js";
   import { refreshAll } from "$app/navigation";
+  import { page } from "$app/state";
 
   let {
     purchases,
@@ -163,15 +165,28 @@
   </span>
 {/snippet}
 
-{#snippet deleteButton(row: Row)}
-  <Button
-    variant="destructive"
-    size="icon-sm"
-    aria-label="Delete {row.ticker} purchase from {row.boughtOn}"
-    onclick={() => askToDelete(row)}
-  >
-    <TrashIcon />
-  </Button>
+{#snippet actions(row: Row)}
+  <div class="inline-flex gap-1">
+    <!-- `from` brings you back to this page after saving or cancelling -->
+    <Button
+      href="/purchases/{row.id}/edit?from={encodeURIComponent(
+        page.url.pathname,
+      )}"
+      variant="outline"
+      size="icon-sm"
+      aria-label="Edit {row.ticker} purchase from {row.boughtOn}"
+    >
+      <PencilIcon />
+    </Button>
+    <Button
+      variant="destructive"
+      size="icon-sm"
+      aria-label="Delete {row.ticker} purchase from {row.boughtOn}"
+      onclick={() => askToDelete(row)}
+    >
+      <TrashIcon />
+    </Button>
+  </div>
 {/snippet}
 
 {#if rows.length === 0}
@@ -226,7 +241,7 @@
               </p>
               <p class="text-xs text-muted-foreground">inc. tax</p>
             </div>
-            {@render deleteButton(p)}
+            {@render actions(p)}
           </div>
         </div>
         <dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
@@ -315,8 +330,7 @@
             </span>
             <span role="cell" class="text-right">{@render valueText(p)}</span>
             <span role="cell" class="text-right">{@render diffText(p)}</span>
-            <span role="cell" class="text-right">{@render deleteButton(p)}</span
-            >
+            <span role="cell" class="text-right">{@render actions(p)}</span>
           </div>
         {/each}
       </div>

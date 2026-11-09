@@ -32,3 +32,18 @@ export async function loadPortfolio(userId: string) {
 
   return { purchases, colors, prices };
 }
+
+/** Ticker → most recent company name, from all the user's purchases. */
+export async function loadCompanyNames(userId: string) {
+  const rows = await db
+    .select({ ticker: purchase.ticker, companyName: purchase.companyName })
+    .from(purchase)
+    .where(eq(purchase.userId, userId))
+    .orderBy(desc(purchase.createdAt));
+
+  // newest first, so keep the first (most recent) name per ticker
+  const companies = new Map<string, string>();
+  for (const { ticker, companyName } of rows)
+    if (!companies.has(ticker)) companies.set(ticker, companyName);
+  return companies;
+}

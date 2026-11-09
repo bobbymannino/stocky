@@ -13,7 +13,9 @@ const positiveNumber = (label: string) =>
     v.gtValue(0, `${label} must be greater than 0`),
   );
 
-const AddPurchaseSchema = v.object({
+const PurchaseSchema = v.object({
+  /** Set when editing an existing purchase; left out when adding one. */
+  id: v.optional(v.pipe(v.number(), v.integer(), v.minValue(1))),
   ticker: v.pipe(
     v.string(),
     v.trim(),
@@ -44,24 +46,43 @@ const AddPurchaseSchema = v.object({
   shares: positiveNumber("Shares"),
 });
 
-export const addPurchase = form(AddPurchaseSchema, async (data) => {
+/** Adds a purchase, or updates one of the user's own when `id` is set. */
+export const savePurchase = form(PurchaseSchema, async ({ id, ...data }) => {
   const { locals } = getRequestEvent();
   if (!locals.auth) redirect(303, "/login");
+  const userId = locals.auth.user.id;
 
-  await db.insert(purchase).values({
-    userId: locals.auth.user.id,
+  const values = {
     ticker: data.ticker,
     companyName: data.companyName,
     boughtAt: data.boughtAt,
     // numeric columns take strings to keep precision
     pricePerShare: String(data.pricePerShare),
     shares: String(data.shares),
-  });
+  };
+
+  if (id === undefined) {
+    await db.insert(purchase).values({ userId, ...values });
+  } else {
+    // scoped to the user so nobody can edit someone else's purchase by id
+    const updated = await db
+      .update(purchase)
+      .set(values)
+      .where(
+        and(
+          eq(purchase.id, id),
+          eq(purchase.userId, userId),
+          isNull(purchase.archivedAt),
+        ),
+      )
+      .returning({ id: purchase.id });
+    if (updated.length === 0) error(404, "Purchase not found");
+  }
 
   // a new company gets its colour now; existing ones keep theirs
-  await ensureCompanyColors(locals.auth.user.id, [data.ticker]);
+  await ensureCompanyColors(userId, [data.ticker]);
 
-  // the client resets the form and navigates to the portfolio itself
+  // the client resets the form and navigates away itself
 });
 
 export const deletePurchase = command(

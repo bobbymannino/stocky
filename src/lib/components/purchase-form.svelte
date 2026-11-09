@@ -4,18 +4,25 @@
   import * as Card from "#lib/components/ui/card/index.js";
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
-  import { addPurchase } from "#lib/remote/purchases.remote.js";
+  import type { Purchase } from "#lib/purchases.js";
+  import { savePurchase } from "#lib/remote/purchases.remote.js";
   import { cn } from "#lib/utils.js";
   import { goto } from "$app/navigation";
 
   let {
     companies,
     initialTicker,
+    purchase,
+    returnTo = "/",
   }: {
     /** Ticker → company name, from the user's existing purchases. */
     companies: Map<string, string>;
     /** Pre-fills the ticker; a known company's name then fills itself in. */
     initialTicker?: string;
+    /** The purchase being edited; leave out to add a new one. */
+    purchase?: Purchase;
+    /** Where to go after saving, or on cancel when editing. */
+    returnTo?: string;
   } = $props();
 
   // local date (not UTC), so late-night entries don't land on the wrong day
@@ -25,16 +32,34 @@
     String(now.getMonth() + 1).padStart(2, "0"),
     String(now.getDate()).padStart(2, "0"),
   ].join("-");
-  const { fields } = addPurchase;
+  const { fields } = savePurchase;
 
   let error = $state<string>();
   // the company name we last filled in, so we only replace our own value
   // and never overwrite something the user typed themselves
   let autofilled = $state<string>();
 
-  // Remote form state outlives the page, so start each visit with an empty form.
-  // A back/forward visit then restores its snapshot on top of this (see the page).
+  // Remote form state outlives the page, so start each visit with an empty form,
+  // or the purchase being edited. A back/forward visit to the add page then
+  // restores its snapshot on top of this (see that page).
   function resetForm() {
+    if (purchase) {
+      fields.set({
+        id: purchase.id,
+        ticker: purchase.ticker,
+        companyName: purchase.companyName,
+        boughtAt: purchase.boughtAt,
+        pricePerShare: Number(purchase.pricePerShare),
+        shares: Number(purchase.shares),
+      });
+      // treat a name matching our suggestion as ours, so changing the ticker
+      // swaps it; a name the user wrote themselves is left alone
+      autofilled =
+        companies.get(purchase.ticker) === purchase.companyName
+          ? purchase.companyName
+          : undefined;
+      return;
+    }
     fields.set({ boughtAt: today, ticker: initialTicker ?? "" });
     autofilled = undefined;
   }
@@ -129,12 +154,16 @@
 
 <Card.Root>
   <Card.Header>
-    <Card.Title>Add purchase</Card.Title>
-    <Card.Description>Record shares you've bought.</Card.Description>
+    <Card.Title>{purchase ? "Edit purchase" : "Add purchase"}</Card.Title>
+    <Card.Description>
+      {purchase
+        ? "Correct the details of shares you've bought."
+        : "Record shares you've bought."}
+    </Card.Description>
   </Card.Header>
   <Card.Content>
     <form
-      {...addPurchase.enhance(async (form) => {
+      {...savePurchase.enhance(async (form) => {
         error = undefined;
         try {
           // `.updates()` skips refreshing this page; the portfolio loads fresh anyway
@@ -142,7 +171,7 @@
             // reset before navigating so the history snapshot is the empty form,
             // not the purchase that was just saved
             resetForm();
-            await goto("/");
+            await goto(returnTo);
           }
         } catch {
           error = "Something went wrong. Please try again.";
@@ -150,6 +179,9 @@
       })}
       class="grid gap-4 sm:grid-cols-2"
     >
+      {#if purchase}
+        <input {...fields.id.as("hidden", purchase.id)} />
+      {/if}
       <div class="relative grid gap-2">
         <Label for="ticker">Ticker</Label>
         <Input
@@ -249,9 +281,22 @@
         />
         {@render issues(fields.shares.issues())}
       </div>
-      <div class="flex items-end">
-        <Button type="submit" class="w-full" disabled={addPurchase.pending > 0}>
-          {addPurchase.pending > 0 ? "Adding…" : "Add"}
+      <div class="flex items-end gap-2">
+        {#if purchase}
+          <Button href={returnTo} variant="outline" class="flex-1">
+            Cancel
+          </Button>
+        {/if}
+        <Button
+          type="submit"
+          class="flex-1"
+          disabled={savePurchase.pending > 0}
+        >
+          {#if purchase}
+            {savePurchase.pending > 0 ? "Updating…" : "Update"}
+          {:else}
+            {savePurchase.pending > 0 ? "Adding…" : "Add"}
+          {/if}
         </Button>
       </div>
       {#if error}
