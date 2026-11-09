@@ -7,7 +7,7 @@
   import { enhance } from "$app/forms";
   import type { PageProps } from "./$types";
 
-  let { form }: PageProps = $props();
+  let { data, form }: PageProps = $props();
 </script>
 
 <div class="flex flex-1 items-center justify-center p-4">
@@ -26,6 +26,8 @@
         use:enhance
         class="flex flex-col gap-4"
       >
+        <!-- where to go after signing in; the server checks it stays on this site -->
+        <input type="hidden" name="redirectTo" value={data.redirectTo} />
         <div class="grid gap-2">
           <Label for="name">Name</Label>
           <Input id="name" name="name" placeholder="Sign up only" />

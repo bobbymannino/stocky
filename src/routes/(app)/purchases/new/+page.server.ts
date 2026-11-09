@@ -1,11 +1,12 @@
 import { redirect } from "@sveltejs/kit";
 import { definePageMetaTags } from "svelte-meta-tags";
+import { loginUrl } from "#lib/server/login-redirect.js";
 import { loadCompanyNames } from "#lib/server/portfolio.js";
 import { parseTicker } from "#lib/ticker.js";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ locals, url }) => {
-  if (!locals.auth) redirect(303, "/login");
+  if (!locals.auth) redirect(303, loginUrl(url));
 
   return {
     // auto-fills company names in the form

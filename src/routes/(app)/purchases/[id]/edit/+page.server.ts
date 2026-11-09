@@ -3,6 +3,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { definePageMetaTags } from "svelte-meta-tags";
 import { db } from "#lib/server/db/index.js";
 import { purchase } from "#lib/server/db/schema.js";
+import { loginUrl } from "#lib/server/login-redirect.js";
 import { loadCompanyNames } from "#lib/server/portfolio.js";
 import type { PageServerLoad } from "./$types";
 
@@ -14,7 +15,7 @@ function returnPath(from: string | null) {
 }
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
-  if (!locals.auth) redirect(303, "/login");
+  if (!locals.auth) redirect(303, loginUrl(url));
   const userId = locals.auth.user.id;
 
   const id = Number(params.id);

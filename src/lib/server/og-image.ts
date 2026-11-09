@@ -2,7 +2,10 @@
 import inter400 from "@fontsource/inter/files/inter-latin-400-normal.woff?inline";
 import inter700 from "@fontsource/inter/files/inter-latin-700-normal.woff?inline";
 import { Resvg } from "@resvg/resvg-js";
+import { desc, eq } from "drizzle-orm";
 import satori from "satori";
+import { db } from "#lib/server/db/index.js";
+import { purchase } from "#lib/server/db/schema.js";
 
 export const OG_WIDTH = 1200;
 export const OG_HEIGHT = 630;
@@ -208,4 +211,20 @@ export async function renderHoldingImage(opts: {
   });
   // a plain copy, since Response bodies want an ArrayBuffer-backed array
   return new Uint8Array(new Resvg(svg).render().asPng());
+}
+
+/**
+ * A company name for `ticker` when there's no signed-in viewer to ask (link
+ * previews): the most recent name anyone gave it.
+ */
+export async function loadSharedCompanyName(
+  ticker: string,
+): Promise<string | undefined> {
+  const [row] = await db
+    .select({ companyName: purchase.companyName })
+    .from(purchase)
+    .where(eq(purchase.ticker, ticker))
+    .orderBy(desc(purchase.createdAt))
+    .limit(1);
+  return row?.companyName;
 }

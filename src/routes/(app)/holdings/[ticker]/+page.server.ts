@@ -6,6 +6,7 @@ import type { SavedPrices } from "#lib/current-prices.svelte.js";
 import { ensureCompanyColors } from "#lib/server/company-colors.js";
 import { db } from "#lib/server/db/index.js";
 import { currentPrice, priceQuote, purchase } from "#lib/server/db/schema.js";
+import { loginUrl } from "#lib/server/login-redirect.js";
 import { OG_HEIGHT, OG_WIDTH } from "#lib/server/og-image.js";
 import { splitWishlist } from "#lib/server/portfolio.js";
 import { parseTicker } from "#lib/ticker.js";
@@ -15,7 +16,7 @@ import type { PageServerLoad } from "./$types";
 const MAX_QUOTES = 2000;
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
-  if (!locals.auth) redirect(303, "/login");
+  if (!locals.auth) redirect(303, loginUrl(url));
   const userId = locals.auth.user.id;
   const ticker = parseTicker(params.ticker);
   if (!ticker) error(404, "Not found");
