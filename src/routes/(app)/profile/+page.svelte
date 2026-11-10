@@ -1,7 +1,9 @@
 <script lang="ts">
   import CrownIcon from "@lucide/svelte/icons/crown";
+  import GitBranchIcon from "@lucide/svelte/icons/git-branch";
   import LogOutIcon from "@lucide/svelte/icons/log-out";
   import { onMount } from "svelte";
+  import { APP_VERSION, BUILT_AT, REPO_URL } from "#lib/app-info.js";
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Card from "#lib/components/ui/card/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
@@ -107,6 +109,13 @@
   onMount(() => (timeZone = undefined));
   let joined = $derived(formatDate(user.createdAt, timeZone));
   let vipSinceText = $derived(vipSince && formatDate(vipSince, timeZone));
+  let builtAtText = $derived(
+    BUILT_AT?.toLocaleString(undefined, {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone,
+    }),
+  );
 
   /** The page's sections rise in top to bottom; this is each one's place in line. */
   let step = $derived((n: number) => stagger(n + (vipSince ? 1 : 0)));
@@ -360,4 +369,37 @@
       Sign out
     </Button>
   </form>
+
+  <section
+    aria-label="About Stocky"
+    class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t pt-6 text-sm text-muted-foreground"
+    in:rise|global={{ delay: step(6) }}
+  >
+    <a
+      href={REPO_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+    >
+      <GitBranchIcon class="size-4" aria-hidden="true" />
+      View on GitHub
+    </a>
+    <a
+      href="{REPO_URL}/releases/tag/v{APP_VERSION}"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="font-mono text-xs transition-colors hover:text-foreground"
+      title="Release notes for v{APP_VERSION}"
+    >
+      v{APP_VERSION}
+    </a>
+    {#if BUILT_AT}
+      <span class="text-xs">
+        Built <time
+          datetime={BUILT_AT.toISOString()}
+          title={BUILT_AT.toISOString()}>{builtAtText}</time
+        >
+      </span>
+    {/if}
+  </section>
 </div>
