@@ -1,5 +1,7 @@
 <script lang="ts">
+  import LoaderCircleIcon from "@lucide/svelte/icons/loader-circle";
   import PencilIcon from "@lucide/svelte/icons/pencil";
+  import RefreshCwIcon from "@lucide/svelte/icons/refresh-cw";
   import TrashIcon from "@lucide/svelte/icons/trash";
   import { flip } from "svelte/animate";
   import { fade } from "svelte/transition";
@@ -10,8 +12,10 @@
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Select from "#lib/components/ui/select/index.js";
   import type { CurrentPrices } from "#lib/current-prices.svelte.js";
+  import { MARKETS_CLOSED_MESSAGE } from "#lib/market-hours.js";
   import { useMoney } from "#lib/money.svelte.js";
   import { flipParams, rise, stagger } from "#lib/motion.js";
+  import { useNow } from "#lib/now.svelte.js";
   import { purchaseCosts, type Purchase } from "#lib/purchases.js";
   import { deletePurchase } from "#lib/remote/purchases.remote.js";
   import { cn, formatPercent } from "#lib/utils.js";
@@ -46,6 +50,15 @@
   let noun = $derived(wishlist ? "wishlist trade" : "purchase");
 
   const money = useMoney();
+
+  // undefined until mounted, like the other live-price buttons
+  const now = useNow();
+
+  async function refreshPrice(ticker: string) {
+    await prices.fetchLive(ticker);
+    // the fetch adds a point to the shared history (e.g. the holding's chart)
+    if (!prices.error(ticker)) await refreshAll();
+  }
 
   const date = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
 
@@ -181,7 +194,38 @@
 {/snippet}
 
 {#snippet actions(row: Row)}
+  {@const cooldown =
+    now.current === undefined ? 0 : prices.cooldown(row.ticker, now.current)}
+  {@const marketsClosed =
+    now.current !== undefined && prices.isClosed(row.ticker, now.current)}
+  {@const fetching = prices.isFetching(row.ticker)}
+  {@const priceError = prices.error(row.ticker)}
   <div class="inline-flex gap-1">
+    <!-- one price per ticker, so every row of it shares the cooldown -->
+    <Button
+      variant="outline"
+      size="icon-sm"
+      class={cn(cooldown > 0 && "w-auto min-w-11 px-2 text-xs tabular-nums")}
+      disabled={fetching || cooldown > 0 || marketsClosed}
+      title={marketsClosed
+        ? MARKETS_CLOSED_MESSAGE
+        : (priceError ??
+          (cooldown > 0
+            ? `You can check ${row.ticker} again in ${Math.ceil(cooldown / 1000)}s`
+            : `Get the live ${row.ticker} price`))}
+      aria-label={cooldown > 0
+        ? `Refresh ${row.ticker} price, available again in ${Math.ceil(cooldown / 1000)} seconds`
+        : `Refresh ${row.ticker} price`}
+      onclick={() => refreshPrice(row.ticker)}
+    >
+      {#if fetching}
+        <LoaderCircleIcon class="animate-spin" />
+      {:else if cooldown > 0}
+        {Math.ceil(cooldown / 1000)}s
+      {:else}
+        <RefreshCwIcon />
+      {/if}
+    </Button>
     <!-- `from` brings you back to this page after saving or cancelling -->
     <Button
       href="/purchases/{row.id}/edit?from={encodeURIComponent(
