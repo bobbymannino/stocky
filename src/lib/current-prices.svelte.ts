@@ -1,5 +1,5 @@
 import { LIVE_PRICE_COOLDOWN } from "#lib/live-price-cooldown.js";
-import { isMarketWeekend } from "#lib/market-hours.js";
+import { isClosedFor } from "#lib/market-hours.js";
 import {
   refreshCurrentPrice,
   setCurrentPrice,
@@ -60,6 +60,11 @@ export class CurrentPrices {
     return Math.max(0, saved.updatedAt + LIVE_PRICE_COOLDOWN - now);
   }
 
+  /** Whether the markets are shut for this ticker now; see `isClosedFor`. */
+  isClosed(ticker: string, now: number): boolean {
+    return isClosedFor(this.source(ticker), now);
+  }
+
   isFetching(ticker: string): boolean {
     return this.#fetching[ticker] ?? false;
   }
@@ -104,12 +109,13 @@ export class CurrentPrices {
   }
 
   /**
-   * Fetches the live price on page load, unless it's the weekend, it's still in
-   * its cooldown, or the user typed their own price (which this would overwrite). Failures stay
+   * Fetches the live price on page load, unless it's the weekend and there's
+   * already a live price, it's still in its cooldown, or the user typed their
+   * own price (which this would overwrite). Failures stay
    * quiet, since the user didn't ask. Resolves whether a new price arrived.
    */
   async autoFetch(ticker: string): Promise<boolean> {
-    if (isMarketWeekend()) return false;
+    if (this.isClosed(ticker, Date.now())) return false;
     if (this.source(ticker) === "manual") return false;
     if (this.cooldown(ticker, Date.now()) > 0) return false;
     if (this.isFetching(ticker)) return false;

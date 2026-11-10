@@ -12,10 +12,7 @@
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Card from "#lib/components/ui/card/index.js";
   import { CurrentPrices } from "#lib/current-prices.svelte.js";
-  import {
-    isMarketWeekend,
-    MARKETS_CLOSED_MESSAGE,
-  } from "#lib/market-hours.js";
+  import { MARKETS_CLOSED_MESSAGE } from "#lib/market-hours.js";
   import { useMoney } from "#lib/money.svelte.js";
   import { rise, stagger } from "#lib/motion.js";
   import { useNow } from "#lib/now.svelte.js";
@@ -42,15 +39,15 @@
 
   // undefined until mounted: times show in the viewer's time zone
   const now = useNow();
-  // false until mounted (like `now`); the server refuses weekend fetches too
-  let marketsClosed = $derived(
-    now.current !== undefined && isMarketWeekend(now.current),
-  );
 
   onMount(async () => {
     // a fresh fetch adds a point to the shared history, so redraw the chart
     if (await prices.autoFetch(data.ticker)) await refreshAll();
   });
+  // false until mounted (like `now`); the server refuses these fetches too
+  let marketsClosed = $derived(
+    now.current !== undefined && prices.isClosed(data.ticker, now.current),
+  );
   let cooldown = $derived(
     now.current === undefined ? 0 : prices.cooldown(data.ticker, now.current),
   );

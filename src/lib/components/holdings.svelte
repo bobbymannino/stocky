@@ -14,10 +14,7 @@
   import { Input } from "#lib/components/ui/input/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
   import type { CurrentPrices } from "#lib/current-prices.svelte.js";
-  import {
-    isMarketWeekend,
-    MARKETS_CLOSED_MESSAGE,
-  } from "#lib/market-hours.js";
+  import { MARKETS_CLOSED_MESSAGE } from "#lib/market-hours.js";
   import { useMoney } from "#lib/money.svelte.js";
   import { flipParams, rise, stagger } from "#lib/motion.js";
   import { useNow } from "#lib/now.svelte.js";
@@ -38,10 +35,6 @@
 
   // undefined until mounted: times show in the viewer's time zone
   const now = useNow();
-  // false until mounted (like `now`); the server refuses weekend fetches too
-  let marketsClosed = $derived(
-    now.current !== undefined && isMarketWeekend(now.current),
-  );
 
   onMount(() => {
     for (const h of holdings) void prices.autoFetch(h.ticker);
@@ -152,6 +145,9 @@
       {@const updatedAt = prices.updatedAt(h.ticker)}
       {@const cooldown =
         now.current === undefined ? 0 : prices.cooldown(h.ticker, now.current)}
+      <!-- false until mounted (like `now`); the server refuses these fetches too -->
+      {@const marketsClosed =
+        now.current !== undefined && prices.isClosed(h.ticker, now.current)}
       {@const value = price === undefined ? undefined : price * h.shares}
       {@const gain = value === undefined ? undefined : value - h.cost}
       <!-- tiles rise in one after another, and glide when one is removed -->
