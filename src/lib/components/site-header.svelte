@@ -114,7 +114,13 @@
     <Sheet.Root bind:open={menuOpen}>
       <Sheet.Trigger>
         {#snippet child({ props })}
-          <Button {...props} variant="ghost" size="icon" class="sm:hidden">
+          <Button
+            {...props}
+            variant="ghost"
+            size="icon"
+            title="Open menu"
+            class="sm:hidden"
+          >
             <MenuIcon />
             <span class="sr-only">Open menu</span>
           </Button>

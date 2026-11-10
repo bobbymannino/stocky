@@ -234,6 +234,7 @@
       variant="outline"
       size="icon-sm"
       aria-label="Edit {row.ticker} {noun} from {row.boughtOn}"
+      title="Edit this {noun}"
     >
       <PencilIcon />
     </Button>
@@ -241,6 +242,7 @@
       variant="destructive"
       size="icon-sm"
       aria-label="Delete {row.ticker} {noun} from {row.boughtOn}"
+      title="Delete this {noun}"
       onclick={() => askToDelete(row)}
     >
       <TrashIcon />
