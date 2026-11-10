@@ -6,14 +6,25 @@
   import * as Card from "#lib/components/ui/card/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
   import * as Select from "#lib/components/ui/select/index.js";
+  import { Separator } from "#lib/components/ui/separator/index.js";
   import VipBadge from "#lib/components/vip-badge.svelte";
   import { pop, rise, stagger } from "#lib/motion.js";
   import {
+    APPEARANCE_LABELS,
+    APPEARANCES,
+    applyTheme,
     CURRENCY_MODE_LABELS,
     CURRENCY_MODES,
+    DARK_THEMES,
+    LIGHT_THEMES,
+    THEME_LABELS,
     type CurrencyMode,
+    type ThemePreferences,
   } from "#lib/preferences.js";
-  import { setCurrencyMode } from "#lib/remote/preferences.remote.js";
+  import {
+    setCurrencyMode,
+    setThemePreferences,
+  } from "#lib/remote/preferences.remote.js";
   import { cn, formatMoney } from "#lib/utils.js";
   import { refreshAll } from "$app/navigation";
   import type { PageProps } from "./$types";
@@ -42,6 +53,34 @@
       saveError = "Couldn't save your preference. Please try again.";
     } finally {
       saving = false;
+    }
+  }
+
+  // svelte-ignore state_referenced_locally
+  let theme = $state<ThemePreferences>({
+    appearance: data.preferences.appearance,
+    lightTheme: data.preferences.lightTheme,
+    darkTheme: data.preferences.darkTheme,
+  });
+  let themeSaving = $state(false);
+  let themeError = $state<string>();
+
+  /** Shows the new theme straight away, then saves it; undone if saving fails. */
+  async function changeTheme(changes: Partial<ThemePreferences>) {
+    const previous = { ...theme };
+    theme = { ...theme, ...changes };
+    applyTheme(theme);
+    themeSaving = true;
+    themeError = undefined;
+    try {
+      await setThemePreferences(changes);
+      await refreshAll();
+    } catch {
+      theme = previous;
+      applyTheme(theme);
+      themeError = "Couldn't save your theme. Please try again.";
+    } finally {
+      themeSaving = false;
     }
   }
 
@@ -220,6 +259,91 @@
         >
           {saveError ??
             (saving ? "Saving…" : `Amounts look like ${example(currencyMode)}`)}
+        </p>
+
+        <Separator class="my-2" />
+
+        <div class="grid gap-4 sm:grid-cols-3">
+          <div class="grid gap-2">
+            <Label for="appearance">Appearance</Label>
+            <Select.Root
+              type="single"
+              value={theme.appearance}
+              onValueChange={(v) =>
+                changeTheme({
+                  appearance: v as ThemePreferences["appearance"],
+                })}
+              disabled={themeSaving}
+            >
+              <Select.Trigger id="appearance" class="w-full">
+                {APPEARANCE_LABELS[theme.appearance]}
+              </Select.Trigger>
+              <Select.Content>
+                {#each APPEARANCES as a (a)}
+                  <Select.Item value={a} label={APPEARANCE_LABELS[a]}>
+                    {APPEARANCE_LABELS[a]}
+                  </Select.Item>
+                {/each}
+              </Select.Content>
+            </Select.Root>
+          </div>
+          <div class="grid gap-2">
+            <Label for="light-theme">Light theme</Label>
+            <Select.Root
+              type="single"
+              value={theme.lightTheme}
+              onValueChange={(v) =>
+                changeTheme({
+                  lightTheme: v as ThemePreferences["lightTheme"],
+                })}
+              disabled={themeSaving}
+            >
+              <Select.Trigger id="light-theme" class="w-full">
+                {THEME_LABELS[theme.lightTheme]}
+              </Select.Trigger>
+              <Select.Content>
+                {#each LIGHT_THEMES as t (t)}
+                  <Select.Item value={t} label={THEME_LABELS[t]}>
+                    {THEME_LABELS[t]}
+                  </Select.Item>
+                {/each}
+              </Select.Content>
+            </Select.Root>
+          </div>
+          <div class="grid gap-2">
+            <Label for="dark-theme">Dark theme</Label>
+            <Select.Root
+              type="single"
+              value={theme.darkTheme}
+              onValueChange={(v) =>
+                changeTheme({ darkTheme: v as ThemePreferences["darkTheme"] })}
+              disabled={themeSaving}
+            >
+              <Select.Trigger id="dark-theme" class="w-full">
+                {THEME_LABELS[theme.darkTheme]}
+              </Select.Trigger>
+              <Select.Content>
+                {#each DARK_THEMES as t (t)}
+                  <Select.Item value={t} label={THEME_LABELS[t]}>
+                    {THEME_LABELS[t]}
+                  </Select.Item>
+                {/each}
+              </Select.Content>
+            </Select.Root>
+          </div>
+        </div>
+        <p
+          class={themeError
+            ? "text-xs text-destructive"
+            : "text-xs text-muted-foreground"}
+          aria-live="polite"
+        >
+          {themeError ??
+            (themeSaving
+              ? "Saving…"
+              : theme.appearance === "system"
+                ? "Follows your device, using the light or dark theme to match."
+                : `Always ${theme.appearance}, using the ${theme.appearance} theme.`)}
         </p>
       </Card.Content>
     </Card.Root>
