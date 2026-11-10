@@ -24,14 +24,23 @@ export const APPEARANCE_LABELS: Record<Appearance, string> = {
  * `routes/layout.css`, under `[data-light-theme]` or `[data-dark-theme]`, that
  * fills every Catppuccin colour slot, so adding one is a CSS block and a name here.
  */
-export const LIGHT_THEMES = ["latte"] as const;
+export const LIGHT_THEMES = ["latte", "ayu-light"] as const;
 export type LightTheme = (typeof LIGHT_THEMES)[number];
-export const DARK_THEMES = ["mocha"] as const;
+export const DARK_THEMES = [
+  "mocha",
+  "dracula",
+  "ayu-mirage",
+  "ayu-dark",
+] as const;
 export type DarkTheme = (typeof DARK_THEMES)[number];
 
 export const THEME_LABELS: Record<LightTheme | DarkTheme, string> = {
   latte: "Catppuccin Latte",
   mocha: "Catppuccin Mocha",
+  "ayu-light": "Ayu Light",
+  dracula: "Dracula",
+  "ayu-mirage": "Ayu Mirage",
+  "ayu-dark": "Ayu Dark",
 };
 
 export type ThemePreferences = {

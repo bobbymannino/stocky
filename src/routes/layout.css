@@ -126,6 +126,129 @@
   --dark-ctp-crust: #11111b;
 }
 
+/* Ayu Light (ayu-colors v8). Ayu has no pink or lavender, so those are made
+   to suit; green, red and muted text are a little darker than Ayu's own, to
+   stay readable on its near-white background. */
+:root[data-light-theme="ayu-light"] {
+  --light-ctp-rosewater: #e59645;
+  --light-ctp-flamingo: #ed9366;
+  --light-ctp-pink: #e0679f;
+  --light-ctp-mauve: #a37acc;
+  --light-ctp-red: #cf4848;
+  --light-ctp-maroon: #f07171;
+  --light-ctp-peach: #fa8d3e;
+  --light-ctp-yellow: #f2ae49;
+  --light-ctp-green: #6b8f00;
+  --light-ctp-teal: #4cbf99;
+  --light-ctp-sky: #55b4d4;
+  --light-ctp-sapphire: #399ee6;
+  --light-ctp-blue: #478acc;
+  --light-ctp-lavender: #7f86e0;
+  --light-ctp-text: #5c6166;
+  --light-ctp-subtext1: #6c7075;
+  --light-ctp-subtext0: #6f7478;
+  --light-ctp-overlay2: #8c9093;
+  --light-ctp-overlay1: #9c9fa2;
+  --light-ctp-overlay0: #acaeb1;
+  --light-ctp-surface2: #bcbec0;
+  --light-ctp-surface1: #caccce;
+  --light-ctp-surface0: #dadbdc;
+  --light-ctp-base: #fcfcfc;
+  --light-ctp-mantle: #f3f3f4;
+  --light-ctp-crust: #eeeeee;
+}
+
+/* Dracula (draculatheme.com/spec): its own colours and ANSI brights; the
+   greys between background and text are blended from the two. */
+:root[data-dark-theme="dracula"] {
+  --dark-ctp-rosewater: #ffd5e6;
+  --dark-ctp-flamingo: #ff92df;
+  --dark-ctp-pink: #ff79c6;
+  --dark-ctp-mauve: #bd93f9;
+  --dark-ctp-red: #ff5555;
+  --dark-ctp-maroon: #ff6e6e;
+  --dark-ctp-peach: #ffb86c;
+  --dark-ctp-yellow: #f1fa8c;
+  --dark-ctp-green: #50fa7b;
+  --dark-ctp-teal: #6df1bc;
+  --dark-ctp-sky: #8be9fd;
+  --dark-ctp-sapphire: #6fc8f2;
+  --dark-ctp-blue: #82a0f7;
+  --dark-ctp-lavender: #d6acff;
+  --dark-ctp-text: #f8f8f2;
+  --dark-ctp-subtext1: #e1e1dd;
+  --dark-ctp-subtext0: #cacbc9;
+  --dark-ctp-overlay2: #b3b4b4;
+  --dark-ctp-overlay1: #9c9d9f;
+  --dark-ctp-overlay0: #86878b;
+  --dark-ctp-surface2: #6d6e74;
+  --dark-ctp-surface1: #44475a;
+  --dark-ctp-surface0: #3d3f49;
+  --dark-ctp-base: #282a36;
+  --dark-ctp-mantle: #20222b;
+  --dark-ctp-crust: #17181f;
+}
+
+/* Ayu Mirage and Ayu Dark (ayu-colors v8). As with Ayu Light, pink and
+   lavender are made to suit, and the greys are blended. */
+:root[data-dark-theme="ayu-mirage"] {
+  --dark-ctp-rosewater: #ffdfb3;
+  --dark-ctp-flamingo: #f29e74;
+  --dark-ctp-pink: #f5a3c7;
+  --dark-ctp-mauve: #dfbfff;
+  --dark-ctp-red: #ff6666;
+  --dark-ctp-maroon: #f28779;
+  --dark-ctp-peach: #ffad66;
+  --dark-ctp-yellow: #ffd173;
+  --dark-ctp-green: #87d96c;
+  --dark-ctp-teal: #95e6cb;
+  --dark-ctp-sky: #5ccfe6;
+  --dark-ctp-sapphire: #73d0ff;
+  --dark-ctp-blue: #80bfff;
+  --dark-ctp-lavender: #b8b5ff;
+  --dark-ctp-text: #cccac2;
+  --dark-ctp-subtext1: #bab8b3;
+  --dark-ctp-subtext0: #a7a7a3;
+  --dark-ctp-overlay2: #959594;
+  --dark-ctp-overlay1: #828384;
+  --dark-ctp-overlay0: #707175;
+  --dark-ctp-surface2: #5b5e64;
+  --dark-ctp-surface1: #494c55;
+  --dark-ctp-surface0: #353944;
+  --dark-ctp-base: #242936;
+  --dark-ctp-mantle: #1d212b;
+  --dark-ctp-crust: #15181f;
+}
+
+:root[data-dark-theme="ayu-dark"] {
+  --dark-ctp-rosewater: #e6c08a;
+  --dark-ctp-flamingo: #f29668;
+  --dark-ctp-pink: #f39ac2;
+  --dark-ctp-mauve: #d2a6ff;
+  --dark-ctp-red: #d95757;
+  --dark-ctp-maroon: #f07178;
+  --dark-ctp-peach: #ff8f40;
+  --dark-ctp-yellow: #ffb454;
+  --dark-ctp-green: #7fd962;
+  --dark-ctp-teal: #95e6cb;
+  --dark-ctp-sky: #39bae6;
+  --dark-ctp-sapphire: #59c2ff;
+  --dark-ctp-blue: #73b8ff;
+  --dark-ctp-lavender: #aaa6ff;
+  --dark-ctp-text: #bfbdb6;
+  --dark-ctp-subtext1: #abaaa5;
+  --dark-ctp-subtext0: #989793;
+  --dark-ctp-overlay2: #848482;
+  --dark-ctp-overlay1: #717170;
+  --dark-ctp-overlay0: #5d5e5f;
+  --dark-ctp-surface2: #48494b;
+  --dark-ctp-surface1: #34363a;
+  --dark-ctp-surface0: #1f2127;
+  --dark-ctp-base: #0d1017;
+  --dark-ctp-mantle: #0a0d12;
+  --dark-ctp-crust: #08090d;
+}
+
 /* static: company colours are referenced at runtime (see #lib/company-colors),
    so Tailwind can't see them and would otherwise drop the unused variables.
    light-dark() picks the light or dark theme's value from `color-scheme`. */
