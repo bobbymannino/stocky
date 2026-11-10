@@ -1,0 +1,590 @@
+/* Colour themes. Every theme fills all 26 Catppuccin slots for one appearance
+   (as --light-ctp-* or --dark-ctp-*), and layout.css turns the chosen pair into
+   --color-ctp-* with light-dark(). `:root` holds the defaults (Latte and Mocha)
+   for signed-out visitors.
+
+   Catppuccin flavours are exact. For the others, each theme's own colours are
+   used where it has them; slots it lacks are derived from its colours (greys
+   blended from its background and text, plus some accents), and gain/loss
+   green and red are nudged where needed to stay readable on its background.
+
+   To add a theme: add a block here, then its name to LIGHT_THEMES or
+   DARK_THEMES and THEME_LABELS in #lib/preferences. */
+
+/* ---------- Light ---------- */
+
+/* Catppuccin Latte (official palette) — the default light theme */
+:root,
+:root[data-light-theme="latte"] {
+  --light-ctp-rosewater: #dc8a78;
+  --light-ctp-flamingo: #dd7878;
+  --light-ctp-pink: #ea76cb;
+  --light-ctp-mauve: #8839ef;
+  --light-ctp-red: #d20f39;
+  --light-ctp-maroon: #e64553;
+  --light-ctp-peach: #fe640b;
+  --light-ctp-yellow: #df8e1d;
+  --light-ctp-green: #40a02b;
+  --light-ctp-teal: #179299;
+  --light-ctp-sky: #04a5e5;
+  --light-ctp-sapphire: #209fb5;
+  --light-ctp-blue: #1e66f5;
+  --light-ctp-lavender: #7287fd;
+  --light-ctp-text: #4c4f69;
+  --light-ctp-subtext1: #5c5f77;
+  --light-ctp-subtext0: #6c6f85;
+  --light-ctp-overlay2: #7c7f93;
+  --light-ctp-overlay1: #8c8fa1;
+  --light-ctp-overlay0: #9ca0b0;
+  --light-ctp-surface2: #acb0be;
+  --light-ctp-surface1: #bcc0cc;
+  --light-ctp-surface0: #ccd0da;
+  --light-ctp-base: #eff1f5;
+  --light-ctp-mantle: #e6e9ef;
+  --light-ctp-crust: #dce0e8;
+}
+
+/* Ayu Light (ayu-colors v8). Ayu has no pink or lavender, so those are made
+   to suit; green, red and muted text are a little darker than Ayu's own, to
+   stay readable on its near-white background. */
+:root[data-light-theme="ayu-light"] {
+  --light-ctp-rosewater: #e59645;
+  --light-ctp-flamingo: #ed9366;
+  --light-ctp-pink: #e0679f;
+  --light-ctp-mauve: #a37acc;
+  --light-ctp-red: #cf4848;
+  --light-ctp-maroon: #f07171;
+  --light-ctp-peach: #fa8d3e;
+  --light-ctp-yellow: #f2ae49;
+  --light-ctp-green: #6b8f00;
+  --light-ctp-teal: #4cbf99;
+  --light-ctp-sky: #55b4d4;
+  --light-ctp-sapphire: #399ee6;
+  --light-ctp-blue: #478acc;
+  --light-ctp-lavender: #7f86e0;
+  --light-ctp-text: #5c6166;
+  --light-ctp-subtext1: #6c7075;
+  --light-ctp-subtext0: #6f7478;
+  --light-ctp-overlay2: #8c9093;
+  --light-ctp-overlay1: #9c9fa2;
+  --light-ctp-overlay0: #acaeb1;
+  --light-ctp-surface2: #bcbec0;
+  --light-ctp-surface1: #caccce;
+  --light-ctp-surface0: #dadbdc;
+  --light-ctp-base: #fcfcfc;
+  --light-ctp-mantle: #f3f3f4;
+  --light-ctp-crust: #eeeeee;
+}
+
+/* Gruvbox Light: Gruvbox (morhetz/gruvbox), faded accents */
+:root[data-light-theme="gruvbox-light"] {
+  --light-ctp-rosewater: #91220e;
+  --light-ctp-flamingo: #d65d0e;
+  --light-ctp-pink: #b16286;
+  --light-ctp-mauve: #8f3f71;
+  --light-ctp-red: #9d0006;
+  --light-ctp-maroon: #cc241d;
+  --light-ctp-peach: #af3a03;
+  --light-ctp-yellow: #b57614;
+  --light-ctp-green: #79740e;
+  --light-ctp-teal: #427b58;
+  --light-ctp-sky: #3c8aa8;
+  --light-ctp-sapphire: #458588;
+  --light-ctp-blue: #076678;
+  --light-ctp-lavender: #6c6fa8;
+  --light-ctp-text: #3c3836;
+  --light-ctp-subtext1: #504945;
+  --light-ctp-subtext0: #665c54;
+  --light-ctp-overlay2: #7c6f64;
+  --light-ctp-overlay1: #928374;
+  --light-ctp-overlay0: #a89984;
+  --light-ctp-surface2: #bdae93;
+  --light-ctp-surface1: #d5c4a1;
+  --light-ctp-surface0: #ebdbb2;
+  --light-ctp-base: #fbf1c7;
+  --light-ctp-mantle: #f2e5bc;
+  --light-ctp-crust: #eae0ba;
+}
+
+/* One Light: Atom One Light */
+:root[data-light-theme="one-light"] {
+  --light-ctp-rosewater: #a3582b;
+  --light-ctp-flamingo: #be5f25;
+  --light-ctp-pink: #ce38a4;
+  --light-ctp-mauve: #a626a4;
+  --light-ctp-red: #d24f43;
+  --light-ctp-maroon: #ca1243;
+  --light-ctp-peach: #986801;
+  --light-ctp-yellow: #c18401;
+  --light-ctp-green: #50a14f;
+  --light-ctp-teal: #289286;
+  --light-ctp-sky: #0184bc;
+  --light-ctp-sapphire: #207ed7;
+  --light-ctp-blue: #4078f2;
+  --light-ctp-lavender: #734fcb;
+  --light-ctp-text: #383a42;
+  --light-ctp-subtext1: #4b4d54;
+  --light-ctp-subtext0: #5f6067;
+  --light-ctp-overlay2: #727479;
+  --light-ctp-overlay1: #86878c;
+  --light-ctp-overlay0: #a0a1a7;
+  --light-ctp-surface2: #acadb0;
+  --light-ctp-surface1: #bebec1;
+  --light-ctp-surface0: #d1d2d3;
+  --light-ctp-base: #fafafa;
+  --light-ctp-mantle: #f0f0f1;
+  --light-ctp-crust: #e5e5e6;
+}
+
+/* Rosé Pine Dawn: Rosé Pine Dawn; it has no green, so gains use a derived one */
+:root[data-light-theme="rose-pine-dawn"] {
+  --light-ctp-rosewater: #d7827e;
+  --light-ctp-flamingo: #c66c5c;
+  --light-ctp-pink: #c267a6;
+  --light-ctp-mauve: #907aa9;
+  --light-ctp-red: #ad5f75;
+  --light-ctp-maroon: #c28091;
+  --light-ctp-peach: #d7743f;
+  --light-ctp-yellow: #ea9d34;
+  --light-ctp-green: #4f8a5a;
+  --light-ctp-teal: #3f8f80;
+  --light-ctp-sky: #56949f;
+  --light-ctp-sapphire: #3d7f8f;
+  --light-ctp-blue: #286983;
+  --light-ctp-lavender: #5c7296;
+  --light-ctp-text: #575279;
+  --light-ctp-subtext1: #676285;
+  --light-ctp-subtext0: #787290;
+  --light-ctp-overlay2: #797593;
+  --light-ctp-overlay1: #9893a7;
+  --light-ctp-overlay0: #9893a5;
+  --light-ctp-surface2: #cecacd;
+  --light-ctp-surface1: #dfdad9;
+  --light-ctp-surface0: #f2e9e1;
+  --light-ctp-base: #faf4ed;
+  --light-ctp-mantle: #f2e9e1;
+  --light-ctp-crust: #ebe5e3;
+}
+
+/* Solarized Light: Solarized (Ethan Schoonover) */
+:root[data-light-theme="solarized-light"] {
+  --light-ctp-rosewater: #bb4833;
+  --light-ctp-flamingo: #d43e22;
+  --light-ctp-pink: #d33682;
+  --light-ctp-mauve: #6c71c4;
+  --light-ctp-red: #dc322f;
+  --light-ctp-maroon: #e35953;
+  --light-ctp-peach: #cb4b16;
+  --light-ctp-yellow: #b58900;
+  --light-ctp-green: #829600;
+  --light-ctp-teal: #2aa198;
+  --light-ctp-sky: #2aa1c8;
+  --light-ctp-sapphire: #2896cd;
+  --light-ctp-blue: #268bd2;
+  --light-ctp-lavender: #497ecb;
+  --light-ctp-text: #586e75;
+  --light-ctp-subtext1: #687c80;
+  --light-ctp-subtext0: #657b83;
+  --light-ctp-overlay2: #8a9796;
+  --light-ctp-overlay1: #839496;
+  --light-ctp-overlay0: #93a1a1;
+  --light-ctp-surface2: #bbc0b7;
+  --light-ctp-surface1: #caccc1;
+  --light-ctp-surface0: #dad9cc;
+  --light-ctp-base: #fdf6e3;
+  --light-ctp-mantle: #eee8d5;
+  --light-ctp-crust: #eeead9;
+}
+
+/* Tokyo Night Day: Tokyo Night Day (folke/tokyonight.nvim) */
+:root[data-light-theme="tokyo-night-day"] {
+  --light-ctp-rosewater: #b4494e;
+  --light-ctp-flamingo: #d34332;
+  --light-ctp-pink: #c652ce;
+  --light-ctp-mauve: #9854f1;
+  --light-ctp-red: #ce2355;
+  --light-ctp-maroon: #c64343;
+  --light-ctp-peach: #b15c00;
+  --light-ctp-yellow: #8c6c3e;
+  --light-ctp-green: #587539;
+  --light-ctp-teal: #118c74;
+  --light-ctp-sky: #007197;
+  --light-ctp-sapphire: #188092;
+  --light-ctp-blue: #2e7de9;
+  --light-ctp-lavender: #7847bd;
+  --light-ctp-text: #3760bf;
+  --light-ctp-subtext1: #486dc3;
+  --light-ctp-subtext0: #4369c2;
+  --light-ctp-overlay2: #6a87cb;
+  --light-ctp-overlay1: #7b94cf;
+  --light-ctp-overlay0: #848cb5;
+  --light-ctp-surface2: #9daed7;
+  --light-ctp-surface1: #acbadb;
+  --light-ctp-surface0: #bdc7df;
+  --light-ctp-base: #e1e2e7;
+  --light-ctp-mantle: #d0d5e3;
+  --light-ctp-crust: #c4c8da;
+}
+
+/* ---------- Dark ---------- */
+
+/* Catppuccin Mocha (official palette) — the default dark theme */
+:root,
+:root[data-dark-theme="mocha"] {
+  --dark-ctp-rosewater: #f5e0dc;
+  --dark-ctp-flamingo: #f2cdcd;
+  --dark-ctp-pink: #f5c2e7;
+  --dark-ctp-mauve: #cba6f7;
+  --dark-ctp-red: #f38ba8;
+  --dark-ctp-maroon: #eba0ac;
+  --dark-ctp-peach: #fab387;
+  --dark-ctp-yellow: #f9e2af;
+  --dark-ctp-green: #a6e3a1;
+  --dark-ctp-teal: #94e2d5;
+  --dark-ctp-sky: #89dceb;
+  --dark-ctp-sapphire: #74c7ec;
+  --dark-ctp-blue: #89b4fa;
+  --dark-ctp-lavender: #b4befe;
+  --dark-ctp-text: #cdd6f4;
+  --dark-ctp-subtext1: #bac2de;
+  --dark-ctp-subtext0: #a6adc8;
+  --dark-ctp-overlay2: #9399b2;
+  --dark-ctp-overlay1: #7f849c;
+  --dark-ctp-overlay0: #6c7086;
+  --dark-ctp-surface2: #585b70;
+  --dark-ctp-surface1: #45475a;
+  --dark-ctp-surface0: #313244;
+  --dark-ctp-base: #1e1e2e;
+  --dark-ctp-mantle: #181825;
+  --dark-ctp-crust: #11111b;
+}
+
+/* Catppuccin Macchiato (official palette) */
+:root[data-dark-theme="macchiato"] {
+  --dark-ctp-rosewater: #f4dbd6;
+  --dark-ctp-flamingo: #f0c6c6;
+  --dark-ctp-pink: #f5bde6;
+  --dark-ctp-mauve: #c6a0f6;
+  --dark-ctp-red: #ed8796;
+  --dark-ctp-maroon: #ee99a0;
+  --dark-ctp-peach: #f5a97f;
+  --dark-ctp-yellow: #eed49f;
+  --dark-ctp-green: #a6da95;
+  --dark-ctp-teal: #8bd5ca;
+  --dark-ctp-sky: #91d7e3;
+  --dark-ctp-sapphire: #7dc4e4;
+  --dark-ctp-blue: #8aadf4;
+  --dark-ctp-lavender: #b7bdf8;
+  --dark-ctp-text: #cad3f5;
+  --dark-ctp-subtext1: #b8c0e0;
+  --dark-ctp-subtext0: #a5adcb;
+  --dark-ctp-overlay2: #939ab7;
+  --dark-ctp-overlay1: #8087a2;
+  --dark-ctp-overlay0: #6e738d;
+  --dark-ctp-surface2: #5b6078;
+  --dark-ctp-surface1: #494d64;
+  --dark-ctp-surface0: #363a4f;
+  --dark-ctp-base: #24273a;
+  --dark-ctp-mantle: #1e2030;
+  --dark-ctp-crust: #181926;
+}
+
+/* Catppuccin Frappé (official palette) */
+:root[data-dark-theme="frappe"] {
+  --dark-ctp-rosewater: #f2d5cf;
+  --dark-ctp-flamingo: #eebebe;
+  --dark-ctp-pink: #f4b8e4;
+  --dark-ctp-mauve: #ca9ee6;
+  --dark-ctp-red: #e78284;
+  --dark-ctp-maroon: #ea999c;
+  --dark-ctp-peach: #ef9f76;
+  --dark-ctp-yellow: #e5c890;
+  --dark-ctp-green: #a6d189;
+  --dark-ctp-teal: #81c8be;
+  --dark-ctp-sky: #99d1db;
+  --dark-ctp-sapphire: #85c1dc;
+  --dark-ctp-blue: #8caaee;
+  --dark-ctp-lavender: #babbf1;
+  --dark-ctp-text: #c6d0f5;
+  --dark-ctp-subtext1: #b5bfe2;
+  --dark-ctp-subtext0: #a5adce;
+  --dark-ctp-overlay2: #949cbb;
+  --dark-ctp-overlay1: #838ba7;
+  --dark-ctp-overlay0: #737994;
+  --dark-ctp-surface2: #626880;
+  --dark-ctp-surface1: #51576d;
+  --dark-ctp-surface0: #414559;
+  --dark-ctp-base: #303446;
+  --dark-ctp-mantle: #292c3c;
+  --dark-ctp-crust: #232634;
+}
+
+/* Ayu Mirage (ayu-colors v8): pink and lavender made to suit, greys blended */
+:root[data-dark-theme="ayu-mirage"] {
+  --dark-ctp-rosewater: #ffdfb3;
+  --dark-ctp-flamingo: #f29e74;
+  --dark-ctp-pink: #f5a3c7;
+  --dark-ctp-mauve: #dfbfff;
+  --dark-ctp-red: #ff6666;
+  --dark-ctp-maroon: #f28779;
+  --dark-ctp-peach: #ffad66;
+  --dark-ctp-yellow: #ffd173;
+  --dark-ctp-green: #87d96c;
+  --dark-ctp-teal: #95e6cb;
+  --dark-ctp-sky: #5ccfe6;
+  --dark-ctp-sapphire: #73d0ff;
+  --dark-ctp-blue: #80bfff;
+  --dark-ctp-lavender: #b8b5ff;
+  --dark-ctp-text: #cccac2;
+  --dark-ctp-subtext1: #bab8b3;
+  --dark-ctp-subtext0: #a7a7a3;
+  --dark-ctp-overlay2: #959594;
+  --dark-ctp-overlay1: #828384;
+  --dark-ctp-overlay0: #707175;
+  --dark-ctp-surface2: #5b5e64;
+  --dark-ctp-surface1: #494c55;
+  --dark-ctp-surface0: #353944;
+  --dark-ctp-base: #242936;
+  --dark-ctp-mantle: #1d212b;
+  --dark-ctp-crust: #15181f;
+}
+
+/* Ayu Dark (ayu-colors v8): pink and lavender made to suit, greys blended */
+:root[data-dark-theme="ayu-dark"] {
+  --dark-ctp-rosewater: #e6c08a;
+  --dark-ctp-flamingo: #f29668;
+  --dark-ctp-pink: #f39ac2;
+  --dark-ctp-mauve: #d2a6ff;
+  --dark-ctp-red: #d95757;
+  --dark-ctp-maroon: #f07178;
+  --dark-ctp-peach: #ff8f40;
+  --dark-ctp-yellow: #ffb454;
+  --dark-ctp-green: #7fd962;
+  --dark-ctp-teal: #95e6cb;
+  --dark-ctp-sky: #39bae6;
+  --dark-ctp-sapphire: #59c2ff;
+  --dark-ctp-blue: #73b8ff;
+  --dark-ctp-lavender: #aaa6ff;
+  --dark-ctp-text: #bfbdb6;
+  --dark-ctp-subtext1: #abaaa5;
+  --dark-ctp-subtext0: #989793;
+  --dark-ctp-overlay2: #848482;
+  --dark-ctp-overlay1: #717170;
+  --dark-ctp-overlay0: #5d5e5f;
+  --dark-ctp-surface2: #48494b;
+  --dark-ctp-surface1: #34363a;
+  --dark-ctp-surface0: #1f2127;
+  --dark-ctp-base: #0d1017;
+  --dark-ctp-mantle: #0a0d12;
+  --dark-ctp-crust: #08090d;
+}
+
+/* Dracula (draculatheme.com/spec): its colours and ANSI brights, greys blended */
+:root[data-dark-theme="dracula"] {
+  --dark-ctp-rosewater: #ffd5e6;
+  --dark-ctp-flamingo: #ff92df;
+  --dark-ctp-pink: #ff79c6;
+  --dark-ctp-mauve: #bd93f9;
+  --dark-ctp-red: #ff5555;
+  --dark-ctp-maroon: #ff6e6e;
+  --dark-ctp-peach: #ffb86c;
+  --dark-ctp-yellow: #f1fa8c;
+  --dark-ctp-green: #50fa7b;
+  --dark-ctp-teal: #6df1bc;
+  --dark-ctp-sky: #8be9fd;
+  --dark-ctp-sapphire: #6fc8f2;
+  --dark-ctp-blue: #82a0f7;
+  --dark-ctp-lavender: #d6acff;
+  --dark-ctp-text: #f8f8f2;
+  --dark-ctp-subtext1: #e1e1dd;
+  --dark-ctp-subtext0: #cacbc9;
+  --dark-ctp-overlay2: #b3b4b4;
+  --dark-ctp-overlay1: #9c9d9f;
+  --dark-ctp-overlay0: #86878b;
+  --dark-ctp-surface2: #6d6e74;
+  --dark-ctp-surface1: #44475a;
+  --dark-ctp-surface0: #3d3f49;
+  --dark-ctp-base: #282a36;
+  --dark-ctp-mantle: #20222b;
+  --dark-ctp-crust: #17181f;
+}
+
+/* Gruvbox Dark: Gruvbox (morhetz/gruvbox) */
+:root[data-dark-theme="gruvbox-dark"] {
+  --dark-ctp-rosewater: #f4a06c;
+  --dark-ctp-flamingo: #fc6426;
+  --dark-ctp-pink: #e8a0c0;
+  --dark-ctp-mauve: #d3869b;
+  --dark-ctp-red: #fb4934;
+  --dark-ctp-maroon: #f76e54;
+  --dark-ctp-peach: #fe8019;
+  --dark-ctp-yellow: #fabd2f;
+  --dark-ctp-green: #b8bb26;
+  --dark-ctp-teal: #8ec07c;
+  --dark-ctp-sky: #8fbfc9;
+  --dark-ctp-sapphire: #7fa8b8;
+  --dark-ctp-blue: #83a598;
+  --dark-ctp-lavender: #a9a3d6;
+  --dark-ctp-text: #ebdbb2;
+  --dark-ctp-subtext1: #d5c4a1;
+  --dark-ctp-subtext0: #bdae93;
+  --dark-ctp-overlay2: #a89984;
+  --dark-ctp-overlay1: #928374;
+  --dark-ctp-overlay0: #7c6f64;
+  --dark-ctp-surface2: #665c54;
+  --dark-ctp-surface1: #504945;
+  --dark-ctp-surface0: #3c3836;
+  --dark-ctp-base: #282828;
+  --dark-ctp-mantle: #1d2021;
+  --dark-ctp-crust: #171717;
+}
+
+/* Nord: Nord (nordtheme.com) */
+:root[data-dark-theme="nord"] {
+  --dark-ctp-rosewater: #d6aeae;
+  --dark-ctp-flamingo: #c8746d;
+  --dark-ctp-pink: #d672a8;
+  --dark-ctp-mauve: #b48ead;
+  --dark-ctp-red: #cb7d85;
+  --dark-ctp-maroon: #c8838c;
+  --dark-ctp-peach: #d08770;
+  --dark-ctp-yellow: #ebcb8b;
+  --dark-ctp-green: #a3be8c;
+  --dark-ctp-teal: #8fbcbb;
+  --dark-ctp-sky: #88c0d0;
+  --dark-ctp-sapphire: #81a1c1;
+  --dark-ctp-blue: #5e81ac;
+  --dark-ctp-lavender: #8988ac;
+  --dark-ctp-text: #e5e9f0;
+  --dark-ctp-subtext1: #d8dee9;
+  --dark-ctp-subtext0: #bdc1c9;
+  --dark-ctp-overlay2: #a9adb6;
+  --dark-ctp-overlay1: #9499a3;
+  --dark-ctp-overlay0: #80858f;
+  --dark-ctp-surface2: #4c566a;
+  --dark-ctp-surface1: #434c5e;
+  --dark-ctp-surface0: #3b4252;
+  --dark-ctp-base: #2e3440;
+  --dark-ctp-mantle: #252a33;
+  --dark-ctp-crust: #1b1e25;
+}
+
+/* One Dark: Atom One Dark */
+:root[data-dark-theme="one-dark"] {
+  --dark-ctp-rosewater: #c29a96;
+  --dark-ctp-flamingo: #d8836e;
+  --dark-ctp-pink: #e066c3;
+  --dark-ctp-mauve: #c678dd;
+  --dark-ctp-red: #e06c75;
+  --dark-ctp-maroon: #be5046;
+  --dark-ctp-peach: #d19a66;
+  --dark-ctp-yellow: #e5c07b;
+  --dark-ctp-green: #98c379;
+  --dark-ctp-teal: #77bc9e;
+  --dark-ctp-sky: #56b6c2;
+  --dark-ctp-sapphire: #5cb2d8;
+  --dark-ctp-blue: #61afef;
+  --dark-ctp-lavender: #9494e6;
+  --dark-ctp-text: #abb2bf;
+  --dark-ctp-subtext1: #9da3b0;
+  --dark-ctp-subtext0: #8e95a0;
+  --dark-ctp-overlay2: #808691;
+  --dark-ctp-overlay1: #717782;
+  --dark-ctp-overlay0: #5c6370;
+  --dark-ctp-surface2: #4b5263;
+  --dark-ctp-surface1: #3e4451;
+  --dark-ctp-surface0: #353942;
+  --dark-ctp-base: #282c34;
+  --dark-ctp-mantle: #21252b;
+  --dark-ctp-crust: #171a1e;
+}
+
+/* Rosé Pine: Rosé Pine (rosepinetheme.com); it has no green, so gains use a derived one */
+:root[data-dark-theme="rose-pine"] {
+  --dark-ctp-rosewater: #ebbcba;
+  --dark-ctp-flamingo: #ee8887;
+  --dark-ctp-pink: #df7fc8;
+  --dark-ctp-mauve: #c4a7e7;
+  --dark-ctp-red: #eb6f92;
+  --dark-ctp-maroon: #e88baa;
+  --dark-ctp-peach: #f2a07c;
+  --dark-ctp-yellow: #f6c177;
+  --dark-ctp-green: #9ccf9f;
+  --dark-ctp-teal: #8fd1c0;
+  --dark-ctp-sky: #9ccfd8;
+  --dark-ctp-sapphire: #5c9ab5;
+  --dark-ctp-blue: #7aa2d8;
+  --dark-ctp-lavender: #9fa4e0;
+  --dark-ctp-text: #e0def4;
+  --dark-ctp-subtext1: #cac8dd;
+  --dark-ctp-subtext0: #b4b2c6;
+  --dark-ctp-overlay2: #908caa;
+  --dark-ctp-overlay1: #888698;
+  --dark-ctp-overlay0: #6e6a86;
+  --dark-ctp-surface2: #524f67;
+  --dark-ctp-surface1: #403d52;
+  --dark-ctp-surface0: #26233a;
+  --dark-ctp-base: #191724;
+  --dark-ctp-mantle: #12101b;
+  --dark-ctp-crust: #0e0d15;
+}
+
+/* Solarized Dark: Solarized (Ethan Schoonover) */
+:root[data-dark-theme="solarized-dark"] {
+  --dark-ctp-rosewater: #b47062;
+  --dark-ctp-flamingo: #d43e22;
+  --dark-ctp-pink: #d33682;
+  --dark-ctp-mauve: #6c71c4;
+  --dark-ctp-red: #e25754;
+  --dark-ctp-maroon: #ca4e4c;
+  --dark-ctp-peach: #cb4b16;
+  --dark-ctp-yellow: #b58900;
+  --dark-ctp-green: #859900;
+  --dark-ctp-teal: #2aa198;
+  --dark-ctp-sky: #2aa1c8;
+  --dark-ctp-sapphire: #2896cd;
+  --dark-ctp-blue: #268bd2;
+  --dark-ctp-lavender: #497ecb;
+  --dark-ctp-text: #93a1a1;
+  --dark-ctp-subtext1: #839495;
+  --dark-ctp-subtext0: #839496;
+  --dark-ctp-overlay2: #627a7e;
+  --dark-ctp-overlay1: #657b83;
+  --dark-ctp-overlay0: #586e75;
+  --dark-ctp-surface2: #315259;
+  --dark-ctp-surface1: #20454e;
+  --dark-ctp-surface0: #073642;
+  --dark-ctp-base: #002b36;
+  --dark-ctp-mantle: #00222b;
+  --dark-ctp-crust: #00191f;
+}
+
+/* Tokyo Night: Tokyo Night (folke/tokyonight.nvim) */
+:root[data-dark-theme="tokyo-night"] {
+  --dark-ctp-rosewater: #deaab7;
+  --dark-ctp-flamingo: #fb8a79;
+  --dark-ctp-pink: #da78d1;
+  --dark-ctp-mauve: #bb9af7;
+  --dark-ctp-red: #f7768e;
+  --dark-ctp-maroon: #db4b4b;
+  --dark-ctp-peach: #ff9e64;
+  --dark-ctp-yellow: #e0af68;
+  --dark-ctp-green: #9ece6a;
+  --dark-ctp-teal: #73daca;
+  --dark-ctp-sky: #7dcfff;
+  --dark-ctp-sapphire: #2ac3de;
+  --dark-ctp-blue: #7aa2f7;
+  --dark-ctp-lavender: #9d7cd8;
+  --dark-ctp-text: #c0caf5;
+  --dark-ctp-subtext1: #aeb7de;
+  --dark-ctp-subtext0: #a9b1d6;
+  --dark-ctp-overlay2: #737aa2;
+  --dark-ctp-overlay1: #565f89;
+  --dark-ctp-overlay0: #545c7e;
+  --dark-ctp-surface2: #414868;
+  --dark-ctp-surface1: #3b4261;
+  --dark-ctp-surface0: #292e42;
+  --dark-ctp-base: #1a1b26;
+  --dark-ctp-mantle: #16161e;
+  --dark-ctp-crust: #0f1016;
+}
