@@ -64,6 +64,13 @@
       "when": 1794254939384,
       "tag": "0008_purchase_wishlist",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794297403071,
+      "tag": "0009_user_theme",
+      "breakpoints": true
     }
   ]
 }

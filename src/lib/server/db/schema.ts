@@ -11,7 +11,12 @@ import {
   primaryKey,
   boolean,
 } from "drizzle-orm/pg-core";
-import { CURRENCY_MODES } from "../../preferences";
+import {
+  APPEARANCES,
+  CURRENCY_MODES,
+  DARK_THEMES,
+  LIGHT_THEMES,
+} from "../../preferences";
 import { user } from "./auth.schema";
 
 export const task = pgTable("task", {
@@ -131,6 +136,18 @@ export const userPreference = pgTable("user_preference", {
   currencyMode: text("currency_mode", { enum: CURRENCY_MODES })
     .notNull()
     .default("pence"),
+  /** See `APPEARANCES` in `#lib/preferences`. */
+  appearance: text("appearance", { enum: APPEARANCES })
+    .notNull()
+    .default("system"),
+  /** The theme for light appearance; see `LIGHT_THEMES`. */
+  lightTheme: text("light_theme", { enum: LIGHT_THEMES })
+    .notNull()
+    .default("latte"),
+  /** The theme for dark appearance; see `DARK_THEMES`. */
+  darkTheme: text("dark_theme", { enum: DARK_THEMES })
+    .notNull()
+    .default("mocha"),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
