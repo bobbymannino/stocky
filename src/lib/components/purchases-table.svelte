@@ -355,21 +355,16 @@
     <div
       role="table"
       aria-label={wishlist ? "Your wishlist trades" : "Your purchases"}
-      class="grid grid-cols-[repeat(10,auto)] gap-y-2 text-sm whitespace-nowrap"
+      class="grid grid-cols-[repeat(9,auto)] gap-y-2 text-sm whitespace-nowrap"
     >
       <div role="rowgroup" class="contents">
         <div
           role="row"
           class="col-span-full grid grid-cols-subgrid border-l-4 border-transparent px-4 pb-1 text-left font-medium text-muted-foreground *:pr-4 *:last:pr-0"
         >
+          <span role="columnheader" title="Stock ticker symbol">Ticker</span>
           <span role="columnheader" title="Date the shares were bought"
             >Bought</span
-          >
-          <span role="columnheader" title="Stock ticker symbol">Ticker</span>
-          <span
-            role="columnheader"
-            class="text-right"
-            title="Price per share when bought">Price</span
           >
           <span
             role="columnheader"
@@ -379,17 +374,12 @@
           <span
             role="columnheader"
             class="text-right"
+            title="Price per share when bought">Price</span
+          >
+          <span
+            role="columnheader"
+            class="text-right"
             title="Number of shares bought">Shares</span
-          >
-          <span
-            role="columnheader"
-            class="text-right"
-            title="Price × shares, before tax">Total</span
-          >
-          <span
-            role="columnheader"
-            class="text-right"
-            title="0.5% tax on the total">Tax (0.5%)</span
           >
           <span
             role="columnheader"
@@ -399,13 +389,13 @@
           <span
             role="columnheader"
             class="text-right"
-            title="Latest price × shares">Current value</span
+            title="Current value minus total cost including tax"
+            >Gain / loss</span
           >
           <span
             role="columnheader"
             class="text-right"
-            title="Current value minus total cost including tax"
-            >Gain / loss</span
+            title="Latest price × shares">Current value</span
           >
           <span role="columnheader" title="Actions"
             ><span class="sr-only">Actions</span></span
@@ -427,26 +417,20 @@
             )}
             style:border-left-color={companyColorVar(colors[p.ticker])}
           >
-            <span role="cell" class="tabular-nums">{p.boughtOn}</span>
             <span role="cell" class="font-mono">
               {@render ticker(p.ticker)}
             </span>
+            <span role="cell" class="tabular-nums">{p.boughtOn}</span>
+            <span role="cell" class="text-right">{@render priceText(p)}</span>
             <span role="cell" class="text-right tabular-nums">
               {money.format(p.price)}
             </span>
-            <span role="cell" class="text-right">{@render priceText(p)}</span>
             <span role="cell" class="text-right tabular-nums">{p.shares}</span>
-            <span
-              role="cell"
-              class="text-right text-muted-foreground tabular-nums"
-            >
-              {money.format(p.total)}
-            </span>
             <span role="cell" class="text-right font-medium tabular-nums">
               {money.format(p.totalIncTax)}
             </span>
-            <span role="cell" class="text-right">{@render valueText(p)}</span>
             <span role="cell" class="text-right">{@render diffText(p)}</span>
+            <span role="cell" class="text-right">{@render valueText(p)}</span>
             <span role="cell" class="text-right">{@render actions(p)}</span>
           </div>
         {/each}
