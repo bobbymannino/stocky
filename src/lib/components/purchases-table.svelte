@@ -52,7 +52,8 @@
   let noun = $derived(wishlist ? "wishlist trade" : "purchase");
 
   // with a mouse, row actions move into a right-click menu instead of a column
-  const hasMouse = new MediaQuery("(hover: hover) and (pointer: fine)");
+  // `any-` so a touchscreen laptop with a mouse/trackpad still counts
+  const hasMouse = new MediaQuery("(any-hover: hover) and (any-pointer: fine)");
 
   const money = useMoney();
 
