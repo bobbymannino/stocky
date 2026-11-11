@@ -172,6 +172,19 @@
   </span>
 {/snippet}
 
+{#snippet priceText(row: Row)}
+  {@const price = prices.get(row.ticker)}
+  <span
+    class={cn(
+      "tabular-nums",
+      price !== undefined && price > row.price && "text-ctp-green",
+      price !== undefined && price < row.price && "text-ctp-red",
+    )}
+  >
+    <NumberRoll value={price === undefined ? "—" : money.format(price)} />
+  </span>
+{/snippet}
+
 {#snippet diffText(row: Row)}
   {@const value = currentValue(row)}
   {@const diff = value === undefined ? undefined : value - row.totalIncTax}
@@ -361,6 +374,11 @@
           <span
             role="columnheader"
             class="text-right"
+            title="Latest price per share">Current price</span
+          >
+          <span
+            role="columnheader"
+            class="text-right"
             title="Number of shares bought">Shares</span
           >
           <span
@@ -416,18 +434,13 @@
             <span role="cell" class="text-right tabular-nums">
               {money.format(p.price)}
             </span>
+            <span role="cell" class="text-right">{@render priceText(p)}</span>
             <span role="cell" class="text-right tabular-nums">{p.shares}</span>
             <span
               role="cell"
               class="text-right text-muted-foreground tabular-nums"
             >
               {money.format(p.total)}
-            </span>
-            <span
-              role="cell"
-              class="text-right text-muted-foreground tabular-nums"
-            >
-              {money.format(p.tax)}
             </span>
             <span role="cell" class="text-right font-medium tabular-nums">
               {money.format(p.totalIncTax)}
