@@ -51,9 +51,16 @@
 
   let noun = $derived(wishlist ? "wishlist trade" : "purchase");
 
-  // with a mouse, row actions move into a right-click menu instead of a column
-  // `any-` so a touchscreen laptop with a mouse/trackpad still counts
+  // with a mouse, rows get a right-click menu; `any-` so a touchscreen laptop
+  // with a mouse/trackpad still counts
   const hasMouse = new MediaQuery("(any-hover: hover) and (any-pointer: fine)");
+  // anything with a touchscreen keeps the action buttons, as touch has no right-click
+  const hasTouch = new MediaQuery("(any-pointer: coarse)");
+  let showActions = $derived(!hasMouse.current || hasTouch.current);
+
+  // a device can have both, so the menu only answers the mouse: a touch or pen
+  // long-press is left to the browser instead of opening it
+  let lastPointer = $state("mouse");
 
   const money = useMoney();
 
@@ -402,9 +409,9 @@
       aria-label={wishlist ? "Your wishlist trades" : "Your purchases"}
       class={cn(
         "grid gap-y-2 text-sm whitespace-nowrap",
-        hasMouse.current
-          ? "grid-cols-[repeat(8,auto)]"
-          : "grid-cols-[repeat(9,auto)]",
+        showActions
+          ? "grid-cols-[repeat(9,auto)]"
+          : "grid-cols-[repeat(8,auto)]",
       )}
     >
       <div role="rowgroup" class="contents">
@@ -447,7 +454,7 @@
             class="text-right"
             title="Latest price × shares">Current value</span
           >
-          {#if !hasMouse.current}
+          {#if showActions}
             <span role="columnheader" title="Actions"
               ><span class="sr-only">Actions</span></span
             >
@@ -468,11 +475,12 @@
               rowTint(p),
             )}
             style:border-left-color={companyColorVar(colors[p.ticker])}
+            onpointerdowncapture={(e) => (lastPointer = e.pointerType)}
           >
             <!-- the row is a nested subgrid so the whole card is right-clickable -->
             <ContextMenu.Root>
               <ContextMenu.Trigger
-                disabled={!hasMouse.current}
+                disabled={!hasMouse.current || lastPointer !== "mouse"}
                 role="row"
                 class="col-span-full grid grid-cols-subgrid items-center py-2 pr-2 pl-4 select-auto *:pr-4 *:last:pr-0"
               >
@@ -497,7 +505,7 @@
                 <span role="cell" class="text-right"
                   >{@render valueText(p)}</span
                 >
-                {#if !hasMouse.current}
+                {#if showActions}
                   <span role="cell" class="text-right"
                     >{@render actions(p)}</span
                   >
