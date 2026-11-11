@@ -4,12 +4,14 @@
   import RefreshCwIcon from "@lucide/svelte/icons/refresh-cw";
   import TrashIcon from "@lucide/svelte/icons/trash";
   import { flip } from "svelte/animate";
+  import { MediaQuery } from "svelte/reactivity";
   import { fade } from "svelte/transition";
   import { companyColorVar, type CompanyColors } from "#lib/company-colors.js";
   import CompanySwatch from "#lib/components/company-swatch.svelte";
   import NumberRoll from "#lib/components/number-roll.svelte";
   import * as AlertDialog from "#lib/components/ui/alert-dialog/index.js";
   import { Button } from "#lib/components/ui/button/index.js";
+  import * as ContextMenu from "#lib/components/ui/context-menu/index.js";
   import * as Select from "#lib/components/ui/select/index.js";
   import type { CurrentPrices } from "#lib/current-prices.svelte.js";
   import { MARKETS_CLOSED_MESSAGE } from "#lib/market-hours.js";
@@ -19,7 +21,7 @@
   import { purchaseCosts, type Purchase } from "#lib/purchases.js";
   import { deletePurchase } from "#lib/remote/purchases.remote.js";
   import { cn, formatPercent } from "#lib/utils.js";
-  import { refreshAll } from "$app/navigation";
+  import { goto, refreshAll } from "$app/navigation";
   import { page } from "$app/state";
 
   let {
@@ -48,6 +50,9 @@
   } = $props();
 
   let noun = $derived(wishlist ? "wishlist trade" : "purchase");
+
+  // with a mouse, row actions move into a right-click menu instead of a column
+  const hasMouse = new MediaQuery("(hover: hover) and (pointer: fine)");
 
   const money = useMoney();
 
@@ -118,6 +123,11 @@
   let dialogOpen = $state(false);
   let deleting = $state(false);
   let deleteError = $state<string>();
+
+  // `from` brings you back to this page after saving or cancelling
+  function editHref(row: Row) {
+    return `/purchases/${row.id}/edit?from=${encodeURIComponent(page.url.pathname)}`;
+  }
 
   function askToDelete(row: Row) {
     pendingDelete = row;
@@ -206,6 +216,43 @@
   </span>
 {/snippet}
 
+{#snippet rowMenu(row: Row)}
+  {@const cooldown =
+    now.current === undefined ? 0 : prices.cooldown(row.ticker, now.current)}
+  {@const marketsClosed =
+    now.current !== undefined && prices.isClosed(row.ticker, now.current)}
+  {@const fetching = prices.isFetching(row.ticker)}
+  <ContextMenu.Content class="w-48">
+    <ContextMenu.Item
+      disabled={fetching || cooldown > 0 || marketsClosed}
+      onSelect={() => refreshPrice(row.ticker)}
+    >
+      {#if fetching}
+        <LoaderCircleIcon class="animate-spin" />
+        Getting {row.ticker} price…
+      {:else if marketsClosed}
+        <RefreshCwIcon />
+        Markets closed
+      {:else if cooldown > 0}
+        <RefreshCwIcon />
+        Check again in {Math.ceil(cooldown / 1000)}s
+      {:else}
+        <RefreshCwIcon />
+        Refresh {row.ticker} price
+      {/if}
+    </ContextMenu.Item>
+    <ContextMenu.Item onSelect={() => goto(editHref(row))}>
+      <PencilIcon />
+      Edit {noun}
+    </ContextMenu.Item>
+    <ContextMenu.Separator />
+    <ContextMenu.Item variant="destructive" onSelect={() => askToDelete(row)}>
+      <TrashIcon />
+      Delete {noun}
+    </ContextMenu.Item>
+  </ContextMenu.Content>
+{/snippet}
+
 {#snippet actions(row: Row)}
   {@const cooldown =
     now.current === undefined ? 0 : prices.cooldown(row.ticker, now.current)}
@@ -239,11 +286,8 @@
         <RefreshCwIcon />
       {/if}
     </Button>
-    <!-- `from` brings you back to this page after saving or cancelling -->
     <Button
-      href="/purchases/{row.id}/edit?from={encodeURIComponent(
-        page.url.pathname,
-      )}"
+      href={editHref(row)}
       variant="outline"
       size="icon-sm"
       aria-label="Edit {row.ticker} {noun} from {row.boughtOn}"
@@ -355,7 +399,12 @@
     <div
       role="table"
       aria-label={wishlist ? "Your wishlist trades" : "Your purchases"}
-      class="grid grid-cols-[repeat(9,auto)] gap-y-2 text-sm whitespace-nowrap"
+      class={cn(
+        "grid gap-y-2 text-sm whitespace-nowrap",
+        hasMouse.current
+          ? "grid-cols-[repeat(8,auto)]"
+          : "grid-cols-[repeat(9,auto)]",
+      )}
     >
       <div role="rowgroup" class="contents">
         <div
@@ -397,9 +446,11 @@
             class="text-right"
             title="Latest price × shares">Current value</span
           >
-          <span role="columnheader" title="Actions"
-            ><span class="sr-only">Actions</span></span
-          >
+          {#if !hasMouse.current}
+            <span role="columnheader" title="Actions"
+              ><span class="sr-only">Actions</span></span
+            >
+          {/if}
         </div>
       </div>
       <div role="rowgroup" class="contents">
@@ -409,29 +460,50 @@
           <div
             in:rise|global={{ delay: stagger(i, delay) }}
             animate:flip={flipParams()}
-            role="row"
+            role="none"
             class={cn(
-              "col-span-full grid grid-cols-subgrid items-center py-2 pr-2 pl-4 *:pr-4 *:last:pr-0",
+              "col-span-full grid grid-cols-subgrid",
               rowCard,
               rowTint(p),
             )}
             style:border-left-color={companyColorVar(colors[p.ticker])}
           >
-            <span role="cell" class="font-mono">
-              {@render ticker(p.ticker)}
-            </span>
-            <span role="cell" class="tabular-nums">{p.boughtOn}</span>
-            <span role="cell" class="text-right">{@render priceText(p)}</span>
-            <span role="cell" class="text-right tabular-nums">
-              {money.format(p.price)}
-            </span>
-            <span role="cell" class="text-right tabular-nums">{p.shares}</span>
-            <span role="cell" class="text-right font-medium tabular-nums">
-              {money.format(p.totalIncTax)}
-            </span>
-            <span role="cell" class="text-right">{@render diffText(p)}</span>
-            <span role="cell" class="text-right">{@render valueText(p)}</span>
-            <span role="cell" class="text-right">{@render actions(p)}</span>
+            <!-- the row is a nested subgrid so the whole card is right-clickable -->
+            <ContextMenu.Root>
+              <ContextMenu.Trigger
+                disabled={!hasMouse.current}
+                role="row"
+                class="col-span-full grid grid-cols-subgrid items-center py-2 pr-2 pl-4 select-auto *:pr-4 *:last:pr-0"
+              >
+                <span role="cell" class="font-mono">
+                  {@render ticker(p.ticker)}
+                </span>
+                <span role="cell" class="tabular-nums">{p.boughtOn}</span>
+                <span role="cell" class="text-right"
+                  >{@render priceText(p)}</span
+                >
+                <span role="cell" class="text-right tabular-nums">
+                  {money.format(p.price)}
+                </span>
+                <span role="cell" class="text-right tabular-nums"
+                  >{p.shares}</span
+                >
+                <span role="cell" class="text-right font-medium tabular-nums">
+                  {money.format(p.totalIncTax)}
+                </span>
+                <span role="cell" class="text-right">{@render diffText(p)}</span
+                >
+                <span role="cell" class="text-right"
+                  >{@render valueText(p)}</span
+                >
+                {#if !hasMouse.current}
+                  <span role="cell" class="text-right"
+                    >{@render actions(p)}</span
+                  >
+                {/if}
+              </ContextMenu.Trigger>
+              {@render rowMenu(p)}
+            </ContextMenu.Root>
           </div>
         {/each}
       </div>
