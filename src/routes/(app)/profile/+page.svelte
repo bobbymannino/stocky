@@ -4,12 +4,14 @@
   import LogOutIcon from "@lucide/svelte/icons/log-out";
   import { onMount } from "svelte";
   import { APP_VERSION, BUILT_AT, REPO_URL } from "#lib/app-info.js";
+  import NumberRoll from "#lib/components/number-roll.svelte";
   import { Button } from "#lib/components/ui/button/index.js";
   import * as Card from "#lib/components/ui/card/index.js";
   import { Label } from "#lib/components/ui/label/index.js";
   import * as Select from "#lib/components/ui/select/index.js";
   import { Separator } from "#lib/components/ui/separator/index.js";
   import VipBadge from "#lib/components/vip-badge.svelte";
+  import { useMoney } from "#lib/money.svelte.js";
   import { pop, rise, stagger } from "#lib/motion.js";
   import {
     APPEARANCE_LABELS,
@@ -27,13 +29,16 @@
     setCurrencyMode,
     setThemePreferences,
   } from "#lib/remote/preferences.remote.js";
-  import { cn, formatMoney } from "#lib/utils.js";
+  import { cn, formatMoney, formatPercent } from "#lib/utils.js";
   import { refreshAll } from "$app/navigation";
   import type { PageProps } from "./$types";
 
   let { data }: PageProps = $props();
 
   let user = $derived(data.user);
+
+  const money = useMoney();
+  let summary = $derived(data.holdings);
 
   // what's picked, shown straight away while it saves
   // svelte-ignore state_referenced_locally
@@ -226,6 +231,78 @@
   <div in:rise|global={{ delay: step(4) }}>
     <Card.Root>
       <Card.Header>
+        <Card.Title>Total holdings</Card.Title>
+        <Card.Description>
+          {#if summary.holdings === 0}
+            Add a purchase to see your totals.
+          {:else if summary.unpriced > 0}
+            Value and gain leave out {summary.unpriced}
+            {summary.unpriced === 1 ? "company" : "companies"} without a price. Set
+            one on the
+            <a href="/" class="underline hover:text-foreground"
+              >portfolio page</a
+            >.
+          {:else}
+            Using the latest prices saved on your portfolio. Wishlist trades
+            aren't included.
+          {/if}
+        </Card.Description>
+      </Card.Header>
+      {#if summary.holdings > 0}
+        <Card.Content>
+          <dl class="grid gap-4 sm:grid-cols-3">
+            <div>
+              <dt class="text-xs text-muted-foreground">Invested (inc. tax)</dt>
+              <dd class="text-lg font-semibold tabular-nums">
+                <NumberRoll value={money.format(summary.invested)} />
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">Value</dt>
+              <dd class="text-lg font-semibold tabular-nums">
+                {#if summary.value === undefined}
+                  —
+                {:else}
+                  <NumberRoll value={money.format(summary.value)} />
+                {/if}
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">Gain / loss</dt>
+              <dd
+                class={cn(
+                  "text-lg font-semibold tabular-nums",
+                  summary.gain !== undefined &&
+                    summary.gain > 0 &&
+                    "text-ctp-green",
+                  summary.gain !== undefined &&
+                    summary.gain < 0 &&
+                    "text-ctp-red",
+                )}
+              >
+                {#if summary.gain === undefined}
+                  —
+                {:else}
+                  <NumberRoll value={money.signed(summary.gain)} />
+                  {#if summary.gainPercent !== undefined}
+                    <span class="text-xs">
+                      <NumberRoll
+                        value="({formatPercent(summary.gainPercent)})"
+                      />
+                    </span>
+                  {/if}
+                {/if}
+              </dd>
+            </div>
+          </dl>
+        </Card.Content>
+      {/if}
+    </Card.Root>
+  </div>
+
+  <div in:rise|global={{ delay: step(5) }}>
+    <Card.Root>
+      <Card.Header>
         <Card.Title>Preferences</Card.Title>
         <Card.Description
           >Saved to your account as soon as you change them.</Card.Description
@@ -362,7 +439,7 @@
     method="post"
     action="?/signOut"
     class="flex justify-end"
-    in:rise|global={{ delay: step(5) }}
+    in:rise|global={{ delay: step(6) }}
   >
     <Button type="submit" variant="destructive">
       <LogOutIcon />
@@ -373,7 +450,7 @@
   <section
     aria-label="About Stocky"
     class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t pt-6 text-sm text-muted-foreground"
-    in:rise|global={{ delay: step(6) }}
+    in:rise|global={{ delay: step(7) }}
   >
     <a
       href={REPO_URL}
