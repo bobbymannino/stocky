@@ -342,7 +342,7 @@
     <div
       role="table"
       aria-label={wishlist ? "Your wishlist trades" : "Your purchases"}
-      class="grid grid-cols-[repeat(11,auto)] gap-y-2 text-sm whitespace-nowrap"
+      class="grid grid-cols-[repeat(10,auto)] gap-y-2 text-sm whitespace-nowrap"
     >
       <div role="rowgroup" class="contents">
         <div
@@ -353,7 +353,6 @@
             >Bought</span
           >
           <span role="columnheader" title="Stock ticker symbol">Ticker</span>
-          <span role="columnheader" title="Company name">Company</span>
           <span
             role="columnheader"
             class="text-right"
@@ -413,9 +412,6 @@
             <span role="cell" class="tabular-nums">{p.boughtOn}</span>
             <span role="cell" class="font-mono">
               {@render ticker(p.ticker)}
-            </span>
-            <span role="cell" class="max-w-48 truncate" title={p.companyName}>
-              {p.companyName}
             </span>
             <span role="cell" class="text-right tabular-nums">
               {money.format(p.price)}
