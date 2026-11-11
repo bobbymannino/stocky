@@ -349,17 +349,50 @@
           role="row"
           class="col-span-full grid grid-cols-subgrid border-l-4 border-transparent px-4 pb-1 text-left font-medium text-muted-foreground *:pr-4 *:last:pr-0"
         >
-          <span role="columnheader">Bought</span>
-          <span role="columnheader">Ticker</span>
-          <span role="columnheader">Company</span>
-          <span role="columnheader" class="text-right">Price</span>
-          <span role="columnheader" class="text-right">Shares</span>
-          <span role="columnheader" class="text-right">Total</span>
-          <span role="columnheader" class="text-right">Tax (0.5%)</span>
-          <span role="columnheader" class="text-right">Total (inc. tax)</span>
-          <span role="columnheader" class="text-right">Current value</span>
-          <span role="columnheader" class="text-right">Gain / loss</span>
-          <span role="columnheader"><span class="sr-only">Actions</span></span>
+          <span role="columnheader" title="Date the shares were bought"
+            >Bought</span
+          >
+          <span role="columnheader" title="Stock ticker symbol">Ticker</span>
+          <span role="columnheader" title="Company name">Company</span>
+          <span
+            role="columnheader"
+            class="text-right"
+            title="Price per share when bought">Price</span
+          >
+          <span
+            role="columnheader"
+            class="text-right"
+            title="Number of shares bought">Shares</span
+          >
+          <span
+            role="columnheader"
+            class="text-right"
+            title="Price × shares, before tax">Total</span
+          >
+          <span
+            role="columnheader"
+            class="text-right"
+            title="0.5% tax on the total">Tax (0.5%)</span
+          >
+          <span
+            role="columnheader"
+            class="text-right"
+            title="Total cost including tax">Total (inc. tax)</span
+          >
+          <span
+            role="columnheader"
+            class="text-right"
+            title="Latest price × shares">Current value</span
+          >
+          <span
+            role="columnheader"
+            class="text-right"
+            title="Current value minus total cost including tax"
+            >Gain / loss</span
+          >
+          <span role="columnheader" title="Actions"
+            ><span class="sr-only">Actions</span></span
+          >
         </div>
       </div>
       <div role="rowgroup" class="contents">

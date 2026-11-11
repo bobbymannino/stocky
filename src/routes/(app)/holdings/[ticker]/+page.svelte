@@ -251,8 +251,14 @@
                 class="sticky top-0 bg-card text-left text-muted-foreground"
               >
                 <tr>
-                  <th class="py-1 font-medium">Recorded</th>
-                  <th class="py-1 text-right font-medium">Price</th>
+                  <th
+                    class="py-1 font-medium"
+                    title="When the price was recorded">Recorded</th
+                  >
+                  <th
+                    class="py-1 text-right font-medium"
+                    title="Price per share at that time">Price</th
+                  >
                 </tr>
               </thead>
               <tbody>
