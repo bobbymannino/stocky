@@ -1,4 +1,5 @@
 <script lang="ts">
+  import HelpFab from "#lib/components/help-fab.svelte";
   import SiteHeader from "#lib/components/site-header.svelte";
   import { setCurrencyMode } from "#lib/money.svelte.js";
   import { applyTheme } from "#lib/preferences.js";
@@ -15,3 +16,4 @@
 
 <SiteHeader user={data.user} />
 {@render children()}
+<HelpFab />
