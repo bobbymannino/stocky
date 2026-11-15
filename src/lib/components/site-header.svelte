@@ -18,6 +18,7 @@
   const NAV = [
     { href: "/", label: "Portfolio" },
     { href: "/purchases", label: "Purchases" },
+    { href: "/help", label: "Help" },
     { href: "/search", label: "Search" },
   ];
   const PROFILE = { href: "/profile", label: "Profile" };
