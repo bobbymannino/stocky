@@ -11,14 +11,14 @@
   <Table.Caption class="sr-only">Help table</Table.Caption>
   <Table.Header>
     <Table.Row>
-      <Table.Head>Pence - <i>p</i></Table.Head>
+      <Table.Head class="text-end">Pence - <i>p</i></Table.Head>
       <Table.Head>Pounds - <i>£</i></Table.Head>
     </Table.Row>
   </Table.Header>
   <Table.Body>
-    {#each sortedPences as pence (pence)}
-      <Table.Row>
-        <Table.Cell>{pence}p</Table.Cell>
+    {#each sortedPences as pence, i (pence)}
+      <Table.Row class={!(i % 2) ? "bg-card" : undefined}>
+        <Table.Cell class="text-end">{pence}p</Table.Cell>
         <Table.Cell>£{pence * 0.01}</Table.Cell>
       </Table.Row>
     {/each}
