@@ -71,6 +71,13 @@
       "when": 1794297403071,
       "tag": "0009_user_theme",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795440645248,
+      "tag": "0010_dividends",
+      "breakpoints": true
     }
   ]
 }
