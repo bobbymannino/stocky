@@ -127,6 +127,43 @@ export const priceQuote = pgTable(
   ],
 );
 
+/**
+ * Dividends per company, shared by all users. Refreshed from Yahoo at most
+ * once a day per ticker; see `dividendFetch` and `#lib/server/dividends`.
+ */
+export const dividend = pgTable(
+  "dividend",
+  {
+    ticker: text("ticker").notNull(),
+    /** Ex-dividend date (YYYY-MM-DD, UTC); Yahoo doesn't give payment dates. */
+    exDate: date("ex_date", { mode: "string" }).notNull(),
+    /** Per share, converted to GBP when fetched. */
+    amount: numeric("amount", { precision: 18, scale: 6 }).notNull(),
+    /** Per share as the source quoted it, in `currency`. */
+    quotedAmount: numeric("quoted_amount", {
+      precision: 18,
+      scale: 6,
+    }).notNull(),
+    /** The source's currency code, e.g. `USD`, or `GBp` for London pence. */
+    currency: text("currency").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.ticker, table.exDate] })],
+);
+
+/**
+ * When each ticker's dividends were last fetched, so a company that pays none
+ * (and so has no `dividend` rows) still isn't refetched more than once a day.
+ */
+export const dividendFetch = pgTable("dividend_fetch", {
+  ticker: text("ticker").primaryKey(),
+  fetchedAt: timestamp("fetched_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});
+
 /** Each user's settings; a missing row means all the defaults. */
 export const userPreference = pgTable("user_preference", {
   userId: text("user_id")

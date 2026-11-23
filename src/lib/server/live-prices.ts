@@ -153,3 +153,67 @@ export async function fetchPriceGbp(ticker: string): Promise<{
     currency: quote.currency,
   };
 }
+
+// --- Dividends ---------------------------------------------------------------
+
+export type FetchedDividend = {
+  /** Ex-dividend date, `YYYY-MM-DD` (UTC). */
+  exDate: string;
+  /** Per share, in GBP. */
+  amount: number;
+  /** Per share as Yahoo quoted it, in `currency`. */
+  quotedAmount: number;
+  /** e.g. `USD`, or `GBp` for London pence. */
+  currency: string;
+};
+
+/**
+ * The last two years of dividends for a ticker from Yahoo, converted to GBP.
+ * Dates are ex-dividend dates, as this endpoint doesn't give payment dates.
+ * A company that pays none returns an empty list.
+ */
+export async function fetchDividends(
+  ticker: string,
+): Promise<FetchedDividend[]> {
+  const url = new URL(`${YAHOO_URL}/${encodeURIComponent(ticker)}`);
+  url.searchParams.set("range", "2y");
+  // daily bars keep each event keyed by its real date
+  url.searchParams.set("interval", "1d");
+  url.searchParams.set("events", "div");
+
+  const res = await fetch(url, {
+    headers: { "User-Agent": "stocky/1.0" },
+    signal: AbortSignal.timeout(TIMEOUT),
+  });
+  if (res.status === 404)
+    throw new PriceError(`No dividend data found for ${ticker}`);
+  if (res.status === 429)
+    throw new PriceError("Too many requests, try again in a minute");
+  if (!res.ok) throw new Error(`Yahoo dividends failed: ${res.status}`);
+
+  const body = (await res.json()) as {
+    chart?: {
+      result?: {
+        meta?: { currency?: string };
+        events?: {
+          dividends?: Record<string, { amount?: number; date?: number }>;
+        };
+      }[];
+    };
+  };
+  const result = body.chart?.result?.[0];
+  const currency = result?.meta?.currency;
+  if (!currency) throw new PriceError(`No dividend data found for ${ticker}`);
+
+  const raw = Object.values(result.events?.dividends ?? {}).filter(
+    (d): d is { amount: number; date: number } => !!d.amount && !!d.date,
+  );
+  if (raw.length === 0) return [];
+  const rate = await toGbpRate(currency);
+  return raw.map((d) => ({
+    exDate: new Date(d.date * 1000).toISOString().slice(0, 10),
+    amount: d.amount * rate,
+    quotedAmount: d.amount,
+    currency,
+  }));
+}

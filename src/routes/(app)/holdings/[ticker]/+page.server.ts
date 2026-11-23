@@ -6,6 +6,7 @@ import type { SavedPrices } from "#lib/current-prices.svelte.js";
 import { ensureCompanyColors } from "#lib/server/company-colors.js";
 import { db } from "#lib/server/db/index.js";
 import { currentPrice, priceQuote, purchase } from "#lib/server/db/schema.js";
+import { getDividends, type DividendInfo } from "#lib/server/dividends.js";
 import { loginUrl } from "#lib/server/login-redirect.js";
 import { OG_HEIGHT, OG_WIDTH } from "#lib/server/og-image.js";
 import { splitWishlist } from "#lib/server/portfolio.js";
@@ -73,6 +74,15 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
     wishlist,
     colors,
     prices,
+    // streamed: the page shouldn't wait on Yahoo
+    dividends: getDividends(ticker).catch((e): DividendInfo => {
+      console.error(`Loading dividends for ${ticker} failed`, e);
+      return {
+        dividends: [],
+        trailingYear: 0,
+        error: "Couldn't load dividends right now",
+      };
+    }),
     history: quotes
       .map((q) => ({ t: q.fetchedAt.getTime(), price: Number(q.price) }))
       .toReversed(),

@@ -89,6 +89,18 @@
     if (!prices.error(data.ticker)) await refreshAll();
   }
 
+  // ex-dates are calendar days, so format them in UTC to avoid shifting a day
+  const exDateFormat = new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeZone: "UTC",
+  });
+  const formatExDate = (d: string) =>
+    exDateFormat.format(new Date(`${d}T00:00:00Z`));
+  const yieldFormat = new Intl.NumberFormat(undefined, {
+    style: "percent",
+    maximumFractionDigits: 2,
+  });
+
   const historyDate = new Intl.DateTimeFormat(undefined, {
     dateStyle: "medium",
     timeStyle: "short",
@@ -275,6 +287,105 @@
           </div>
         </details>
       {/if}
+    </Card.Content>
+  </Card.Root>
+
+  <Card.Root>
+    <Card.Header>
+      <Card.Title>Dividends</Card.Title>
+      <Card.Description>
+        Per share in GBP from Yahoo Finance, refreshed once a day. Dates are
+        ex-dividend dates, usually a few weeks before payment.
+      </Card.Description>
+    </Card.Header>
+    <Card.Content class="flex flex-col gap-4">
+      {#await data.dividends}
+        <p class="flex items-center gap-2 text-sm text-muted-foreground">
+          <LoaderCircleIcon class="size-4 animate-spin" aria-hidden="true" />
+          Loading dividends…
+        </p>
+      {:then info}
+        {@const last = info.dividends[0]}
+        {#if info.error}
+          <p class="text-sm text-destructive">{info.error}</p>
+        {/if}
+        {#if last}
+          <dl class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div>
+              <dt class="text-xs text-muted-foreground">Last dividend</dt>
+              <dd class="text-lg font-semibold">{money.format(last.amount)}</dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">Ex-dividend date</dt>
+              <dd class="text-lg font-semibold">
+                <time datetime={last.exDate}>{formatExDate(last.exDate)}</time>
+              </dd>
+            </div>
+            <div>
+              <dt class="text-xs text-muted-foreground">Last 12 months</dt>
+              <dd class="text-lg font-semibold">
+                {money.format(info.trailingYear)}
+                {#if price}
+                  <span
+                    class="text-xs text-muted-foreground"
+                    title="Last 12 months' dividends over the current price"
+                  >
+                    ({yieldFormat.format(info.trailingYear / price)} yield)
+                  </span>
+                {/if}
+              </dd>
+            </div>
+            {#if totals.shares > 0}
+              <div>
+                <dt
+                  class="text-xs text-muted-foreground"
+                  title="Last 12 months' dividends times the shares you hold now"
+                >
+                  Your yearly income (est.)
+                </dt>
+                <dd class="text-lg font-semibold">
+                  {money.format(info.trailingYear * totals.shares)}
+                </dd>
+              </div>
+            {/if}
+          </dl>
+
+          <details class="text-sm">
+            <summary class="cursor-pointer text-muted-foreground">
+              Show recent dividends
+            </summary>
+            <div class="mt-2 max-h-72 overflow-y-auto">
+              <table class="w-full">
+                <thead
+                  class="sticky top-0 bg-card text-left text-muted-foreground"
+                >
+                  <tr>
+                    <th class="py-1 font-medium">Ex-dividend date</th>
+                    <th class="py-1 text-right font-medium">Per share</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {#each info.dividends as d (d.exDate)}
+                    <tr class="border-t">
+                      <td class="py-1 tabular-nums">
+                        <time datetime={d.exDate}>{formatExDate(d.exDate)}</time
+                        >
+                      </td>
+                      <td class="py-1 text-right tabular-nums">
+                        {money.format(d.amount)}
+                      </td>
+                    </tr>
+                  {/each}
+                </tbody>
+              </table>
+            </div>
+          </details>
+        {:else if !info.error}
+          <p class="text-sm text-muted-foreground">
+            No dividends found for {data.ticker}.
+          </p>
+        {/if}
+      {/await}
     </Card.Content>
   </Card.Root>
 
